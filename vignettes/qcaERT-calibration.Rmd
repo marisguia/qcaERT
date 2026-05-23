@@ -1,0 +1,354 @@
+---
+title: "Calibration robustness and alternative sets"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Calibration robustness and alternative sets}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+Calibration robustness needs a little more structure than the cutoff and case
+tests. qcaERT has to know which raw columns created the calibrated
+conditions, which calibration method was used, and which thresholds may be
+perturbed.
+
+This vignette focuses on `calib.test()` and `altset.test()`.
+
+The examples below use the `LR` data from the `QCA` package.
+
+```{r setup-lr}
+library(QCA)
+library(qcaERT)
+
+data(LR)
+
+conditions <- c("DEV", "URB", "LIT", "IND", "STB")
+outcome <- "SURV"
+dir_exp <- rep("1", length(conditions))
+
+thresholds <- list(
+  DEV = findTh(LR$DEV, groups = 7),
+  URB = findTh(LR$URB, groups = 4),
+  LIT = findTh(LR$LIT, groups = 4),
+  IND = findTh(LR$IND, groups = 4),
+  STB = findTh(LR$STB, groups = 4),
+  SURV = findTh(LR$SURV, groups = 4)
+)
+
+dat <- LR
+dat$DEV <- calibrate(LR$DEV, type = "fuzzy", thresholds = thresholds$DEV)
+dat$URB <- calibrate(LR$URB, type = "fuzzy", thresholds = thresholds$URB)
+dat$LIT <- calibrate(LR$LIT, type = "fuzzy", thresholds = thresholds$LIT)
+dat$IND <- calibrate(LR$IND, type = "fuzzy", thresholds = thresholds$IND)
+dat$STB <- calibrate(LR$STB, type = "fuzzy", thresholds = thresholds$STB)
+dat$SURV <- calibrate(LR$SURV, type = "fuzzy", thresholds = thresholds$SURV)
+```
+
+## Use calibration specifications
+
+Calibration-family functions use `calib_spec`: a named list with one entry per
+set you want qcaERT to be able to recalibrate. This structure keeps the raw
+source, calibration type, calibration method, thresholds, and extra
+`QCA::calibrate()` arguments together.
+
+```{r calib-spec}
+calib_spec <- list(
+  DEV = list(
+    raw = "DEV",
+    type = "fuzzy",
+    method = "direct",
+    thresholds = thresholds$DEV
+  ),
+  URB = list(
+    raw = "URB",
+    type = "fuzzy",
+    thresholds = thresholds$URB
+  ),
+  LIT = list(
+    raw = "LIT",
+    type = "fuzzy",
+    thresholds = thresholds$LIT
+  ),
+  IND = list(
+    raw = "IND",
+    type = "fuzzy",
+    thresholds = thresholds$IND
+  ),
+  STB = list(
+    raw = "STB",
+    type = "fuzzy",
+    thresholds = thresholds$STB
+  )
+)
+
+calib_spec_outcome <- calib_spec
+calib_spec_outcome$SURV <- list(
+  raw = "SURV",
+  type = "fuzzy",
+  thresholds = thresholds$SURV
+)
+```
+
+Each entry contains:
+
+- `raw`: the raw column name in `raw.data`
+- `type`: `"crisp"` or `"fuzzy"`
+- `thresholds`: the baseline calibration thresholds
+- `method`: optional, passed to `QCA::calibrate()`
+- `calibrate`: optional list of extra `QCA::calibrate()` arguments
+
+For condition-only runs, `calib_spec` must contain exactly one entry for every
+condition in `conditions`. When `test.outcome = TRUE`, it must contain the
+conditions plus one entry named by `outcome`. This keeps the recalibration
+structure the same across the calibration-family functions.
+
+## Conditions and test.conditions
+
+`conditions` is the full condition set in the QCA model.
+
+`test.conditions` is the subset whose thresholds should be perturbed.
+
+```{r conditions}
+calib.test(
+  raw.data = LR,
+  calib.data = dat,
+  outcome = "SURV",
+  conditions = c("DEV", "URB", "LIT", "IND", "STB"),
+  calib_spec = calib_spec,
+  test.conditions = c("DEV", "URB"),
+  unit_step = NULL,
+  unit_step_divisor = 10,
+  max_steps = 5,
+  incl.cut = 0.8,
+  n.cut = 1,
+  solution = "all",
+  dir.exp = rep("1", 5),
+  progress = TRUE
+)
+```
+
+If `test.conditions` is not supplied, qcaERT tests all conditions in
+`conditions`.
+
+## Outcome calibration
+
+The outcome is not a condition and should not be placed in `conditions`.
+To test outcome calibration, keep the QCA model unchanged and request the
+outcome explicitly with `test.outcome = TRUE`.
+
+Use `test.conditions = NULL` when you want to test only the outcome
+calibration.
+
+```{r outcome-calibration}
+calib_outcome <- calib.test(
+  raw.data = LR,
+  calib.data = dat,
+  outcome = outcome,
+  conditions = conditions,
+  calib_spec = calib_spec_outcome,
+  test.conditions = NULL,
+  test.outcome = TRUE,
+  unit_step = NULL,
+  unit_step_divisor = 10,
+  max_steps = 5,
+  incl.cut = 0.8,
+  n.cut = 1,
+  solution = "all",
+  dir.exp = dir_exp,
+  progress = TRUE
+)
+
+calib_outcome
+as.data.frame(calib_outcome)
+```
+
+## Anchors by calibration type
+
+qcaERT uses anchor names that match the calibration method.
+
+| Calibration type | Thresholds | Anchor names |
+| --- | --- | --- |
+| Crisp | one threshold | `T` |
+| Fuzzy direct, three thresholds | `c(E, C, I)` | `E`, `C`, `I` |
+| Fuzzy direct, six thresholds | `c(E1, C1, I1, I2, C2, E2)` | `E1`, `C1`, `I1`, `I2`, `C2`, `E2` |
+| Fuzzy indirect | ordered cutpoints | `T1`, `T2`, ... |
+
+By default, `anchors_to_test = NULL` means qcaERT uses all anchors implied by
+each tested condition.
+
+```{r anchors}
+calib.test(
+  raw.data = LR,
+  calib.data = dat,
+  outcome = "SURV",
+  conditions = conditions,
+  calib_spec = calib_spec,
+  test.conditions = "DEV",
+  anchors_to_test = c("E1", "C1", "I1", "I2", "C2", "E2"),
+  unit_step = NULL,
+  unit_step_divisor = 10,
+  max_steps = 5,
+  incl.cut = 0.8,
+  n.cut = 1,
+  solution = "all",
+  dir.exp = dir_exp,
+  progress = TRUE
+)
+```
+
+## Scale-aware perturbations
+
+Raw columns can live on very different scales. A one-unit move may be tiny
+for an economic measure and huge for an index. For that reason, qcaERT can
+compute the threshold step automatically.
+
+```{r scale-aware}
+calib_out <- calib.test(
+  raw.data = LR,
+  calib.data = dat,
+  outcome = outcome,
+  conditions = conditions,
+  calib_spec = calib_spec,
+  test.conditions = c("DEV", "URB"),
+  unit_step = NULL,
+  unit_step_divisor = 10,
+  max_steps = 5,
+  incl.cut = 0.8,
+  n.cut = 1,
+  solution = "all",
+  dir.exp = dir_exp,
+  progress = TRUE
+)
+```
+
+With `unit_step = NULL`, qcaERT derives a step from the threshold geometry for
+each condition. `unit_step_divisor = 10` means the function uses roughly
+one-tenth of the relevant threshold spacing as the move size.
+
+Use a manually supplied `unit_step` only when you have a substantive reason to
+define the perturbation size yourself.
+
+## Direct, indirect, and six-threshold calibration
+
+qcaERT supports the calibration-perturbation cases used in the ordinary QCA
+workflow:
+
+- crisp calibration
+- fuzzy direct calibration with three thresholds
+- fuzzy direct calibration with six thresholds
+- fuzzy indirect calibration with ordered cutpoints
+
+For indirect calibration, qcaERT treats thresholds as ordered cutpoints. Anchor
+names are positional: `T1`, `T2`, and so on.
+
+This scope is deliberate. `calib.test()` and `altset.test()` perturb explicit
+calibration thresholds; they are not general multi-value calibration robustness
+tools and they do not rediscover thresholds during the perturbation search.
+
+```{r indirect}
+calib_spec_indirect <- list(
+  A = list(
+    raw = "A_raw",
+    type = "fuzzy",
+    method = "indirect",
+    thresholds = c(10, 20, 30, 40)
+  )
+)
+```
+
+The same output convention applies: `results` is the clean table,
+`diagnostics` keeps the path detail, and `bounds` summarizes the tested
+threshold bounds.
+
+## From calibration bounds to alternative sets
+
+`calib.test()` asks: how far can one anchor move in one direction before the
+monitored solution changes?
+
+`altset.test()` asks: what happens across sampled alternative analysis settings?
+
+```{r altset}
+altset_out <- altset.test(
+  raw.data = LR,
+  calib.data = dat,
+  outcome = outcome,
+  conditions = conditions,
+  calib_spec = calib_spec,
+  test.conditions = c("DEV", "URB"),
+  unit_step = NULL,
+  unit_step_divisor = 10,
+  calib_max_steps = 5,
+  incl.cut = 0.8,
+  incl_step = 0.02,
+  incl_max_steps = 5,
+  n.cut = 1,
+  ncut_step = 1,
+  ncut_max_steps = 2,
+  n_draws = 50,
+  seed = 123,
+  solution = "all",
+  dir.exp = dir_exp,
+  progress = TRUE
+)
+
+altset_out
+as.data.frame(altset_out)
+altset_out$summary
+```
+
+The same calibration specification is used in both functions. This is intentional:
+the meaning of `conditions`, `test.conditions`, and `test.outcome` should not
+change from one sibling function to another.
+
+```{r altset-outcome}
+altset_outcome <- altset.test(
+  raw.data = LR,
+  calib.data = dat,
+  outcome = outcome,
+  conditions = conditions,
+  calib_spec = calib_spec_outcome,
+  test.conditions = c("DEV", "URB"),
+  test.outcome = TRUE,
+  unit_step = NULL,
+  unit_step_divisor = 10,
+  calib_max_steps = 5,
+  incl.cut = 0.8,
+  incl_step = 0.02,
+  incl_max_steps = 5,
+  n.cut = 1,
+  ncut_step = 1,
+  ncut_max_steps = 2,
+  n_draws = 50,
+  seed = 456,
+  solution = "all",
+  dir.exp = dir_exp,
+  progress = TRUE
+)
+
+as.data.frame(altset_outcome)
+```
+
+## Plotting calibration results
+
+If `ggplot2` is installed, `plot.calib_test()` can show interval, heatmap, and
+trace views.
+
+```{r calib-plots}
+plot(calib_out, solution_type = "conservative")
+plot(calib_out, solution_type = "conservative", type = "heatmap")
+plot(calib_out, solution_type = "conservative", type = "trace", set = "DEV", anchor = "E1", direction = "lower")
+```
+
+Trace plots require an existing condition-anchor-direction path. If the
+requested path is unavailable, the error message lists the available paths.
+
+See `?qcaERT_plots` for the plotting API and `?qcaERT_conventions` for the
+package-wide conventions.

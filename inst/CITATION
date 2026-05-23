@@ -1,0 +1,24 @@
+version <- "0.1.0"
+
+citHeader("To cite qcaERT in publications, please use:")
+
+bibentry(
+  bibtype = "Manual",
+  title = "{qcaERT}: Enhanced Robustness Tests for Qualitative Comparative Analysis",
+  author = person("B. A. H.", "Marisguia"),
+  year = "2026",
+  note = paste("R package version", version),
+  textVersion = paste(
+    "Marisguia, B. A. H. (2026).",
+    "qcaERT: Enhanced Robustness Tests for Qualitative Comparative Analysis.",
+    "R package version", version
+  )
+)
+
+citFooter(
+  paste(
+    "qcaERT extends QCA workflows.",
+    "Please also cite the QCA package when your analysis uses QCA",
+    "calibration, truth-table construction, or minimization."
+  )
+)

@@ -1,0 +1,178 @@
+---
+title: "Reading qcaERT result objects"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reading qcaERT result objects}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+qcaERT functions are designed as siblings. The details differ by test, but the
+main returned-object structure is intentionally shared.
+
+The code fragments in this vignette use object names such as `incl_out`,
+`calib_out`, and `cluster_out`. The getting-started vignette shows how to
+create those objects in a normal QCA workflow.
+
+Most robustness objects contain:
+
+- `results`: the clean table
+- `diagnostics`: the detailed table for inspection and troubleshooting
+- `settings`: the arguments and derived settings used in the run
+- supporting components such as `baseline`, `bounds`, `by_direction`,
+  `by_case`, `by_run`, `by_draw`, or `summary`
+
+Main summaries are:
+
+```{r core-rule}
+print(x)
+as.data.frame(x)
+x$results
+x$diagnostics
+```
+
+`print(x)` gives a concise summary. `as.data.frame(x)` returns the clean table.
+`x$diagnostics` is where to look when you need to understand a specific run,
+case, draw, or stopping reason.
+
+## Boundary tests
+
+`incl.test()`, `ncut.test()`, and `calib.test()` are boundary tests. They move a
+quantity away from the baseline until either the monitored solution changes, an
+error occurs, or the search reaches a limit.
+
+```{r boundary-layout}
+as.data.frame(incl_out)
+incl_out$diagnostics
+incl_out$bounds
+
+as.data.frame(ncut_out)
+ncut_out$diagnostics
+ncut_out$bounds
+
+as.data.frame(calib_out)
+calib_out$diagnostics
+calib_out$bounds
+```
+
+The clean table answers the practical question: how far did the value move
+before the result stopped being stable?
+
+The diagnostics table preserves the path-level detail.
+
+## Case and sample tests
+
+`loo.test()` gives one row per removed case. `subsample.test()` gives one row
+per subsample run.
+
+```{r case-sample-layout}
+as.data.frame(loo_out)
+loo_out$diagnostics
+loo_out$by_case
+
+as.data.frame(subsample_out)
+subsample_out$diagnostics
+subsample_out$by_run
+subsample_out$summary
+```
+
+Use the clean table to find cases or runs that changed the solution. Use the
+supporting list components when you need the full run object for a specific
+case or replication.
+
+## Alternative-set tests
+
+`altset.test()` gives one row per random draw. The result object also stores the
+draw-level run details and aggregate scores.
+
+```{r altset-layout}
+as.data.frame(altset_out)
+altset_out$diagnostics
+altset_out$by_draw
+altset_out$summary
+```
+
+The clean table is for scanning. The summary component is for stability scores
+across all draws. When calibration is part of the sampled draw, `changed_sets`
+names the perturbed calibrated sets and `changed_roles` records whether those
+sets were conditions, the outcome, or both.
+
+## Cluster tests
+
+`cluster.test()` and `theory.test()` are the deliberate structured-result
+exceptions. For `cluster.test()`, `results` is a list:
+
+- `overview`
+- `clusters`
+- `units`
+
+```{r cluster-layout}
+cluster_out$results$overview
+cluster_out$results$clusters
+cluster_out$results$units
+
+as.data.frame(cluster_out)
+cluster_out$diagnostics
+```
+
+For `cluster.test()`, `as.data.frame(cluster_out)` returns
+`cluster_out$results$overview`.
+
+## Theory tests
+
+`theory.test()` is also structured because comparative theory testing has three
+natural clean tables:
+
+- `models`
+- `solutions`
+- `pairwise`
+
+```{r theory-layout}
+as.data.frame(theory_out)
+theory_out$results$models
+theory_out$results$solutions
+theory_out$results$pairwise
+theory_out$diagnostics
+theory_out$by_theory
+```
+
+For `theory.test()`, `as.data.frame(theory_out)` returns
+`theory_out$results$models`. Inspect `results$solutions` when the question is
+which terms were selected, and inspect `results$pairwise` when the question is
+how far selected solution memberships differ across theories.
+
+## Solution tables
+
+`sol.df()` returns a regular data frame directly.
+
+```{r sol-df-layout}
+tab <- sol.df(intermediate = sol, solution = "intermediate")
+tab
+is.data.frame(tab)
+```
+
+Use `sol.df()` when you want to report or inspect QCA minimization output in a
+compact table.
+
+## What to inspect first
+
+In normal use, inspect objects in this order:
+
+1. Print the object.
+2. Call `as.data.frame(x)` for the clean table.
+3. Look at `x$summary` if the function has one.
+4. Open `x$diagnostics` only when you need the full detail.
+5. For `cluster.test()`, inspect `x$results$clusters` and `x$results$units`
+   after checking the overview.
+6. For `theory.test()`, inspect `x$results$solutions` and
+   `x$results$pairwise` after checking the model table.
+
+The same conventions are described formally in `?qcaERT_conventions`.

@@ -1,0 +1,379 @@
+---
+title: "Getting started with qcaERT"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with qcaERT}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+qcaERT adds robustness checks to a normal QCA workflow. It is meant for the
+moment after calibration, truth table construction, and minimization, when the
+main question becomes:
+
+> How much does this solution depend on my thresholds, cutoffs, cases, sample,
+> or grouping structure?
+
+This vignette gives a short path through the package. For a map from robustness
+questions to functions, see `?qcaERT_tests`.
+
+## Start from a QCA analysis
+
+The usual workflow still begins with `QCA`. In this example, the `LR` data are
+calibrated, minimized, and then passed to qcaERT.
+
+```{r setup-lr}
+library(QCA)
+library(qcaERT)
+
+data(LR)
+
+conditions <- c("DEV", "URB", "LIT", "IND", "STB")
+outcome <- "SURV"
+dir_exp <- rep("1", length(conditions))
+
+thresholds <- list(
+  DEV = findTh(LR$DEV, groups = 7),
+  URB = findTh(LR$URB, groups = 4),
+  LIT = findTh(LR$LIT, groups = 4),
+  IND = findTh(LR$IND, groups = 4),
+  STB = findTh(LR$STB, groups = 4),
+  SURV = findTh(LR$SURV, groups = 4)
+)
+
+dat <- LR
+dat$DEV <- calibrate(LR$DEV, type = "fuzzy", thresholds = thresholds$DEV)
+dat$URB <- calibrate(LR$URB, type = "fuzzy", thresholds = thresholds$URB)
+dat$LIT <- calibrate(LR$LIT, type = "fuzzy", thresholds = thresholds$LIT)
+dat$IND <- calibrate(LR$IND, type = "fuzzy", thresholds = thresholds$IND)
+dat$STB <- calibrate(LR$STB, type = "fuzzy", thresholds = thresholds$STB)
+dat$SURV <- calibrate(LR$SURV, type = "fuzzy", thresholds = thresholds$SURV)
+
+tt <- truthTable(
+  data = dat,
+  outcome = outcome,
+  conditions = conditions,
+  incl.cut = 0.8,
+  n.cut = 1
+)
+
+sol <- minimize(tt, include = "?", dir.exp = dir_exp)
+sol.df(intermediate = sol, solution = "intermediate")
+```
+
+`sol.df()` is not a robustness test. It is a compact table builder for QCA
+minimization output.
+
+## Choose a robustness test
+
+Each qcaERT function answers a different robustness question.
+
+| Question | Function |
+| --- | --- |
+| Do calibration thresholds matter? | `calib.test()` |
+| Does the inclusion cutoff matter? | `incl.test()` |
+| Does the frequency cutoff matter? | `ncut.test()` |
+| Do individual cases drive the solution? | `loo.test()` |
+| Is the solution stable across subsamples? | `subsample.test()` |
+| What if several analysis choices vary together? | `altset.test()` |
+| Do theoretically motivated condition sets lead to different solutions? | `theory.test()` |
+| Do results differ across groups or clusters? | `cluster.test()` |
+| How do I turn QCA solutions into a table? | `sol.df()` |
+
+## Test inclusion and frequency cutoffs
+
+`incl.test()` and `ncut.test()` are the simplest robustness tests. They move one
+truth table cutoff below and above the baseline value.
+
+```{r incl-ncut}
+incl_out <- incl.test(
+  data = dat,
+  outcome = outcome,
+  conditions = conditions,
+  incl.cut = 0.8,
+  n.cut = 1,
+  step = 0.02,
+  max_steps = 5,
+  solution = "all",
+  dir.exp = dir_exp,
+  progress = TRUE
+)
+
+incl_out
+as.data.frame(incl_out)
+incl_out$diagnostics
+
+ncut_out <- ncut.test(
+  data = dat,
+  outcome = outcome,
+  conditions = conditions,
+  n.cut = 1,
+  incl.cut = 0.8,
+  step = 1,
+  max_steps = 3,
+  solution = "all",
+  dir.exp = dir_exp,
+  progress = TRUE
+)
+
+ncut_out
+as.data.frame(ncut_out)
+```
+
+The printed object is the quick view. `as.data.frame()` returns the clean table.
+`diagnostics` contains the more detailed internal table.
+
+## Test calibration thresholds
+
+`calib.test()` perturbs one calibration anchor at a time. Use `calib_spec` as
+the calibration specification: it records the raw column, calibration type, method,
+and thresholds in one place. A good default is to let qcaERT compute the
+perturbation size from the threshold spacing instead of choosing a raw number
+by hand.
+
+```{r calib}
+calib_spec <- list(
+  DEV = list(raw = "DEV", type = "fuzzy", thresholds = thresholds$DEV),
+  URB = list(raw = "URB", type = "fuzzy", thresholds = thresholds$URB),
+  LIT = list(raw = "LIT", type = "fuzzy", thresholds = thresholds$LIT),
+  IND = list(raw = "IND", type = "fuzzy", thresholds = thresholds$IND),
+  STB = list(raw = "STB", type = "fuzzy", thresholds = thresholds$STB)
+)
+
+calib_spec_outcome <- calib_spec
+calib_spec_outcome$SURV <- list(
+  raw = "SURV",
+  type = "fuzzy",
+  thresholds = thresholds$SURV
+)
+
+calib_out <- calib.test(
+  raw.data = LR,
+  calib.data = dat,
+  outcome = outcome,
+  conditions = conditions,
+  calib_spec = calib_spec,
+  test.conditions = c("DEV", "URB"),
+  unit_step = NULL,
+  unit_step_divisor = 10,
+  max_steps = 5,
+  incl.cut = 0.8,
+  n.cut = 1,
+  solution = "all",
+  dir.exp = dir_exp,
+  progress = TRUE
+)
+
+calib_out
+as.data.frame(calib_out)
+calib_out$bounds
+```
+
+`conditions` names the full condition set used in the QCA model.
+`test.conditions` names the subset whose calibration thresholds should be
+perturbed. If `test.conditions` is not supplied, qcaERT tests every condition in
+`conditions`.
+
+Outcome calibration is requested explicitly. The outcome is not added to
+`conditions`; instead, use `test.outcome = TRUE` and include the outcome in
+`calib_spec`.
+
+```{r calib-outcome}
+calib_outcome <- calib.test(
+  raw.data = LR,
+  calib.data = dat,
+  outcome = outcome,
+  conditions = conditions,
+  calib_spec = calib_spec_outcome,
+  test.conditions = NULL,
+  test.outcome = TRUE,
+  unit_step = NULL,
+  unit_step_divisor = 10,
+  max_steps = 5,
+  incl.cut = 0.8,
+  n.cut = 1,
+  solution = "all",
+  dir.exp = dir_exp,
+  progress = TRUE
+)
+```
+
+## Test cases and samples
+
+`loo.test()` removes cases one at a time. `subsample.test()` runs repeated
+subsamples.
+
+```{r cases-samples}
+loo_out <- loo.test(
+  data = dat,
+  outcome = outcome,
+  conditions = conditions,
+  cases = 1:5,
+  incl.cut = 0.8,
+  n.cut = 1,
+  solution = "all",
+  dir.exp = dir_exp,
+  progress = TRUE
+)
+
+loo_out
+as.data.frame(loo_out)
+
+subsample_out <- subsample.test(
+  data = dat,
+  outcome = outcome,
+  conditions = conditions,
+  sample_prop = 0.8,
+  reps = 25,
+  seed = 123,
+  incl.cut = 0.8,
+  n.cut = 1,
+  solution = "all",
+  dir.exp = dir_exp,
+  progress = TRUE
+)
+
+subsample_out
+subsample_out$summary
+```
+
+## Test alternative analysis sets
+
+`altset.test()` samples alternative analysis settings. It can vary calibration
+thresholds, `incl.cut`, and `n.cut` in the same run.
+
+```{r altsets}
+altset_out <- altset.test(
+  raw.data = LR,
+  calib.data = dat,
+  outcome = outcome,
+  conditions = conditions,
+  calib_spec = calib_spec,
+  test.conditions = c("DEV", "URB"),
+  unit_step = NULL,
+  unit_step_divisor = 10,
+  calib_max_steps = 5,
+  incl.cut = 0.8,
+  incl_step = 0.02,
+  incl_max_steps = 5,
+  n.cut = 1,
+  ncut_step = 1,
+  ncut_max_steps = 2,
+  n_draws = 50,
+  seed = 123,
+  solution = "all",
+  dir.exp = dir_exp,
+  progress = TRUE
+)
+
+altset_out
+as.data.frame(altset_out)
+altset_out$summary
+```
+
+Use `calib.test()` when you want directional threshold bounds. Use
+`altset.test()` when you want sampled compound perturbations.
+
+## Compare theory specifications
+
+`theory.test()` compares several theoretically motivated condition sets under
+the same outcome, truth-table cutoffs, solution setting, exclusion handling, and
+the same settings for `which_M` and `i_mode`. Each theory gets its own truth
+table; exclusions are recomputed separately when `exclude_mode = "recompute"`.
+
+```{r theory}
+theories <- list(
+  development = c("DEV", "URB", "LIT"),
+  industrial = c("DEV", "URB", "IND"),
+  broad = c("DEV", "URB", "LIT", "IND", "STB")
+)
+
+dir_exp_theories <- list(
+  development = c("1", "1", "1"),
+  industrial = c("1", "1", "1"),
+  broad = c("1", "1", "1", "1", "1")
+)
+
+theory_out <- theory.test(
+  data = dat,
+  outcome = outcome,
+  theories = theories,
+  incl.cut = 0.8,
+  n.cut = 1,
+  solution = "all",
+  dir.exp = dir_exp_theories,
+  progress = TRUE
+)
+
+theory_out
+as.data.frame(theory_out)
+theory_out$results$solutions
+theory_out$results$pairwise
+```
+
+The model table compares fit and truth-table diagnostics by theory and solution_type.
+The solutions table extracts the selected terms. The pairwise table compares
+selected solution memberships across theories.
+
+## Test clusters
+
+`cluster.test()` starts from an existing truth table and compares selected
+configurations across groups.
+
+```{r clusters}
+cluster_data <- dat
+cluster_data$region <- ifelse(seq_len(nrow(cluster_data)) %% 2 == 0, "A", "B")
+cluster_data$unit <- rownames(cluster_data)
+
+cluster_out <- cluster.test(
+  data = cluster_data,
+  tt = tt,
+  cluster_id = "region",
+  unit_id = "unit",
+  solution = "all",
+  dir.exp = dir_exp,
+  progress = TRUE
+)
+
+cluster_out
+as.data.frame(cluster_out)
+cluster_out$results$clusters
+cluster_out$results$units
+```
+
+`cluster.test()` is one of the structured-result exceptions in the package:
+`results` is a list with `overview`, `clusters`, and `units`.
+The other structured-result exception is `theory.test()`, whose `results`
+component contains `models`, `solutions`, and `pairwise`.
+
+## Plot selected results
+
+Plotting is optional and requires `ggplot2`.
+
+```{r plots}
+plot(incl_out, solution_type = "conservative")
+plot(calib_out, solution_type = "conservative")
+plot(calib_out, solution_type = "conservative", type = "heatmap")
+plot(calib_out, solution_type = "conservative", type = "trace", set = "DEV", anchor = "E1", direction = "lower")
+plot(theory_out, solution_type = "conservative")
+```
+
+For plotting details, see `?qcaERT_plots`.
+
+## Next
+
+Read:
+
+- `vignette("qcaERT-result-objects", package = "qcaERT")` for the common
+  returned-object structure.
+- `vignette("qcaERT-calibration", package = "qcaERT")` for calibration
+  specifications, scale-aware threshold moves, and alternative sets.
+- `?qcaERT_conventions` for the package-wide argument and output conventions.
