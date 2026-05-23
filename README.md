@@ -38,12 +38,11 @@ Inside R, the same map is available with:
 
 ## Installation
 
-qcaERT is currently in development. From a local source checkout, install it
-with:
+qcaERT can be installed from GitHub with:
 
 ```r
-install.packages("devtools")
-devtools::install()
+install.packages("remotes")
+remotes::install_github("marisguia/qcaERT")
 ```
 
 Then load it normally:
