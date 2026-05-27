@@ -34,7 +34,7 @@ qcaERT can be installed directly from CRAN:
 install.packages("qcaERT")
 ```
 
-qcaERT can also be installed from GitHub with:
+It can also be installed from GitHub with:
 
 ```r
 install.packages("remotes")
