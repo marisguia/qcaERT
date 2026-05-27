@@ -1,14 +1,10 @@
 # qcaERT
 
-qcaERT provides enhanced robustness tests for Qualitative Comparative Analysis
-(QCA). It is designed for the moment after calibration, truth table
-construction, and minimization, when the question becomes:
+ qcaERT provides enhanced robustness tests for Qualitative Comparative Analysis (QCA). It is designed for the moment after calibration, truth table construction, and minimization, when the question becomes:
 
-> How much does this QCA solution depend on my thresholds, cutoffs, cases,
-> sample, or grouping structure?
+> How much does this QCA solution depend on my thresholds, cutoffs, cases, sample, or grouping structure?
 
-It is build on top of the `QCA` package (Dușa, 2019) workflow, for crisp-set
-and fuzzy-set analyses.
+Building on the workflow supported by the [QCA package](https://cran.r-project.org/web/packages/QCA/index.html) (Dusa, 2019), qcaERT treats robustness evaluation as an auditable process through a series of comprehensive diagnostics.
 
 ## What qcaERT helps with
 
