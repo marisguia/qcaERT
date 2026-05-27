@@ -1,10 +1,6 @@
 ^qcaERT\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
-^Some QCA package functions$
-^Some SetMethods package functions$
-^PROVISORY - Some QCA package functions$
-^PROVISORY - SetMethods 4\.1 functions and dependencies$
 ^\.\.Rcheck$
 ^qcaERT\.Rcheck$
 ^qcaERT_.*\.tar\.gz$
