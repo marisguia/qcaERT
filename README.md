@@ -28,7 +28,13 @@ Inside R, the same map is available with:
 
 ## Installation
 
-qcaERT can be installed from GitHub with:
+qcaERT can be installed directly from CRAN:
+
+```r
+install.packages("qcaERT")
+```
+
+qcaERT can also be installed from GitHub with:
 
 ```r
 install.packages("remotes")
