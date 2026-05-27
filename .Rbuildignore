@@ -1,13 +1,8 @@
 ^qcaERT\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
-^\.\.Rcheck$
 ^qcaERT\.Rcheck$
 ^qcaERT_.*\.tar\.gz$
-^external tests\.R$
-^external tests\.RDataTmp$
-^WHR25_Data_Figure_2\.1v3\.xlsx$
-^FINAL_AUDIT\.txt$
 ^\.Rhistory$
 ^\.RData$
 ^Rplots\.pdf$
