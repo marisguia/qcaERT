@@ -12,3 +12,4 @@
 ^\.RData$
 ^Rplots\.pdf$
 ^The R Journal Paper$
+^Bookdown$
