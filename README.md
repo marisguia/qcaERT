@@ -4,7 +4,7 @@
 
 > How much does this QCA solution depend on my thresholds, cutoffs, cases, sample, or grouping structure?
 
-Building on the workflow supported by the [QCA package](https://cran.r-project.org/web/packages/QCA/index.html) (Dusa, 2019), qcaERT treats robustness evaluation as an auditable process through a series of comprehensive diagnostics.
+Building on the workflow supported by the [QCA package](https://CRAN.R-project.org/package=QCA) (Dusa, 2019), qcaERT treats robustness evaluation as an auditable process through a series of comprehensive diagnostics.
 
 ## What qcaERT helps with
 
