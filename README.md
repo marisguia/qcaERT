@@ -7,14 +7,8 @@ construction, and minimization, when the question becomes:
 > How much does this QCA solution depend on my thresholds, cutoffs, cases,
 > sample, or grouping structure?
 
-The package is built as a family of sibling tools. They share common argument
-conventions, returned-object structure, print behavior, and data-frame
-coercion.
-
-The strongest coverage is the `QCA` package workflow built around
-`QCA::calibrate()`, `QCA::truthTable()`, `QCA::minimize()`, and
-`QCA::findRows()`, especially crisp-set and fuzzy-set analyses. qcaERT is not
-intended to cover every possible QCA variant.
+It is build on top of the `QCA` package (Dușa, 2019) workflow, for crisp-set
+and fuzzy-set analyses.
 
 ## What qcaERT helps with
 
