@@ -2,7 +2,7 @@ test_that("altset.test can perturb only the outcome calibration", {
   skip_if_not_installed("QCA")
 
   fixture <- qcaert_fixture_outcome_calibration()
-  out <- suppressWarnings(altset.test(
+  out <- qcaert_expect_no_warning(altset.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -50,7 +50,7 @@ test_that("altset.test can perturb selected conditions and the outcome together"
   skip_if_not_installed("QCA")
 
   fixture <- qcaert_fixture_outcome_calibration()
-  out <- suppressWarnings(altset.test(
+  out <- qcaert_expect_no_warning(altset.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,

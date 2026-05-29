@@ -3,7 +3,7 @@ test_that("incl_test plot methods return ggplot objects", {
   skip_if_not_installed("ggplot2")
 
   fixture <- qcaert_fixture_direct6()
-  out <- suppressWarnings(incl.test(
+  out <- qcaert_expect_no_warning(incl.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -45,7 +45,7 @@ test_that("calib_test plot methods return ggplot objects for direct-six anchors"
   skip_if_not_installed("ggplot2")
 
   fixture <- qcaert_fixture_direct6()
-  out <- suppressWarnings(calib.test(
+  out <- qcaert_expect_no_warning(calib.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -84,7 +84,9 @@ test_that("calib_test plot methods return ggplot objects for indirect anchors", 
   skip_if_not_installed("ggplot2")
 
   fixture <- qcaert_fixture_indirect()
-  out <- suppressWarnings(calib.test(
+  # QCA's indirect calibration warns on this tiny fixture; keep it explicit.
+  out <- NULL
+  expect_warning(out <- calib.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -97,7 +99,7 @@ test_that("calib_test plot methods return ggplot objects for indirect anchors", 
     n.cut = 1,
     solution = "conservative",
     progress = FALSE
-  ))
+  ), "glm.fit: algorithm did not converge")
 
   expect_s3_class(plot(out), "ggplot")
   expect_s3_class(plot(out, type = "heatmap", cell = "anchor"), "ggplot")

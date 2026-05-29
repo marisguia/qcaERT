@@ -36,7 +36,7 @@ test_that("boundary robustness result schemas are frozen", {
     "reason"
   )
 
-  incl <- suppressWarnings(incl.test(
+  incl <- qcaert_expect_no_warning(incl.test(
     data = dat,
     outcome = "Y",
     conditions = c("A", "B"),
@@ -81,7 +81,7 @@ test_that("boundary robustness result schemas are frozen", {
   ncut_diag[6:8] <- c("n.cut_start", "n.cut_last_safe", "n.cut_first_failing")
   ncut_diag <- c(ncut_diag, "upper_limit")
 
-  ncut <- suppressWarnings(ncut.test(
+  ncut <- qcaert_expect_no_warning(ncut.test(
     data = dat,
     outcome = "Y",
     conditions = c("A", "B"),
@@ -199,7 +199,7 @@ test_that("calibration robustness result schemas are frozen", {
     "result_shape"
   )
 
-  calib <- suppressWarnings(calib.test(
+  calib <- qcaert_expect_no_warning(calib.test(
     raw.data = raw,
     calib.data = calib6,
     outcome = "Y",
@@ -229,7 +229,9 @@ test_that("calibration robustness result schemas are frozen", {
   expect_identical(names(calib$baseline$by_solution_type), "conservative")
   expect_identical(nrow(calib$results), 12L)
 
-  indirect <- suppressWarnings(calib.test(
+  # QCA's indirect calibration warns on this tiny fixture; keep it explicit.
+  indirect <- NULL
+  expect_warning(indirect <- calib.test(
     raw.data = raw,
     calib.data = qcaert_schema_calib3(raw),
     outcome = "Y",
@@ -242,7 +244,7 @@ test_that("calibration robustness result schemas are frozen", {
     n.cut = 1,
     solution = "conservative",
     progress = FALSE
-  ))
+  ), "glm.fit: algorithm did not converge")
 
   expect_identical(unique(indirect$results$anchor), c("T1", "T2", "T3"))
   expect_identical(unique(indirect$results$method), "indirect")
@@ -255,7 +257,7 @@ test_that("alternative-set robustness result schemas are frozen", {
   raw <- qcaert_schema_raw()
   calib6 <- qcaert_schema_calib6(raw)
 
-  alt <- suppressWarnings(altset.test(
+  alt <- qcaert_expect_no_warning(altset.test(
     raw.data = raw,
     calib.data = calib6,
     outcome = "Y",
@@ -388,7 +390,7 @@ test_that("case-deletion and subsample result schemas are frozen", {
     "max_abs_fit_delta"
   )
 
-  loo <- suppressWarnings(loo.test(
+  loo <- qcaert_expect_no_warning(loo.test(
     data = dat,
     outcome = "Y",
     conditions = c("A", "B"),
@@ -430,7 +432,7 @@ test_that("case-deletion and subsample result schemas are frozen", {
   expect_identical(nrow(loo$results), 3L)
   expect_identical(names(loo$by_case), c("1:1", "2:2", "3:3"))
 
-  subsample <- suppressWarnings(subsample.test(
+  subsample <- qcaert_expect_no_warning(subsample.test(
     data = dat,
     outcome = "Y",
     conditions = c("A", "B"),
@@ -515,7 +517,7 @@ test_that("cluster and sol.df result schemas are frozen", {
 
   raw <- qcaert_schema_raw()
   dat <- qcaert_schema_calib6(raw)
-  tt <- suppressWarnings(QCA::truthTable(
+  tt <- qcaert_expect_no_warning(QCA::truthTable(
     dat,
     outcome = "Y",
     conditions = c("A", "B"),
@@ -523,7 +525,7 @@ test_that("cluster and sol.df result schemas are frozen", {
     n.cut = 1
   ))
 
-  cluster <- suppressWarnings(cluster.test(
+  cluster <- qcaert_expect_no_warning(cluster.test(
     data = dat,
     tt = tt,
     cluster_id = "cluster",
@@ -584,7 +586,7 @@ test_that("cluster and sol.df result schemas are frozen", {
   expect_identical(names(as.data.frame(cluster)), names(cluster$results$overview))
   expect_identical(names(cluster$results), c("overview", "clusters", "units"))
 
-  sol <- suppressWarnings(QCA::minimize(tt, include = ""))
+  sol <- qcaert_expect_no_warning(QCA::minimize(tt, include = ""))
   sol_table <- sol.df(conservative = sol, solution = "conservative")
 
   expect_identical(class(sol_table), "data.frame")

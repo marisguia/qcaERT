@@ -36,14 +36,14 @@ test_that("QCA minimize provides data-frame pims for solution consumers", {
   skip_if_not_installed("QCA")
 
   dat <- qcaert_schema_calib3()
-  tt <- suppressWarnings(QCA::truthTable(
+  tt <- qcaert_expect_no_warning(QCA::truthTable(
     dat,
     outcome = "Y",
     conditions = c("A", "B"),
     incl.cut = 0.75,
     n.cut = 1
   ))
-  sol <- suppressWarnings(QCA::minimize(tt, include = ""))
+  sol <- qcaert_expect_no_warning(QCA::minimize(tt, include = ""))
 
   expect_true(is.data.frame(sol$pims))
 
@@ -56,7 +56,7 @@ test_that("cluster.test does not duplicate one-term solutions as term components
   skip_if_not_installed("QCA")
 
   fixture <- qcaert_fixture_cluster()
-  out <- suppressWarnings(cluster.test(
+  out <- qcaert_expect_no_warning(cluster.test(
     data = fixture$data,
     tt = fixture$truth_table,
     cluster_id = fixture$cluster_id,

@@ -100,7 +100,7 @@ qcaert_truth_table <- function(data, outcome, conditions, incl.cut = 0.75, n.cut
     list(...)
   )
 
-  suppressWarnings(do.call(QCA::truthTable, args))
+  qcaert_expect_no_warning(do.call(QCA::truthTable, args))
 }
 
 qcaert_fixture_direct6 <- function() {

@@ -8,10 +8,14 @@ bibentry(
   author = person("B. A. H.", "Marisguia"),
   year = "2026",
   note = paste("R package version", version),
+  url = "https://CRAN.R-project.org/package=qcaERT",
+  doi = "10.32614/CRAN.package.qcaERT",
   textVersion = paste(
     "Marisguia, B. A. H. (2026).",
     "qcaERT: Enhanced Robustness Tests for Qualitative Comparative Analysis.",
-    "R package version", version
+    "R package version", paste0(version, "."),
+    "https://CRAN.R-project.org/package=qcaERT.",
+    "doi:10.32614/CRAN.package.qcaERT"
   )
 )
 

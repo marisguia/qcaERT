@@ -22,6 +22,9 @@ or calibration transformation.
 If you know the robustness concern but not the function name, start with
 \code{?qcaERT_tests}, which maps qcaERT's tools.
 
+qcaERT includes three World Happiness Report demonstration objects. See
+\code{?whr_raw}, \code{?whr_calibrated}, and \code{?whr_calib_spec}.
+
 A typical R workflow for sufficient analysis using qcaERT is:
 \enumerate{
 \item calibrate data with \code{\link[QCA:calibrate]{QCA::calibrate()}},
@@ -112,6 +115,8 @@ sets.
 
 Marisguia, B. A. H. (2026). qcaERT: Enhanced Robustness Tests for
 Qualitative Comparative Analysis. R package version 0.1.0.
+\url{https://CRAN.R-project.org/package=qcaERT}.
+doi:10.32614/CRAN.package.qcaERT.
 
 Please also cite the QCA package and the methodological sources relevant
 to the analysis.
@@ -124,6 +129,15 @@ Springer. \url{https://adriandusa.com/research/books/2019-QCA/}.
 Ragin, C. C. 2014. \emph{The Comparative Method: Moving Beyond Qualitative and
 Quantitative Strategies}. Oakland, California: University of California
 Press.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://CRAN.R-project.org/package=qcaERT}
+  \item \url{https://github.com/marisguia/qcaERT}
+  \item Report bugs at \url{https://github.com/marisguia/qcaERT/issues}
+}
+
 }
 \author{
 Breno A. H. Marisguia

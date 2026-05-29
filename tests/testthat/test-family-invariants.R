@@ -2,7 +2,7 @@ test_that("regular invariant helper validates the common returned-object structu
   skip_if_not_installed("QCA")
 
   dat <- qcaert_schema_calib3()
-  out <- suppressWarnings(incl.test(
+  out <- qcaert_expect_no_warning(incl.test(
     data = dat,
     outcome = "Y",
     conditions = c("A", "B"),
@@ -28,7 +28,7 @@ test_that("cluster invariant helper validates the explicit cluster exception", {
   skip_if_not_installed("QCA")
 
   fixture <- qcaert_fixture_cluster()
-  out <- suppressWarnings(cluster.test(
+  out <- qcaert_expect_no_warning(cluster.test(
     data = fixture$data,
     tt = fixture$truth_table,
     cluster_id = fixture$cluster_id,

@@ -33,6 +33,17 @@ test_that("sol.chart validates sol.df-style input", {
   )
 })
 
+test_that("sol.chart rejects multi-value QCA", {
+  x <- sol_chart_fixture()
+  x$Prime_Implicants[[1L]] <- "A[1]*B[0]"
+
+  expect_error(
+    .sol_chart_prepare(x),
+    "`sol.chart()` does not currently support multi-value QCA.",
+    fixed = TRUE
+  )
+})
+
 test_that("sol.chart aligns detailed prime implicants with simpler prime implicants", {
   chart <- .sol_chart_prepare(sol_chart_fixture(), digits = 2)
 

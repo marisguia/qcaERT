@@ -7,6 +7,39 @@ qcaert_regular_result_classes <- c(
   "subsample_test"
 )
 
+qcaert_expect_no_warning <- function(expr) {
+  expr <- substitute(expr)
+  env <- parent.frame()
+  out <- NULL
+
+  expect_warning(out <- eval(expr, env), NA)
+  out
+}
+
+qcaert_expect_warnings <- function(expr, regexp) {
+  expr <- substitute(expr)
+  env <- parent.frame()
+  warnings <- character()
+
+  out <- withCallingHandlers(
+    eval(expr, env),
+    warning = function(w) {
+      warnings <<- c(warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+
+  expect_true(
+    length(warnings) > 0L,
+    info = paste("Expected at least one warning matching:", regexp)
+  )
+  expect_true(
+    all(grepl(regexp, warnings)),
+    info = paste("Unexpected warnings:", paste(warnings, collapse = " | "))
+  )
+  out
+}
+
 qcaert_expect_clean_names <- function(names, label = "object") {
   expect_false(
     is.null(names),

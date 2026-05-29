@@ -3,7 +3,7 @@ test_that("incl.test solution = all keeps independent solution_type paths", {
 
   fixture <- qcaert_fixture_direct6()
 
-  all <- suppressWarnings(incl.test(
+  all <- qcaert_expect_no_warning(incl.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -16,7 +16,7 @@ test_that("incl.test solution = all keeps independent solution_type paths", {
     progress = FALSE
   ))
 
-  con <- suppressWarnings(incl.test(
+  con <- qcaert_expect_no_warning(incl.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -36,7 +36,7 @@ test_that("incl.test solution = all keeps independent solution_type paths", {
   expect_equal(all$results$con_steps, con$results$steps)
   expect_true(is.matrix(all$bounds))
 
-  long <- suppressWarnings(incl.test(
+  long <- qcaert_expect_no_warning(incl.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -63,7 +63,7 @@ test_that("ncut.test solution = all keeps independent solution_type paths", {
 
   fixture <- qcaert_fixture_direct6()
 
-  all <- suppressWarnings(ncut.test(
+  all <- qcaert_expect_no_warning(ncut.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -76,7 +76,7 @@ test_that("ncut.test solution = all keeps independent solution_type paths", {
     progress = FALSE
   ))
 
-  con <- suppressWarnings(ncut.test(
+  con <- qcaert_expect_no_warning(ncut.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -96,7 +96,7 @@ test_that("ncut.test solution = all keeps independent solution_type paths", {
   expect_equal(all$results$con_steps, con$results$steps)
   expect_true(is.matrix(all$bounds))
 
-  long <- suppressWarnings(ncut.test(
+  long <- qcaert_expect_no_warning(ncut.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -123,7 +123,7 @@ test_that("calib.test solution = all keeps independent solution_type paths", {
 
   fixture <- qcaert_fixture_direct6()
 
-  all <- suppressWarnings(calib.test(
+  all <- qcaert_expect_no_warning(calib.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -139,7 +139,7 @@ test_that("calib.test solution = all keeps independent solution_type paths", {
     progress = FALSE
   ))
 
-  con <- suppressWarnings(calib.test(
+  con <- qcaert_expect_no_warning(calib.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -163,7 +163,7 @@ test_that("calib.test solution = all keeps independent solution_type paths", {
   expect_equal(all$results$con_steps, con$results$steps)
   expect_true(is.list(all$bounds[[fixture$test.conditions[1L]]]))
 
-  long <- suppressWarnings(calib.test(
+  long <- qcaert_expect_no_warning(calib.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -193,7 +193,7 @@ test_that("calib.test exposes intermediate branch selection through i_mode", {
 
   fixture <- qcaert_fixture_direct6()
 
-  out <- suppressWarnings(calib.test(
+  out <- qcaert_expect_no_warning(calib.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,

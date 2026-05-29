@@ -21,7 +21,7 @@ test_that("boundary and sampled siblings forward truthTable dots", {
 
   fixture <- qcaert_fixture_direct6()
 
-  incl <- suppressWarnings(incl.test(
+  incl <- qcaert_expect_no_warning(incl.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -39,7 +39,7 @@ test_that("boundary and sampled siblings forward truthTable dots", {
   expect_true(incl$baseline$tt$options$complete)
   expect_equal(incl$baseline$tt$options$pri.cut, 0.6)
 
-  ncut <- suppressWarnings(ncut.test(
+  ncut <- qcaert_expect_no_warning(ncut.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -57,7 +57,7 @@ test_that("boundary and sampled siblings forward truthTable dots", {
   expect_true(ncut$baseline$tt$options$complete)
   expect_equal(ncut$baseline$tt$options$pri.cut, 0.6)
 
-  altset <- suppressWarnings(altset.test(
+  altset <- qcaert_expect_no_warning(altset.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -91,7 +91,7 @@ test_that("calib.test accepts split truthTable and minimize dots", {
 
   fixture <- qcaert_fixture_direct6()
 
-  out <- suppressWarnings(calib.test(
+  out <- qcaert_expect_no_warning(calib.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,

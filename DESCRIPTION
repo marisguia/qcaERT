@@ -11,10 +11,12 @@ Description: Provides functions for assessing and visualizing robustness in
     theory-specific condition sets, cluster-specific patterns, and solution
     summaries. Methods build on Dusa (2019)
     <doi:10.1007/978-3-319-75668-4> and Ragin (2014, ISBN:9780520280038).
-URL: https://github.com/marisguia/qcaERT
+URL: https://CRAN.R-project.org/package=qcaERT,
+    https://github.com/marisguia/qcaERT
 BugReports: https://github.com/marisguia/qcaERT/issues
 License: MIT + file LICENSE
 Encoding: UTF-8
+LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 VignetteBuilder: 

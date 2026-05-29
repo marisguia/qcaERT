@@ -3,7 +3,7 @@ test_that("altset.test keeps conservative draws comparable when all-solution exc
 
   fixture <- qcaert_fixture_direct6()
 
-  out <- suppressWarnings(altset.test(
+  out <- qcaert_expect_no_warning(altset.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,

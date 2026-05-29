@@ -39,17 +39,18 @@ install.packages("remotes")
 remotes::install_github("marisguia/qcaERT")
 ```
 
-Then load it normally:
+## Citation
+
+To cite qcaERT in publications, use:
+
+Marisguia, B. A. H. (2026). qcaERT: Enhanced Robustness Tests for Qualitative
+Comparative Analysis. R package version 0.1.1.
+https://CRAN.R-project.org/package=qcaERT. doi:10.32614/CRAN.package.qcaERT.
+
+Inside R, citation information is available with:
 
 ```r
-library(qcaERT)
-library(QCA)
-```
-
-Plotting is optional and uses `ggplot2`:
-
-```r
-install.packages("ggplot2")
+citation(package = "qcaERT")
 ```
 
 ## A compact LR workflow
@@ -311,4 +312,4 @@ citation(package = "qcaERT")
 
 ## Status
 
-qcaERT is release-ready.
+qcaERT is available from CRAN: https://CRAN.R-project.org/package=qcaERT

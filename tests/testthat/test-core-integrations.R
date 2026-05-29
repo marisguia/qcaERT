@@ -2,7 +2,8 @@ test_that("incl.test runs end to end on the shared direct-six fixture", {
   skip_if_not_installed("QCA")
 
   fixture <- qcaert_fixture_direct6()
-  out <- suppressWarnings(incl.test(
+  out <- NULL
+  expect_warning(out <- incl.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -13,7 +14,7 @@ test_that("incl.test runs end to end on the shared direct-six fixture", {
     solution = "all",
     dir.exp = fixture$dir.exp,
     progress = FALSE
-  ))
+  ), NA)
 
   expect_qcaert_result_structure(
     out,
@@ -34,7 +35,8 @@ test_that("ncut.test runs end to end on the shared direct-six fixture", {
   skip_if_not_installed("QCA")
 
   fixture <- qcaert_fixture_direct6()
-  out <- suppressWarnings(ncut.test(
+  out <- NULL
+  expect_warning(out <- ncut.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -45,7 +47,7 @@ test_that("ncut.test runs end to end on the shared direct-six fixture", {
     solution = "all",
     dir.exp = fixture$dir.exp,
     progress = FALSE
-  ))
+  ), NA)
 
   expect_qcaert_result_structure(
     out,
@@ -63,7 +65,9 @@ test_that("calib.test runs end to end for indirect calibration", {
   skip_if_not_installed("QCA")
 
   fixture <- qcaert_fixture_indirect()
-  out <- suppressWarnings(calib.test(
+  # QCA's indirect calibration warns on this tiny fixture; keep it explicit.
+  out <- NULL
+  expect_warning(out <- calib.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -76,7 +80,7 @@ test_that("calib.test runs end to end for indirect calibration", {
     n.cut = 1,
     solution = "conservative",
     progress = FALSE
-  ))
+  ), "glm.fit: algorithm did not converge")
 
   expect_qcaert_result_structure(
     out,
@@ -94,7 +98,8 @@ test_that("altset.test runs end to end with deterministic draws", {
   skip_if_not_installed("QCA")
 
   fixture <- qcaert_fixture_direct6()
-  out <- suppressWarnings(altset.test(
+  out <- NULL
+  expect_warning(out <- altset.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -114,7 +119,7 @@ test_that("altset.test runs end to end with deterministic draws", {
     seed = 101,
     solution = "conservative",
     progress = FALSE
-  ))
+  ), NA)
 
   expect_qcaert_result_structure(
     out,
@@ -133,7 +138,8 @@ test_that("loo.test runs end to end on selected cases", {
   skip_if_not_installed("QCA")
 
   fixture <- qcaert_fixture_direct6()
-  out <- suppressWarnings(loo.test(
+  out <- NULL
+  expect_warning(out <- loo.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -143,7 +149,7 @@ test_that("loo.test runs end to end on selected cases", {
     solution = "all",
     dir.exp = fixture$dir.exp,
     progress = FALSE
-  ))
+  ), NA)
 
   expect_qcaert_result_structure(
     out,
@@ -161,7 +167,8 @@ test_that("subsample.test runs end to end with deterministic fixed calibration",
   skip_if_not_installed("QCA")
 
   fixture <- qcaert_fixture_direct6()
-  out <- suppressWarnings(subsample.test(
+  out <- NULL
+  expect_warning(out <- subsample.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -172,7 +179,7 @@ test_that("subsample.test runs end to end with deterministic fixed calibration",
     n.cut = 1,
     solution = "conservative",
     progress = FALSE
-  ))
+  ), NA)
 
   expect_qcaert_result_structure(
     out,
@@ -191,7 +198,8 @@ test_that("cluster.test runs end to end on repeated-unit cluster data", {
   skip_if_not_installed("QCA")
 
   fixture <- qcaert_fixture_cluster()
-  out <- suppressWarnings(cluster.test(
+  out <- NULL
+  expect_warning(out <- cluster.test(
     data = fixture$data,
     tt = fixture$truth_table,
     cluster_id = fixture$cluster_id,
@@ -199,7 +207,7 @@ test_that("cluster.test runs end to end on repeated-unit cluster data", {
     solution = "all",
     dir.exp = fixture$dir.exp,
     progress = FALSE
-  ))
+  ), NA)
 
   expect_qcaert_cluster_structure(
     out,
@@ -227,13 +235,16 @@ test_that("sol.df extracts a clean table from QCA minimization objects", {
     incl.cut = 0.75,
     n.cut = 1
   )
-  conservative <- suppressWarnings(QCA::minimize(tt, include = ""))
-  intermediate <- suppressWarnings(QCA::minimize(
+  conservative <- NULL
+  expect_warning(conservative <- QCA::minimize(tt, include = ""), NA)
+  intermediate <- NULL
+  expect_warning(intermediate <- QCA::minimize(
     tt,
     include = "?",
     dir.exp = fixture$dir.exp
-  ))
-  parsimonious <- suppressWarnings(QCA::minimize(tt, include = "?"))
+  ), NA)
+  parsimonious <- NULL
+  expect_warning(parsimonious <- QCA::minimize(tt, include = "?"), NA)
 
   out <- sol.df(
     conservative = conservative,

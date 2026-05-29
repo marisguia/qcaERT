@@ -2,7 +2,7 @@ test_that("calib.test can test only the outcome calibration", {
   skip_if_not_installed("QCA")
 
   fixture <- qcaert_fixture_outcome_calibration()
-  out <- suppressWarnings(calib.test(
+  out <- qcaert_expect_no_warning(calib.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -37,7 +37,7 @@ test_that("calib.test can test selected conditions and the outcome together", {
   skip_if_not_installed("QCA")
 
   fixture <- qcaert_fixture_outcome_calibration()
-  out <- suppressWarnings(calib.test(
+  out <- qcaert_expect_no_warning(calib.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,

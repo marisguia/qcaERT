@@ -3,7 +3,7 @@ test_that("loo.test keeps conservative comparable when all-solution exclude reco
 
   fixture <- qcaert_fixture_direct6()
 
-  out <- suppressWarnings(loo.test(
+  out <- qcaert_expect_no_warning(loo.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -29,7 +29,7 @@ test_that("subsample.test keeps conservative comparable when all-solution exclud
 
   fixture <- qcaert_fixture_direct6()
 
-  out <- suppressWarnings(subsample.test(
+  out <- qcaert_expect_no_warning(subsample.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,

@@ -138,7 +138,7 @@ test_that("plot solution selectors are reserved for solution_type", {
   skip_if_not_installed("ggplot2")
 
   fixture <- qcaert_fixture_direct6()
-  out <- suppressWarnings(incl.test(
+  out <- qcaert_expect_no_warning(incl.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,

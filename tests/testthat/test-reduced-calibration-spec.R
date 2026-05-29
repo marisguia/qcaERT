@@ -65,7 +65,7 @@ test_that("loo.test and subsample.test use the common calib_spec structure when 
 
   fixture <- qcaert_fixture_outcome_calibration()
 
-  loo_out <- suppressWarnings(loo.test(
+  loo_out <- qcaert_expect_no_warning(loo.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -83,7 +83,7 @@ test_that("loo.test and subsample.test use the common calib_spec structure when 
   expect_identical(loo_out$settings$calib, "recompute")
   expect_identical(loo_out$baseline$calibration$status, "ok")
 
-  subsample_out <- suppressWarnings(subsample.test(
+  subsample_out <- qcaert_expect_no_warning(subsample.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,

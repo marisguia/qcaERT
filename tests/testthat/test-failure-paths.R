@@ -3,7 +3,7 @@ test_that("boundary tests report staged baseline QCA failures", {
 
   fixture <- qcaert_fixture_direct6()
 
-  incl_truth_table <- suppressWarnings(incl.test(
+  incl_truth_table <- qcaert_expect_no_warning(incl.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -18,7 +18,7 @@ test_that("boundary tests report staged baseline QCA failures", {
   expect_true(all(incl_truth_table$diagnostics$stop_reason == "baseline_truth_table_build_error"))
   expect_true(all(incl_truth_table$diagnostics$error_source == "truthTable"))
 
-  incl_minimize <- suppressWarnings(incl.test(
+  incl_minimize <- qcaert_expect_no_warning(incl.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -33,7 +33,7 @@ test_that("boundary tests report staged baseline QCA failures", {
   expect_true(all(incl_minimize$diagnostics$stop_reason == "baseline_requested_minimize_error"))
   expect_true(all(incl_minimize$diagnostics$error_source == "conservative"))
 
-  ncut_truth_table <- suppressWarnings(ncut.test(
+  ncut_truth_table <- qcaert_expect_no_warning(ncut.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -54,7 +54,7 @@ test_that("calib.test reports staged baseline QCA failures and missing selected 
 
   fixture <- qcaert_fixture_direct6()
 
-  missing_solution <- suppressWarnings(calib.test(
+  missing_solution <- qcaert_expect_no_warning(calib.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -75,7 +75,7 @@ test_that("calib.test reports staged baseline QCA failures and missing selected 
   expect_true(all(missing_solution$diagnostics$error_source == "conservative"))
   expect_true(all(missing_solution$results$reason == "baseline_selected_solution_missing"))
 
-  truth_table_failure <- suppressWarnings(calib.test(
+  truth_table_failure <- qcaert_expect_no_warning(calib.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -94,7 +94,7 @@ test_that("calib.test reports staged baseline QCA failures and missing selected 
   expect_true(all(truth_table_failure$diagnostics$stop_reason == "baseline_truth_table_build_error"))
   expect_true(all(truth_table_failure$diagnostics$error_source == "truthTable"))
 
-  minimize_failure <- suppressWarnings(calib.test(
+  minimize_failure <- qcaert_expect_no_warning(calib.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -113,7 +113,7 @@ test_that("calib.test reports staged baseline QCA failures and missing selected 
   expect_true(all(minimize_failure$diagnostics$stop_reason == "baseline_requested_minimize_error"))
   expect_true(all(minimize_failure$diagnostics$error_source == "conservative"))
 
-  exclude_failure <- suppressWarnings(calib.test(
+  exclude_failure <- qcaert_expect_no_warning(calib.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -140,7 +140,7 @@ test_that("plot methods explain zero-row filters", {
 
   fixture <- qcaert_fixture_direct6()
 
-  incl_out <- suppressWarnings(incl.test(
+  incl_out <- qcaert_expect_no_warning(incl.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -157,7 +157,7 @@ test_that("plot methods explain zero-row filters", {
     fixed = TRUE
   )
 
-  calib_out <- suppressWarnings(calib.test(
+  calib_out <- qcaert_expect_no_warning(calib.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,

@@ -36,7 +36,7 @@ test_that("stress: LR boundary and leave-one-out workflows preserve the family s
 
   lr <- qcaert_fixture_lr()
 
-  incl <- suppressWarnings(incl.test(
+  incl <- qcaert_expect_no_warning(incl.test(
     data = lr$calib,
     outcome = lr$outcome,
     conditions = lr$conditions,
@@ -57,7 +57,7 @@ test_that("stress: LR boundary and leave-one-out workflows preserve the family s
     top = c("bounds", "baseline", "by_direction", "settings")
   )
 
-  ncut <- suppressWarnings(ncut.test(
+  ncut <- qcaert_expect_no_warning(ncut.test(
     data = lr$calib,
     outcome = lr$outcome,
     conditions = lr$conditions,
@@ -78,7 +78,7 @@ test_that("stress: LR boundary and leave-one-out workflows preserve the family s
     top = c("bounds", "baseline", "by_direction", "settings")
   )
 
-  loo <- suppressWarnings(loo.test(
+  loo <- qcaert_expect_no_warning(loo.test(
     data = lr$calib,
     outcome = lr$outcome,
     conditions = lr$conditions,
@@ -105,7 +105,7 @@ test_that("stress: calibration workflows cover direct-six and indirect anchors",
   skip_if_not_installed("QCA")
 
   direct <- qcaert_fixture_direct6()
-  direct_out <- suppressWarnings(calib.test(
+  direct_out <- qcaert_expect_no_warning(calib.test(
     raw.data = direct$raw,
     calib.data = direct$calib,
     outcome = direct$outcome,
@@ -131,7 +131,8 @@ test_that("stress: calibration workflows cover direct-six and indirect anchors",
   expect_identical(unique(direct_out$results$anchor), c("E1", "C1", "I1", "I2", "C2", "E2"))
 
   indirect <- qcaert_fixture_indirect()
-  indirect_out <- suppressWarnings(calib.test(
+  # QCA's indirect calibration warns on this tiny fixture; keep it explicit.
+  indirect_out <- qcaert_expect_warnings(calib.test(
     raw.data = indirect$raw,
     calib.data = indirect$calib,
     outcome = indirect$outcome,
@@ -145,7 +146,7 @@ test_that("stress: calibration workflows cover direct-six and indirect anchors",
     solution = "all",
     dir.exp = indirect$dir.exp,
     progress = FALSE
-  ))
+  ), "glm.fit: algorithm did not converge")
   expect_qcaert_result_structure(
     indirect_out,
     class = "calib_test",
@@ -163,7 +164,7 @@ test_that("stress: randomized workflows are reproducible with fixed seeds", {
 
   fixture <- qcaert_fixture_direct6()
 
-  alt_one <- suppressWarnings(altset.test(
+  alt_one <- qcaert_expect_no_warning(altset.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -184,7 +185,7 @@ test_that("stress: randomized workflows are reproducible with fixed seeds", {
     dir.exp = fixture$dir.exp,
     progress = FALSE
   ))
-  alt_two <- suppressWarnings(altset.test(
+  alt_two <- qcaert_expect_no_warning(altset.test(
     raw.data = fixture$raw,
     calib.data = fixture$calib,
     outcome = fixture$outcome,
@@ -216,7 +217,7 @@ test_that("stress: randomized workflows are reproducible with fixed seeds", {
   expect_equal(alt_one$results, alt_two$results)
   expect_equal(alt_one$diagnostics, alt_two$diagnostics)
 
-  subsample_one <- suppressWarnings(subsample.test(
+  subsample_one <- qcaert_expect_no_warning(subsample.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -230,7 +231,7 @@ test_that("stress: randomized workflows are reproducible with fixed seeds", {
     dir.exp = fixture$dir.exp,
     progress = FALSE
   ))
-  subsample_two <- suppressWarnings(subsample.test(
+  subsample_two <- qcaert_expect_no_warning(subsample.test(
     data = fixture$calib,
     outcome = fixture$outcome,
     conditions = fixture$conditions,
@@ -261,7 +262,7 @@ test_that("stress: cluster diagnostics handle all solution types with repeated u
   skip_if_not_installed("QCA")
 
   fixture <- qcaert_fixture_cluster()
-  out <- suppressWarnings(cluster.test(
+  out <- qcaert_expect_no_warning(cluster.test(
     data = fixture$data,
     tt = fixture$truth_table,
     cluster_id = fixture$cluster_id,

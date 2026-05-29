@@ -551,10 +551,21 @@ sol.chart <- function(
   out$solution_type <- vapply(out$Solution, .sol_chart_normalize_solution_type, character(1))
   out$intermediate_branch <- .sol_chart_clean_text(out$Intermediate_CnPn)
   out$prime_implicant <- trimws(as.character(out$Prime_Implicants))
+  .sol_chart_reject_multivalue_qca(out$prime_implicant)
   out$term_id <- seq_len(nrow(out))
   out$states <- lapply(out$prime_implicant, .sol_chart_parse_term)
   out$n_literals <- vapply(out$states, length, integer(1))
   out
+}
+
+.sol_chart_reject_multivalue_qca <- function(prime_implicants) {
+  prime_implicants <- as.character(prime_implicants)
+  prime_implicants <- prime_implicants[!is.na(prime_implicants)]
+  if (any(grepl("\\[|\\]", prime_implicants))) {
+    stop("`sol.chart()` does not currently support multi-value QCA.", call. = FALSE)
+  }
+
+  invisible(TRUE)
 }
 
 .sol_chart_clean_text <- function(x) {
