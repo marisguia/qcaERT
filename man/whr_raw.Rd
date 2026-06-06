@@ -30,7 +30,7 @@ Oxford: Wellbeing Research Centre.
 whr_raw
 }
 \description{
-A compact country-level data set derived from the World Happiness Report
+A country-level data set derived from the World Happiness Report
 2025 data for Figure 2.1. It is included to support qcaERT demonstrations
 based on a real QCA workflow.
 }

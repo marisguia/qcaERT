@@ -79,6 +79,54 @@ test_that("calib_test plot methods return ggplot objects for direct-six anchors"
   )
 })
 
+test_that("calib_test trace plots do not duplicate an evaluated failing threshold", {
+  skip_if_not_installed("ggplot2")
+
+  trace <- data.frame(
+    step = 1:4,
+    value = c(52.68, 52.26, 51.84, 51.42),
+    changed = c(FALSE, FALSE, FALSE, TRUE),
+    status = "ok",
+    change_kind = c(NA_character_, NA_character_, NA_character_, "formula_changed")
+  )
+  diagnostics <- data.frame(
+    set = "BLEN",
+    role = "condition",
+    raw = "BLEN",
+    type = "f",
+    method = "direct",
+    anchor = "I",
+    direction = "lower",
+    solution = "conservative",
+    monitored_solutions = "conservative",
+    start_value = 53.1,
+    last_safe_value = 51.84,
+    failing_value = 51.42,
+    number_of_steps = 3L,
+    total_delta_units = -1.26,
+    delta_as_pct_of_raw_range = 4.58,
+    stop_reason = "solution_change",
+    changed_types = "CON"
+  )
+  out <- structure(
+    list(
+      diagnostics = diagnostics,
+      by_set = list(BLEN = list(steps = list(I_lower = list(trace = trace))))
+    ),
+    class = "calib_test"
+  )
+
+  changed_plot <- plot(out, type = "trace", set = "BLEN", anchor = "I", direction = "lower")
+  expect_equal(changed_plot$layers[[1L]]$data$step, 1:4)
+  expect_length(changed_plot$layers, 4L)
+
+  out$diagnostics$stop_reason <- "feasibility_boundary"
+  out$by_set$BLEN$steps$I_lower$trace <- trace[1:3, , drop = FALSE]
+  boundary_plot <- plot(out, type = "trace", set = "BLEN", anchor = "I", direction = "lower")
+  expect_equal(boundary_plot$layers[[1L]]$data$step, 1:4)
+  expect_equal(boundary_plot$layers[[3L]]$data$step, 4L)
+})
+
 test_that("calib_test plot methods return ggplot objects for indirect anchors", {
   skip_if_not_installed("QCA")
   skip_if_not_installed("ggplot2")

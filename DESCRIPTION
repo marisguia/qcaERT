@@ -1,6 +1,6 @@
 Package: qcaERT
 Title: Enhanced Robustness Tests for Qualitative Comparative Analysis
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     person("Breno A. H.", "Marisguia", email = "marisguiabreno@gmail.com",
            role = c("aut", "cre", "cph"))

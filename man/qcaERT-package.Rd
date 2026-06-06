@@ -114,7 +114,7 @@ sets.
 \section{Recommended citation}{
 
 Marisguia, B. A. H. (2026). qcaERT: Enhanced Robustness Tests for
-Qualitative Comparative Analysis. R package version 0.1.0.
+Qualitative Comparative Analysis. R package version 0.1.1.
 \url{https://CRAN.R-project.org/package=qcaERT}.
 doi:10.32614/CRAN.package.qcaERT.
 

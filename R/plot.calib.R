@@ -228,12 +228,17 @@ plot.calib_test <- function(
 
     fail_point <- NULL
     if (is.finite(failing_value) && !is.na(failing_value)) {
-      next_step <- if (nrow(trace) == 0L) 1L else max(trace$step, na.rm = TRUE) + 1L
-      fail_point <- data.frame(
-        step = next_step,
-        value = failing_value,
-        preserved = factor("No", levels = levels(trace$preserved))
-      )
+      failing_value_recorded <- nrow(trace) > 0L &&
+        any(!is.na(trace$value) & trace$value == failing_value)
+
+      if (!failing_value_recorded) {
+        next_step <- if (nrow(trace) == 0L) 1L else max(trace$step, na.rm = TRUE) + 1L
+        fail_point <- data.frame(
+          step = next_step,
+          value = failing_value,
+          preserved = factor("No", levels = levels(trace$preserved))
+        )
+      }
     }
 
     line_df <- trace[, c("step", "value"), drop = FALSE]

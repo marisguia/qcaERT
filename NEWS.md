@@ -1,7 +1,11 @@
+# qcaERT 0.1.1
+
+- Added the World Happiness Report demonstration objects `whr_raw`, `whr_calibrated`, and `whr_calib_spec`.
+- Fixed calibration trace plots so `plot(..., type = "trace")` no longer duplicates an evaluated failing threshold.
+
 # qcaERT 0.1.0
 
-This is the first public version of qcaERT. This NEWS entry records the current
-public interface.
+This is the first public version of qcaERT.
 
 ## Package scope
 
