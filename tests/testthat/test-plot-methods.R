@@ -40,6 +40,47 @@ test_that("incl_test plot methods return ggplot objects", {
   )
 })
 
+test_that("incl_test trace plots do not duplicate an evaluated failing cutoff", {
+  skip_if_not_installed("ggplot2")
+
+  trace <- data.frame(
+    step = 1:4,
+    incl.cut = c(0.89, 0.88, 0.87, 0.86),
+    changed = c(FALSE, FALSE, FALSE, TRUE),
+    status = "ok",
+    change_kind = c(NA_character_, NA_character_, NA_character_, "formula_changed")
+  )
+  diagnostics <- data.frame(
+    direction = "lower",
+    solution = "conservative",
+    monitored_solutions = "conservative",
+    i_mode = NA_character_,
+    incl.cut_start = 0.9,
+    incl.cut_last_safe = 0.87,
+    incl.cut_first_failing = 0.86,
+    stop_reason = "solution_change",
+    changed_types = "CON",
+    stringsAsFactors = FALSE
+  )
+  out <- structure(
+    list(
+      diagnostics = diagnostics,
+      by_direction = list(lower = list(trace = trace))
+    ),
+    class = "incl_test"
+  )
+
+  changed_plot <- plot(out, type = "trace", direction = "lower")
+  expect_equal(changed_plot$layers[[1L]]$data$step, 1:4)
+  expect_length(changed_plot$layers, 4L)
+
+  out$diagnostics$stop_reason <- "feasibility_boundary"
+  out$by_direction$lower$trace <- trace[1:3, , drop = FALSE]
+  boundary_plot <- plot(out, type = "trace", direction = "lower")
+  expect_equal(boundary_plot$layers[[1L]]$data$step, 1:4)
+  expect_equal(boundary_plot$layers[[3L]]$data$step, 4L)
+})
+
 test_that("calib_test plot methods return ggplot objects for direct-six anchors", {
   skip_if_not_installed("QCA")
   skip_if_not_installed("ggplot2")
