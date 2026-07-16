@@ -16,8 +16,11 @@
 #'   must be a single non-empty character string, and the column must contain
 #'   at least two distinct non-missing cluster values.
 #' @param unit_id Optional name of the column in `data` identifying units that
-#'   may appear in more than one cluster. If `NULL`, units are treated as row
-#'   positions and within-unit diagnostics are not available across clusters.
+#'   may appear in more than one cluster. If `NULL`, within-unit diagnostics
+#'   are not available. Rows with missing unit identifiers remain eligible for
+#'   pooled and cluster-specific fit, but are excluded from within-unit
+#'   diagnostics. Each non-missing unit-cluster combination must identify at
+#'   most one row.
 #' @param solution Solution type to evaluate. Accepted values are `"all"`,
 #'   `"con"` or `"conservative"`, `"par"` or `"parsimonious"`, and `"int"` or
 #'   `"intermediate"`.
@@ -94,13 +97,27 @@
 #' selected baseline configurations, and computes pooled fit values for each
 #' configuration and configuration component.
 #'
-#' Cluster-level diagnostics compare the pooled fit of each selected
-#' configuration with the fit obtained inside each cluster defined by
-#' `cluster_id`.
+#' Rows in `data` and `tt$recoded.data` are paired before cluster diagnostics.
+#' Informative row names must be unique and identical in the same order on both
+#' inputs. Default row names (`1`, ..., `n`) are treated as positional because
+#' [QCA::truthTable()] materializes them in `tt$recoded.data`; positionally
+#' paired inputs must not be independently reordered.
 #'
-#' If `unit_id` identifies units that appear in more than one cluster, the
-#' function also computes within-unit diagnostics by comparing the same unit
-#' across clusters.
+#' Pooled fit uses all original rows with non-missing configuration and outcome
+#' memberships. It does not require non-missing cluster or unit identifiers.
+#' Cluster-specific fit is computed directly from the eligible original rows
+#' belonging to each distinct non-missing `cluster_id`; missing `unit_id`
+#' values do not remove rows from these calculations. Rows with missing
+#' `cluster_id` remain eligible for pooled fit but cannot contribute to
+#' cluster-specific or within-unit fit.
+#'
+#' Within-unit diagnostics use a separate occurrence table formed from rows
+#' with non-missing `unit_id` and `cluster_id`. A unit is repeated when it is
+#' observed in more than one distinct cluster, regardless of its configuration
+#' or outcome membership values. Each non-missing unit-cluster combination
+#' must occur at most once; duplicate combinations are rejected rather than
+#' having their fuzzy memberships summed. Within-unit fit uses the eligible
+#' membership pairs among each repeated unit's observed cluster occurrences.
 #'
 #' Configuration extraction uses the data-frame `pims` component produced by
 #' [QCA::minimize()]. The shared solution-control, QCA solution-object, and
@@ -220,9 +237,16 @@ cluster.test <- function(
     stop("`necessity` must be a single TRUE/FALSE value.")
   }
 
-  if (is.null(tt$recoded.data) || nrow(tt$recoded.data) != nrow(data)) {
+  if (is.null(tt$recoded.data) || is.null(nrow(tt$recoded.data))) {
     stop("`data` must have the same number of rows as `tt$recoded.data`.")
   }
+
+  .validate_row_alignment(
+    x = data,
+    y = tt$recoded.data,
+    x_name = "data",
+    y_name = "tt$recoded.data"
+  )
 
   .err_msg <- function(e) {
     if (!inherits(e, "error")) return(NA_character_)
@@ -259,26 +283,33 @@ cluster.test <- function(
     c(max_abs = max(abs(d)), mean_abs = mean(abs(d)))
   }
 
-  .diag_component_tables <- function(x, y, cluster_vec, unit_vec, necessity) {
-    pooled <- .fit_pair(x, y, necessity = necessity)
+  .diag_component_tables <- function(
+      x,
+      y,
+      cluster_vec,
+      observed_clusters,
+      unit_cluster_occurrences,
+      necessity
+  ) {
+    membership_ok <- !(is.na(x) | is.na(y))
+    pooled <- .fit_pair(
+      x[membership_ok],
+      y[membership_ok],
+      necessity = necessity
+    )
 
-    ok <- !(is.na(x) | is.na(y) | is.na(cluster_vec) | is.na(unit_vec))
-    x <- as.numeric(x[ok])
-    y <- as.numeric(y[ok])
-    cluster_vec <- as.character(cluster_vec[ok])
-    unit_vec <- as.character(unit_vec[ok])
+    by_cluster <- lapply(observed_clusters, function(cluster_value) {
+      cluster_rows <- !is.na(cluster_vec) & cluster_vec == cluster_value
+      cluster_fit_rows <- cluster_rows & membership_ok
+      fitj <- .fit_pair(
+        x[cluster_fit_rows],
+        y[cluster_fit_rows],
+        necessity = necessity
+      )
 
-    X <- xtabs(as.numeric(x) ~ unit_vec + cluster_vec)
-    Y <- xtabs(as.numeric(y) ~ unit_vec + cluster_vec)
-
-    cls <- colnames(X)
-    cls_sizes <- table(cluster_vec)
-
-    by_cluster <- lapply(seq_along(cls), function(j) {
-      fitj <- .fit_pair(X[, j], Y[, j], necessity = necessity)
       data.frame(
-        cluster_id = cls[j],
-        cluster_size = as.integer(cls_sizes[cls[j]]),
+        cluster_id = cluster_value,
+        cluster_size = sum(cluster_fit_rows),
         consistency = unname(fitj["consistency"]),
         coverage = unname(fitj["coverage"]),
         delta_consistency = unname(fitj["consistency"] - pooled["consistency"]),
@@ -288,28 +319,35 @@ cluster.test <- function(
     })
     by_cluster <- do.call(rbind, by_cluster)
 
-    unit_clusters <- tapply(cluster_vec, unit_vec, function(z) length(unique(as.character(z))))
-    repeated_units <- names(unit_clusters)[!is.na(unit_clusters) & unit_clusters > 1L]
-
     by_unit <- NULL
-    if (length(repeated_units) > 0L) {
-      row_keep <- rownames(X) %in% repeated_units
-      Xu <- X[row_keep, , drop = FALSE]
-      Yu <- Y[row_keep, , drop = FALSE]
+    if (!is.null(unit_cluster_occurrences) &&
+        nrow(unit_cluster_occurrences) > 0L) {
+      unit_cluster_counts <- table(unit_cluster_occurrences$unit_id)
+      repeated_units <- names(unit_cluster_counts)[unit_cluster_counts > 1L]
 
-      by_unit <- lapply(seq_len(nrow(Xu)), function(i) {
-        fiti <- .fit_pair(Xu[i, ], Yu[i, ], necessity = necessity)
-        data.frame(
-          unit_id = rownames(Xu)[i],
-          n_clusters = sum((Xu[i, ] > 0) | (Yu[i, ] > 0)),
-          consistency = unname(fiti["consistency"]),
-          coverage = unname(fiti["coverage"]),
-          delta_consistency = unname(fiti["consistency"] - pooled["consistency"]),
-          delta_coverage = unname(fiti["coverage"] - pooled["coverage"]),
-          stringsAsFactors = FALSE
-        )
-      })
-      by_unit <- do.call(rbind, by_unit)
+      if (length(repeated_units) > 0L) {
+        by_unit <- lapply(repeated_units, function(unit_value) {
+          occurrence_rows <- unit_cluster_occurrences$row_index[
+            unit_cluster_occurrences$unit_id == unit_value
+          ]
+          fiti <- .fit_pair(
+            x[occurrence_rows],
+            y[occurrence_rows],
+            necessity = necessity
+          )
+
+          data.frame(
+            unit_id = unit_value,
+            n_clusters = as.integer(unit_cluster_counts[[unit_value]]),
+            consistency = unname(fiti["consistency"]),
+            coverage = unname(fiti["coverage"]),
+            delta_consistency = unname(fiti["consistency"] - pooled["consistency"]),
+            delta_coverage = unname(fiti["coverage"] - pooled["coverage"]),
+            stringsAsFactors = FALSE
+          )
+        })
+        by_unit <- do.call(rbind, by_unit)
+      }
     }
 
     list(
@@ -427,8 +465,10 @@ cluster.test <- function(
   on.exit(progress_state$close(), add = TRUE)
   .bump_pb <- progress_state$tick
 
-  cluster_nonmiss <- stats::na.omit(as.character(data[[cluster_id]]))
-  if (length(unique(cluster_nonmiss)) < 2L) {
+  cluster_vec <- as.character(data[[cluster_id]])
+  observed_clusters <- sort(unique(cluster_vec[!is.na(cluster_vec)]))
+  n_clusters_observed <- length(observed_clusters)
+  if (n_clusters_observed < 2L) {
     stop("`cluster_id` must identify at least two distinct non-missing clusters.")
   }
 
@@ -441,11 +481,28 @@ cluster.test <- function(
   }
 
   recoded_outcome <- as.numeric(tt$recoded.data[, outcome_name])
-  cluster_vec <- as.character(data[[cluster_id]])
-  if (is.null(unit_id)) {
-    unit_vec <- as.character(seq_len(nrow(data)))
-  } else {
+  unit_cluster_occurrences <- NULL
+  if (!is.null(unit_id)) {
     unit_vec <- as.character(data[[unit_id]])
+    occurrence_rows <- which(!is.na(unit_vec) & !is.na(cluster_vec))
+    unit_cluster_occurrences <- data.frame(
+      row_index = occurrence_rows,
+      unit_id = unit_vec[occurrence_rows],
+      cluster_id = cluster_vec[occurrence_rows],
+      stringsAsFactors = FALSE
+    )
+
+    duplicate_occurrence <- duplicated(
+      unit_cluster_occurrences[, c("unit_id", "cluster_id"), drop = FALSE]
+    )
+    if (any(duplicate_occurrence)) {
+      stop(
+        paste0(
+          "`unit_id` and `cluster_id` must identify at most one row per ",
+          "unit-cluster combination; duplicate combinations are not aggregated."
+        )
+      )
+    }
   }
 
   baseline_res <- list(conservative = NULL, parsimonious = NULL, intermediate = NULL)
@@ -496,7 +553,7 @@ cluster.test <- function(
         error_message = baseline_error_message[[rg]],
         pooled_consistency = NA_real_,
         pooled_coverage = NA_real_,
-        n_clusters = length(unique(stats::na.omit(cluster_vec))),
+        n_clusters = n_clusters_observed,
         max_abs_delta_consistency = NA_real_,
         max_abs_delta_coverage = NA_real_,
         mean_abs_delta_consistency = NA_real_,
@@ -543,7 +600,7 @@ cluster.test <- function(
           error_message = ttg$error_message,
           pooled_consistency = NA_real_,
           pooled_coverage = NA_real_,
-          n_clusters = length(unique(stats::na.omit(cluster_vec))),
+          n_clusters = n_clusters_observed,
           max_abs_delta_consistency = NA_real_,
           max_abs_delta_coverage = NA_real_,
           mean_abs_delta_consistency = NA_real_,
@@ -600,7 +657,8 @@ cluster.test <- function(
           x = comp_vectors[[nm]],
           y = recoded_outcome,
           cluster_vec = cluster_vec,
-          unit_vec = unit_vec,
+          observed_clusters = observed_clusters,
+          unit_cluster_occurrences = unit_cluster_occurrences,
           necessity = necessity
         )
 
@@ -794,7 +852,7 @@ cluster.test <- function(
         error_message = NA_character_,
         pooled_consistency = unname(pooled_terms[["solution"]]["consistency"]),
         pooled_coverage = unname(pooled_terms[["solution"]]["coverage"]),
-        n_clusters = length(unique(stats::na.omit(cluster_vec))),
+        n_clusters = n_clusters_observed,
         max_abs_delta_consistency = unname(sum_cl_cons["max_abs"]),
         max_abs_delta_coverage = unname(sum_cl_cov["max_abs"]),
         mean_abs_delta_consistency = unname(sum_cl_cons["mean_abs"]),

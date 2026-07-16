@@ -69,14 +69,14 @@ entry may additionally contain \code{findTh}, a named list of \code{\link[QCA:fi
 arguments; when supplied, thresholds are re-estimated within each
 subsample instead of reusing the baseline \code{thresholds}.}
 
-\item{sample_n}{Integer subsample size. Supply exactly one of \code{sample_n} or
-\code{sample_prop}.}
+\item{sample_n}{Integer subsample size of at least \code{2} and strictly smaller
+than \code{nrow(data)}. Supply exactly one of \code{sample_n} or \code{sample_prop}.}
 
 \item{sample_prop}{Proportion used to determine the realized subsample size.
 Supply exactly one of \code{sample_n} or \code{sample_prop}. The realized sample
 size is \code{round(sample_prop * nrow(data))}.}
 
-\item{reps}{Number of subsample replications.}
+\item{reps}{Positive integer giving the number of subsample replications.}
 
 \item{stratify}{Stratification mode. \code{"none"} samples from the full dataset
 without stratification, \code{"outcome"} stratifies on the baseline analysis
@@ -86,8 +86,8 @@ outcome, and \code{"user"} stratifies on \code{strata}.}
 \code{stratify = "user"}. It must have length \code{nrow(data)} and contain no
 missing values.}
 
-\item{seed}{Optional integer seed passed to \code{\link[=set.seed]{set.seed()}} before drawing the
-subsamples.}
+\item{seed}{Optional finite integer seed passed to \code{\link[=set.seed]{set.seed()}} before
+drawing the subsamples.}
 
 \item{case_labels}{Optional character vector of case labels with length
 \code{nrow(data)}. If \code{NULL}, the function uses \code{rownames(data)} when
@@ -208,6 +208,14 @@ When \code{calib = "fixed"}, the subsample runs use the calibrated values
 already present in \code{data}. When \code{calib = "recompute"}, the function rebuilds
 the calibrated outcome and condition columns within each subsample using
 \code{\link[QCA:findTh]{QCA::findTh()}} and \code{\link[QCA:calibrate]{QCA::calibrate()}} as specified in \code{calib_spec}.
+
+With \code{calib = "recompute"}, rows in \code{raw.data} and \code{data} are paired before
+sampling and recalibration. Informative row names must be unique and
+identical in the same order on both inputs. If \code{data} has only default row
+names and \code{case_labels} is supplied, \code{raw.data} must use those labels as
+unique row names in the same order. If neither input has identifiable
+labels, pairing is positional and the inputs must not be independently
+reordered.
 
 The shared solution-control, exclusion, and returned-object conventions are
 described in \code{?qcaERT_conventions}.

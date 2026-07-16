@@ -219,10 +219,7 @@ sol.df <- function(
   }
 
   if (!is.null(digits)) {
-    if (!is.numeric(digits) || length(digits) != 1L || !is.finite(digits) || digits < 0) {
-      stop("`digits` must be NULL or a single non-negative integer.")
-    }
-    digits <- as.integer(digits)
+    digits <- .as_integerish_scalar(digits, "digits", min = 0L)
   }
 
   if (!is.character(na_string) || length(na_string) != 1L || is.na(na_string)) {

@@ -47,8 +47,8 @@ This must be a single finite number in \verb{[0, 1]}.}
 \item{step}{Positive numeric step size used to move \code{incl.cut} downward and
 upward from the baseline value.}
 
-\item{max_steps}{Maximum number of stepwise moves to attempt in each
-direction.}
+\item{max_steps}{Positive integer giving the maximum number of stepwise
+moves to attempt in each direction.}
 
 \item{n.cut}{Frequency cutoff passed to \code{\link[QCA:truthTable]{QCA::truthTable()}}.}
 

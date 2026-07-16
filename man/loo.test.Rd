@@ -169,6 +169,14 @@ already present in \code{data}. When \code{calib = "recompute"}, the function re
 the calibrated outcome and condition columns after each case deletion
 using \code{\link[QCA:findTh]{QCA::findTh()}} and \code{\link[QCA:calibrate]{QCA::calibrate()}} as specified in \code{calib_spec}.
 
+With \code{calib = "recompute"}, rows in \code{raw.data} and \code{data} are paired before
+deletion and recalibration. Informative row names must be unique and
+identical in the same order on both inputs. If \code{data} has only default row
+names and \code{case_labels} is supplied, \code{raw.data} must use those labels as
+unique row names in the same order. If neither input has identifiable
+labels, pairing is positional and the inputs must not be independently
+reordered.
+
 For each tested case, the function records whether the monitored solution
 changed, whether monitored fit measures changed beyond \code{fit_tol}, and
 whether the reduced-data run stopped with a calibration, truth table,

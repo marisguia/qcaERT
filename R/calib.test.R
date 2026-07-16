@@ -46,10 +46,11 @@
 #'   each set's threshold spacing.
 #' @param unit_step_divisor Positive number used to compute `unit_step`
 #'   automatically when `unit_step = NULL`. The default is `10`.
-#' @param max_steps Maximum number of upward or downward threshold moves to
-#'   attempt for each tested anchor.
+#' @param max_steps Positive integer giving the maximum number of upward or
+#'   downward threshold moves to attempt for each tested anchor.
 #' @param incl.cut Inclusion cutoff passed to [QCA::truthTable()].
-#' @param n.cut Frequency cutoff passed to [QCA::truthTable()].
+#' @param n.cut Frequency cutoff passed to [QCA::truthTable()]. This must be an
+#'   integer-like value of at least `1`.
 #' @param dir.exp Directional expectations used when the monitored solution is
 #'   intermediate.
 #' @param i_mode Character string controlling intermediate-solution selection.
@@ -123,6 +124,11 @@
 #' `test.outcome = TRUE`, from `raw.data` using `calib_spec`. It then compares
 #' perturbed analyses against the baseline solution under the selected solution
 #' type.
+#'
+#' Rows in `raw.data` and `calib.data` are paired before recalibration.
+#' Informative row names must be unique and identical in the same order on both
+#' inputs. If both inputs use only default row names (`1`, ..., `n`), pairing
+#' is positional and the inputs must not be independently reordered.
 #'
 #' When `solution = "all"`, conservative, parsimonious, and, when requested,
 #' intermediate paths are searched independently for each tested set, anchor,
@@ -883,6 +889,10 @@ calib.test <- function(
   }
 
   # validate/align ----
+  max_steps <- .as_integerish_scalar(max_steps, "max_steps", min = 1L)
+  n.cut <- .as_integerish_scalar(n.cut, "n.cut", min = 1L)
+  which_M <- .coerce_which_M(which_M)
+
   if (is.null(dim(raw.data)) || is.null(nrow(raw.data)) || nrow(raw.data) < 1L) {
     stop("`raw.data` must be a non-empty data frame with at least one row.")
   }
@@ -891,9 +901,12 @@ calib.test <- function(
     stop("`calib.data` must be a non-empty data frame with at least one row.")
   }
 
-  if (nrow(raw.data) != nrow(calib.data)) {
-    stop("`raw.data` and `calib.data` must have the same number of rows.")
-  }
+  .validate_row_alignment(
+    x = raw.data,
+    y = calib.data,
+    x_name = "raw.data",
+    y_name = "calib.data"
+  )
 
   if (!is.character(outcome) || length(outcome) != 1L || !nzchar(outcome)) {
     stop("`outcome` must be a single non-empty character string.")
@@ -936,7 +949,6 @@ calib.test <- function(
   thr_list <- calib_context$thresholds
   unit_step_vec <- calib_context$unit_step_targets
   anchors_to_test <- calib_context$anchors_to_test
-  which_M <- .coerce_which_M(which_M)
 
   tested_sets <- c(test.conditions, if (test.outcome) outcome else character(0))
   tested_roles <- c(rep("condition", length(test.conditions)), if (test.outcome) "outcome" else character(0))

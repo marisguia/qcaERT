@@ -17,8 +17,8 @@
 #'   This must be a single finite number in `[0, 1]`.
 #' @param step Positive numeric step size used to move `incl.cut` downward and
 #'   upward from the baseline value.
-#' @param max_steps Maximum number of stepwise moves to attempt in each
-#'   direction.
+#' @param max_steps Positive integer giving the maximum number of stepwise
+#'   moves to attempt in each direction.
 #' @param n.cut Frequency cutoff passed to [QCA::truthTable()].
 #' @param solution Solution type to monitor. Accepted values are `"all"`,
 #'   `"con"` or `"conservative"`, `"par"` or `"parsimonious"`, and `"int"` or
@@ -214,11 +214,7 @@ incl.test <- function(
     stop("`step` must be a single finite number > 0.")
   }
 
-  if (!is.numeric(max_steps) || length(max_steps) != 1L || !is.finite(max_steps) ||
-      max_steps < 1) {
-    stop("`max_steps` must be a single integer >= 1.")
-  }
-  max_steps <- as.integer(max_steps)
+  max_steps <- .as_integerish_scalar(max_steps, "max_steps", min = 1L)
 
   n.cut <- .as_integerish_scalar(n.cut, "n.cut", min = 1L)
 

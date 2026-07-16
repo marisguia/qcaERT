@@ -98,6 +98,21 @@
 #' `results$overview`. `theory.test()` returns `models`, `pairwise`, and
 #' `solutions`; `as.data.frame()` returns `results$models`.
 #'
+#' @section Progress and Reproducibility:
+#' Functions using the shared progress display show a varying introductory
+#' message and a text progress bar only in interactive sessions when
+#' `progress = TRUE`. Message selection uses private cosmetic state initialized
+#' from wall-clock time and the R process identifier, then advanced with an
+#' internal invocation counter. It does not call R's random-number generator,
+#' create or modify `.Random.seed`, or alter the sampling algorithms and seed
+#' arguments used by [altset.test()] or [subsample.test()].
+#'
+#' This separation is intentional: changing a display option must not change
+#' the random analytical specifications or subsamples produced from a fixed
+#' seed. The displayed message itself is cosmetic and is not intended to be
+#' reproducible; messages may vary or repeat across calls while analytical
+#' results remain unchanged.
+#'
 #' @section Plotting:
 #' Plotting requires `ggplot2`. `plot()` methods are provided
 #' for `incl_test`, `calib_test`, and `theory_test` objects. Interval and trace

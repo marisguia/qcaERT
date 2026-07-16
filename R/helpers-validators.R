@@ -113,3 +113,87 @@
   }
   invisible(TRUE)
 }
+
+.validate_row_alignment <- function(
+    x,
+    y,
+    x_name,
+    y_name,
+    y_case_ids = NULL
+) {
+  nx <- nrow(x)
+  ny <- nrow(y)
+
+  if (is.null(nx) || is.null(ny)) {
+    stop("Internal error: paired row-alignment inputs must have row counts.")
+  }
+
+  if (nx != ny) {
+    stop(sprintf(
+      "`%s` and `%s` must have the same number of rows.",
+      x_name,
+      y_name
+    ))
+  }
+
+  alignment_ids <- function(z, case_ids) {
+    rn <- rownames(z)
+
+    if (!is.null(rn) &&
+        !identical(as.character(rn), as.character(seq_len(nrow(z))))) {
+      return(as.character(rn))
+    }
+
+    if (is.null(case_ids)) NULL else as.character(case_ids)
+  }
+
+  x_ids <- alignment_ids(x, NULL)
+  y_ids <- alignment_ids(y, y_case_ids)
+
+  invalid_ids <- function(ids) {
+    !is.null(ids) &&
+      (length(ids) != nx || anyNA(ids) || any(!nzchar(ids)) ||
+        anyDuplicated(ids) > 0L)
+  }
+
+  if (invalid_ids(x_ids) || invalid_ids(y_ids)) {
+    stop(sprintf(
+      paste0(
+        "Row names or case identifiers used to align `%s` and `%s` ",
+        "must be non-missing, non-empty, and unique."
+      ),
+      x_name,
+      y_name
+    ))
+  }
+
+  if (is.null(x_ids) && is.null(y_ids)) {
+    return(invisible(TRUE))
+  }
+
+  if (is.null(x_ids) || is.null(y_ids)) {
+    stop(sprintf(
+      paste0(
+        "Cannot verify row alignment between `%s` and `%s`: only one input ",
+        "has identifiable row names or case identifiers. Use matching unique ",
+        "identifiers in the same order on both inputs, or use default row ",
+        "names on both and preserve positional order."
+      ),
+      x_name,
+      y_name
+    ))
+  }
+
+  if (!identical(x_ids, y_ids)) {
+    stop(sprintf(
+      paste0(
+        "`%s` and `%s` must have identical unique row names or case ",
+        "identifiers in the same order."
+      ),
+      x_name,
+      y_name
+    ))
+  }
+
+  invisible(TRUE)
+}

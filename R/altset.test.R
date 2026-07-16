@@ -48,19 +48,20 @@
 #'   each set's threshold spacing.
 #' @param unit_step_divisor Positive number used to compute `unit_step`
 #'   automatically when `unit_step = NULL`. The default is `10`.
-#' @param calib_max_steps Maximum number of threshold moves away from the
-#'   baseline used when building alternative calibration candidates.
+#' @param calib_max_steps Positive integer giving the maximum number of
+#'   threshold moves away from the baseline used when building alternative
+#'   calibration candidates.
 #' @param incl.cut Baseline inclusion cutoff passed to [QCA::truthTable()].
 #' @param incl_step Positive step size used to build the candidate grid of
 #'   inclusion-cutoff values around `incl.cut`.
-#' @param incl_max_steps Maximum number of stepwise moves away from the
-#'   baseline `incl.cut` used to build the candidate grid.
+#' @param incl_max_steps Positive integer giving the maximum number of stepwise
+#'   moves away from the baseline `incl.cut` used to build the candidate grid.
 #' @param n.cut Baseline truth table frequency cutoff passed to
 #'   [QCA::truthTable()].
 #' @param ncut_step Positive integer step size used to build the candidate grid
 #'   of frequency-cutoff values around `n.cut`.
-#' @param ncut_max_steps Maximum number of stepwise moves away from the
-#'   baseline `n.cut` used to build the candidate grid.
+#' @param ncut_max_steps Positive integer giving the maximum number of stepwise
+#'   moves away from the baseline `n.cut` used to build the candidate grid.
 #' @param dir.exp Directional expectations used when the monitored solution is
 #'   intermediate.
 #' @param i_mode Character string controlling intermediate-solution selection.
@@ -74,13 +75,16 @@
 #'   when `exclude_mode = "recompute"`.
 #' @param exclude_static Already computed exclusion object reused when
 #'   `exclude_mode = "static"`.
-#' @param n_draws Number of random alternative draws to run.
+#' @param n_draws Positive integer giving the number of random alternative
+#'   draws to run.
 #' @param fit_tol Non-negative tolerance used when deciding whether fit values
 #'   changed.
-#' @param seed Optional integer seed passed to [set.seed()] before generating
-#'   the random draws.
+#' @param seed Optional finite integer seed passed to [set.seed()] before
+#'   generating the random draws.
 #' @param progress Logical; if `TRUE` and the session is interactive, show a
-#'   text progress bar.
+#'   varying cosmetic message and a text progress bar. The display uses
+#'   package-private cosmetic state and does not consume the random-number
+#'   stream controlled by `seed`.
 #' @param verbose Logical; if `TRUE`, print a completion message after each
 #'   draw.
 #' @param x An `altset_test` object returned by [altset.test()].
@@ -127,6 +131,11 @@
 #' `incl.cut`, and `n.cut`. It then generates `n_draws` random alternative
 #' draws.
 #'
+#' Rows in `raw.data` and `calib.data` are paired before recalibration.
+#' Informative row names must be unique and identical in the same order on both
+#' inputs. If both inputs use only default row names (`1`, ..., `n`), pairing
+#' is positional and the inputs must not be independently reordered.
+#'
 #' Each draw samples:
 #' \itemize{
 #'   \item one admissible inclusion cutoff from the grid defined by
@@ -142,6 +151,11 @@
 #' The function rejects a sampled draw if it is identical to the baseline on
 #' all three dimensions and resamples until it gets a non-baseline draw or
 #' reaches the internal retry limit.
+#'
+#' Progress display is deliberately isolated from analytical randomness.
+#' Consequently, a fixed `seed` produces the same alternative draws and result
+#' object whether `progress` is `TRUE` or `FALSE`; only the interactive console
+#' display differs.
 #'
 #' The shared solution-control, exclusion, calibration-specification, and
 #' returned-object conventions are described in `?qcaERT_conventions`.
@@ -300,9 +314,12 @@ altset.test <- function(
   if (is.null(dim(calib.data)) || is.null(nrow(calib.data)) || nrow(calib.data) < 1L) {
     stop("`calib.data` must be a non-empty data frame object with at least one row.")
   }
-  if (nrow(raw.data) != nrow(calib.data)) {
-    stop("`raw.data` and `calib.data` must have the same number of rows.")
-  }
+  .validate_row_alignment(
+    x = raw.data,
+    y = calib.data,
+    x_name = "raw.data",
+    y_name = "calib.data"
+  )
   if (!is.character(outcome) || length(outcome) != 1L || !nzchar(outcome)) {
     stop("`outcome` must be a single non-empty character string.")
   }
@@ -340,6 +357,9 @@ altset.test <- function(
   ncut_max_steps <- .as_integerish_scalar(ncut_max_steps, "ncut_max_steps", min = 1L)
   incl_max_steps <- .as_integerish_scalar(incl_max_steps, "incl_max_steps", min = 1L)
   calib_max_steps <- .as_integerish_scalar(calib_max_steps, "calib_max_steps", min = 1L)
+  if (!is.null(seed)) {
+    seed <- .as_integerish_scalar(seed, "seed")
+  }
 
   # minimize-style conveniences from calib.test -
   if (!is.null(altset$outcome)) {

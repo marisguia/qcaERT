@@ -110,6 +110,23 @@ their clean output has more than one natural table. \code{cluster.test()} return
 \code{solutions}; \code{as.data.frame()} returns \code{results$models}.
 }
 
+\section{Progress and Reproducibility}{
+
+Functions using the shared progress display show a varying introductory
+message and a text progress bar only in interactive sessions when
+\code{progress = TRUE}. Message selection uses private cosmetic state initialized
+from wall-clock time and the R process identifier, then advanced with an
+internal invocation counter. It does not call R's random-number generator,
+create or modify \code{.Random.seed}, or alter the sampling algorithms and seed
+arguments used by \code{\link[=altset.test]{altset.test()}} or \code{\link[=subsample.test]{subsample.test()}}.
+
+This separation is intentional: changing a display option must not change
+the random analytical specifications or subsamples produced from a fixed
+seed. The displayed message itself is cosmetic and is not intended to be
+reproducible; messages may vary or repeat across calls while analytical
+results remain unchanged.
+}
+
 \section{Plotting}{
 
 Plotting requires \code{ggplot2}. \code{plot()} methods are provided

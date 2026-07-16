@@ -134,6 +134,102 @@ test_that("calib.test reports staged baseline QCA failures and missing selected 
   expect_true(all(exclude_failure$diagnostics$error_source == "exclude"))
 })
 
+test_that("calibration robustness functions reject independently reordered rows", {
+  skip_if_not_installed("QCA")
+
+  fixture <- qcaert_fixture_direct6()
+  case_ids <- paste0("case_", seq_len(nrow(fixture$raw)))
+  raw <- fixture$raw
+  calib <- fixture$calib
+  rownames(raw) <- case_ids
+  rownames(calib) <- case_ids
+  raw_reordered <- raw[rev(seq_len(nrow(raw))), , drop = FALSE]
+
+  alignment_error <- paste0(
+    "`raw.data` and `calib.data` must have identical unique row names ",
+    "or case identifiers in the same order."
+  )
+
+  expect_error(
+    calib.test(
+      raw.data = raw_reordered,
+      calib.data = calib,
+      outcome = fixture$outcome,
+      conditions = fixture$conditions,
+      calib_spec = fixture$calib_spec,
+      progress = FALSE
+    ),
+    alignment_error,
+    fixed = TRUE
+  )
+
+  expect_error(
+    altset.test(
+      raw.data = raw_reordered,
+      calib.data = calib,
+      outcome = fixture$outcome,
+      conditions = fixture$conditions,
+      calib_spec = fixture$calib_spec,
+      progress = FALSE
+    ),
+    alignment_error,
+    fixed = TRUE
+  )
+})
+
+test_that("cluster.test rejects data reordered after truth-table construction", {
+  skip_if_not_installed("QCA")
+
+  fixture <- qcaert_fixture_cluster()
+  data <- fixture$data
+  rownames(data) <- paste0("case_", seq_len(nrow(data)))
+  tt <- qcaert_truth_table(
+    data = data,
+    outcome = fixture$outcome,
+    conditions = fixture$conditions,
+    incl.cut = 0.75,
+    n.cut = 1
+  )
+
+  expect_error(
+    cluster.test(
+      data = data[rev(seq_len(nrow(data))), , drop = FALSE],
+      tt = tt,
+      cluster_id = fixture$cluster_id,
+      unit_id = fixture$unit_id,
+      progress = FALSE
+    ),
+    paste0(
+      "`data` and `tt$recoded.data` must have identical unique row names ",
+      "or case identifiers in the same order."
+    ),
+    fixed = TRUE
+  )
+})
+
+test_that("cluster.test rejects duplicate unit-cluster observations", {
+  skip_if_not_installed("QCA")
+
+  fixture <- qcaert_fixture_cluster()
+  duplicate_data <- fixture$data
+  duplicate_data[[fixture$unit_id]][2L] <- duplicate_data[[fixture$unit_id]][1L]
+
+  expect_error(
+    cluster.test(
+      data = duplicate_data,
+      tt = fixture$truth_table,
+      cluster_id = fixture$cluster_id,
+      unit_id = fixture$unit_id,
+      progress = FALSE
+    ),
+    paste0(
+      "`unit_id` and `cluster_id` must identify at most one row per ",
+      "unit-cluster combination; duplicate combinations are not aggregated."
+    ),
+    fixed = TRUE
+  )
+})
+
 test_that("plot methods explain zero-row filters", {
   skip_if_not_installed("QCA")
   skip_if_not_installed("ggplot2")

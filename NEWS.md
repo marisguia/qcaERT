@@ -1,3 +1,19 @@
+# qcaERT 0.1.2
+
+- Added centralized row-alignment checks for paired raw, calibrated, reduced-run,
+  and truth-table inputs. Identifiable case labels must now be unique and appear
+  in the same order; otherwise pairing remains explicitly positional.
+- Corrected `cluster.test()` pooled, cluster-specific, and within-unit
+  calculations. Missing unit identifiers no longer remove rows from pooled or
+  cluster fit, and duplicate unit-cluster observations are rejected.
+- Isolated cosmetic progress-message selection from R's analytical random-number
+  stream, so progress display cannot change seeded results.
+- Standardized validation of integer-valued controls, including search budgets,
+  sample sizes, replications, seeds, and display digits. Intentional
+  `sample_prop` rounding is unchanged.
+- Declared `R (>= 3.5.0)`, matching the serialization format used by the shipped
+  demonstration data.
+
 # qcaERT 0.1.1
 
 - Added the World Happiness Report demonstration objects `whr_raw`, `whr_calibrated`, and `whr_calib_spec`.

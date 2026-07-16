@@ -103,3 +103,51 @@ test_that("loo.test and subsample.test use the common calib_spec structure when 
   expect_identical(subsample_out$settings$calib, "recompute")
   expect_identical(subsample_out$baseline$calibration$status, "ok")
 })
+
+test_that("recomputed reduced runs reject raw rows that do not match case labels", {
+  skip_if_not_installed("QCA")
+
+  fixture <- qcaert_fixture_outcome_calibration()
+  case_ids <- paste0("case_", seq_len(nrow(fixture$raw)))
+  raw <- fixture$raw
+  rownames(raw) <- case_ids
+  raw_reordered <- raw[rev(seq_len(nrow(raw))), , drop = FALSE]
+
+  alignment_error <- paste0(
+    "`raw.data` and `data` must have identical unique row names ",
+    "or case identifiers in the same order."
+  )
+
+  expect_error(
+    loo.test(
+      data = fixture$calib,
+      outcome = fixture$outcome,
+      conditions = fixture$conditions,
+      cases = 1L,
+      case_labels = case_ids,
+      calib = "recompute",
+      raw.data = raw_reordered,
+      calib_spec = fixture$calib_spec,
+      progress = FALSE
+    ),
+    alignment_error,
+    fixed = TRUE
+  )
+
+  expect_error(
+    subsample.test(
+      data = fixture$calib,
+      outcome = fixture$outcome,
+      conditions = fixture$conditions,
+      calib = "recompute",
+      raw.data = raw_reordered,
+      calib_spec = fixture$calib_spec,
+      sample_n = 8,
+      reps = 1,
+      case_labels = case_ids,
+      progress = FALSE
+    ),
+    alignment_error,
+    fixed = TRUE
+  )
+})

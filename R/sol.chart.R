@@ -506,10 +506,7 @@ sol.chart <- function(
 }
 
 .sol_chart_digits <- function(digits) {
-  if (!is.numeric(digits) || length(digits) != 1L || !is.finite(digits) || digits < 0) {
-    stop("`digits` must be a single non-negative integer.", call. = FALSE)
-  }
-  as.integer(digits)
+  .as_integerish_scalar(digits, "digits", min = 0L)
 }
 
 .sol_chart_select_model <- function(df, model) {

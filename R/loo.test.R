@@ -108,6 +108,14 @@
 #' the calibrated outcome and condition columns after each case deletion
 #' using [QCA::findTh()] and [QCA::calibrate()] as specified in `calib_spec`.
 #'
+#' With `calib = "recompute"`, rows in `raw.data` and `data` are paired before
+#' deletion and recalibration. Informative row names must be unique and
+#' identical in the same order on both inputs. If `data` has only default row
+#' names and `case_labels` is supplied, `raw.data` must use those labels as
+#' unique row names in the same order. If neither input has identifiable
+#' labels, pairing is positional and the inputs must not be independently
+#' reordered.
+#'
 #' For each tested case, the function records whether the monitored solution
 #' changed, whether monitored fit measures changed beyond `fit_tol`, and
 #' whether the reduced-data run stopped with a calibration, truth table,
@@ -275,6 +283,14 @@ loo.test <- function(
   dots_tt <- dots_split$tt
   dots_min <- dots_split$min
 
+  alignment_case_ids <- NULL
+  if (!is.null(case_labels)) {
+    alignment_case_ids <- .reduced_resolve_case_labels(
+      data = data,
+      case_labels = case_labels
+    )$case_label
+  }
+
   analysis_vars <- NULL
   raw_data_work <- NULL
 
@@ -288,9 +304,17 @@ loo.test <- function(
     if (is.null(raw.data)) {
       stop("When `calib = \"recompute\"`, `raw.data` must be supplied.")
     }
-    if (is.null(dim(raw.data)) || is.null(nrow(raw.data)) || nrow(raw.data) != nrow(data)) {
-      stop("When `calib = \"recompute\"`, `raw.data` must be a data frame object with the same number of rows as `data`.")
+    if (is.null(dim(raw.data)) || is.null(nrow(raw.data))) {
+      stop("When `calib = \"recompute\"`, `raw.data` must be a data frame object.")
     }
+
+    .validate_row_alignment(
+      x = raw.data,
+      y = data,
+      x_name = "raw.data",
+      y_name = "data",
+      y_case_ids = alignment_case_ids
+    )
 
     raw_data_work <- .reduced_as_df(raw.data)
     calib_spec <- .reduced_validate_calib_spec(

@@ -66,6 +66,43 @@
   )
 }
 
+.qcaert_progress_message <- local({
+  counter <- 0
+  state <- 0
+  modulus <- 2147483647
+
+  hash_key <- function(key) {
+    hash <- 5381
+    for (code in utf8ToInt(enc2utf8(key))) {
+      hash <- (hash * 33 + code) %% modulus
+    }
+    hash
+  }
+
+  function() {
+    messages <- .qcaert_progress_messages()
+    if (length(messages) == 0L) {
+      return("")
+    }
+
+    counter <<- counter + 1
+    key <- paste(
+      sprintf("%.9f", as.numeric(Sys.time())),
+      Sys.getpid(),
+      format(counter, scientific = FALSE, trim = TRUE),
+      format(state, scientific = FALSE, trim = TRUE),
+      sep = ":"
+    )
+
+    state <<- (hash_key(key) * 48271) %% modulus
+    messages[[1L + as.integer(state %% length(messages))]]
+  }
+})
+
+.qcaert_is_interactive <- function() {
+  interactive()
+}
+
 .new_qcaert_progress <- function(total, progress = TRUE) {
   pb <- NULL
   done <- 0L
@@ -74,8 +111,8 @@
     total <- 0L
   }
 
-  if (isTRUE(progress) && interactive() && is.finite(total) && total > 0L) {
-    cat(sample(.qcaert_progress_messages(), size = 1L), "\n")
+  if (isTRUE(progress) && .qcaert_is_interactive() && is.finite(total) && total > 0L) {
+    cat(.qcaert_progress_message(), "\n")
     pb <- utils::txtProgressBar(min = 0, max = total, style = 3)
   }
 

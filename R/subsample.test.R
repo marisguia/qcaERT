@@ -30,20 +30,20 @@
 #'   entry may additionally contain `findTh`, a named list of [QCA::findTh()]
 #'   arguments; when supplied, thresholds are re-estimated within each
 #'   subsample instead of reusing the baseline `thresholds`.
-#' @param sample_n Integer subsample size. Supply exactly one of `sample_n` or
-#'   `sample_prop`.
+#' @param sample_n Integer subsample size of at least `2` and strictly smaller
+#'   than `nrow(data)`. Supply exactly one of `sample_n` or `sample_prop`.
 #' @param sample_prop Proportion used to determine the realized subsample size.
 #'   Supply exactly one of `sample_n` or `sample_prop`. The realized sample
 #'   size is `round(sample_prop * nrow(data))`.
-#' @param reps Number of subsample replications.
+#' @param reps Positive integer giving the number of subsample replications.
 #' @param stratify Stratification mode. `"none"` samples from the full dataset
 #'   without stratification, `"outcome"` stratifies on the baseline analysis
 #'   outcome, and `"user"` stratifies on `strata`.
 #' @param strata Optional stratification column used when
 #'   `stratify = "user"`. It must have length `nrow(data)` and contain no
 #'   missing values.
-#' @param seed Optional integer seed passed to [set.seed()] before drawing the
-#'   subsamples.
+#' @param seed Optional finite integer seed passed to [set.seed()] before
+#'   drawing the subsamples.
 #' @param case_labels Optional character vector of case labels with length
 #'   `nrow(data)`. If `NULL`, the function uses `rownames(data)` when
 #'   available; otherwise it uses row numbers converted to character.
@@ -137,6 +137,14 @@
 #' already present in `data`. When `calib = "recompute"`, the function rebuilds
 #' the calibrated outcome and condition columns within each subsample using
 #' [QCA::findTh()] and [QCA::calibrate()] as specified in `calib_spec`.
+#'
+#' With `calib = "recompute"`, rows in `raw.data` and `data` are paired before
+#' sampling and recalibration. Informative row names must be unique and
+#' identical in the same order on both inputs. If `data` has only default row
+#' names and `case_labels` is supplied, `raw.data` must use those labels as
+#' unique row names in the same order. If neither input has identifiable
+#' labels, pairing is positional and the inputs must not be independently
+#' reordered.
 #'
 #' The shared solution-control, exclusion, and returned-object conventions are
 #' described in `?qcaERT_conventions`.
@@ -243,16 +251,10 @@ subsample.test <- function(
   }
   .validate_outcome_conditions_distinct(outcome, conditions)
 
-  if (!is.numeric(reps) || length(reps) != 1L || !is.finite(reps) || reps < 1) {
-    stop("`reps` must be a single integer >= 1.")
-  }
-  reps <- as.integer(reps)
+  reps <- .as_integerish_scalar(reps, "reps", min = 1L)
 
   if (!is.null(seed)) {
-    if (!is.numeric(seed) || length(seed) != 1L || !is.finite(seed)) {
-      stop("`seed` must be NULL or a single finite numeric value.")
-    }
-    seed <- as.integer(seed)
+    seed <- .as_integerish_scalar(seed, "seed")
   }
 
   if (xor(is.null(sample_n), is.null(sample_prop)) == FALSE) {
@@ -262,10 +264,7 @@ subsample.test <- function(
   n_total <- nrow(data)
 
   if (!is.null(sample_n)) {
-    if (!is.numeric(sample_n) || length(sample_n) != 1L || !is.finite(sample_n)) {
-      stop("`sample_n` must be a single finite number.")
-    }
-    sample_n <- as.integer(sample_n)
+    sample_n <- .as_integerish_scalar(sample_n, "sample_n", min = 2L)
   } else {
     if (!is.numeric(sample_prop) || length(sample_prop) != 1L || !is.finite(sample_prop) ||
         sample_prop <= 0 || sample_prop >= 1) {
@@ -345,6 +344,9 @@ subsample.test <- function(
   dots_tt <- dots_split$tt
   dots_min <- dots_split$min
 
+  case_ref <- .reduced_resolve_case_labels(data = data, case_labels = case_labels)
+  alignment_case_ids <- if (is.null(case_labels)) NULL else case_ref$case_label
+
   analysis_vars <- NULL
   raw_data_work <- NULL
 
@@ -358,9 +360,17 @@ subsample.test <- function(
     if (is.null(raw.data)) {
       stop("When `calib = \"recompute\"`, `raw.data` must be supplied.")
     }
-    if (is.null(dim(raw.data)) || is.null(nrow(raw.data)) || nrow(raw.data) != nrow(data)) {
-      stop("When `calib = \"recompute\"`, `raw.data` must be a data frame object with the same number of rows as `data`.")
+    if (is.null(dim(raw.data)) || is.null(nrow(raw.data))) {
+      stop("When `calib = \"recompute\"`, `raw.data` must be a data frame object.")
     }
+
+    .validate_row_alignment(
+      x = raw.data,
+      y = data,
+      x_name = "raw.data",
+      y_name = "data",
+      y_case_ids = alignment_case_ids
+    )
 
     raw_data_work <- .reduced_as_df(raw.data)
     calib_spec <- .reduced_validate_calib_spec(
@@ -501,8 +511,6 @@ subsample.test <- function(
     if (length(u) == 0L) return(NA_real_)
     length(intersect(a, b)) / length(u)
   }
-
-  case_ref <- .reduced_resolve_case_labels(data = data, case_labels = case_labels)
 
   baseline <- .run_once(
     data_step = data,

@@ -79,3 +79,159 @@ test_that("cluster.test does not duplicate one-term solutions as term components
     expect_false(any(units$component == units$solution_expression))
   }
 })
+
+test_that("cluster.test pooled and cluster fits agree with QCA pof", {
+  skip_if_not_installed("QCA")
+
+  fixture <- qcaert_fixture_cluster()
+
+  pof_fit <- function(x, y, necessity) {
+    relation <- if (necessity) "necessity" else "sufficiency"
+    fit <- qcaert_expect_no_warning(QCA::pof(
+      setms = x,
+      outcome = y,
+      relation = relation
+    ))$incl.cov[1L, , drop = FALSE]
+
+    if (necessity) {
+      c(
+        consistency = fit$inclN,
+        coverage = fit$covN
+      )
+    } else {
+      c(
+        consistency = fit$inclS,
+        coverage = fit$covS
+      )
+    }
+  }
+
+  for (necessity in c(FALSE, TRUE)) {
+    out <- qcaert_expect_no_warning(cluster.test(
+      data = fixture$data,
+      tt = fixture$truth_table,
+      cluster_id = fixture$cluster_id,
+      unit_id = fixture$unit_id,
+      solution = "conservative",
+      necessity = necessity,
+      progress = FALSE
+    ))
+
+    expect_length(out$baseline$configurations, 1L)
+    configuration <- out$baseline$configurations[[1L]]
+    configuration_key <- configuration$configuration_key
+    x <- configuration$solution_membership
+    y <- configuration$outcome_membership
+
+    pooled_expected <- pof_fit(x, y, necessity)
+    diagnostic <- out$diagnostics[
+      out$diagnostics$configuration_key == configuration_key,
+      ,
+      drop = FALSE
+    ]
+
+    expect_equal(diagnostic$pooled_consistency, unname(pooled_expected["consistency"]))
+    expect_equal(diagnostic$pooled_coverage, unname(pooled_expected["coverage"]))
+
+    cluster_results <- out$results$clusters[
+      out$results$clusters$configuration == configuration_key &
+        out$results$clusters$component == "solution",
+      ,
+      drop = FALSE
+    ]
+
+    for (cluster_value in cluster_results$cluster_id) {
+      rows <- !is.na(fixture$data[[fixture$cluster_id]]) &
+        fixture$data[[fixture$cluster_id]] == cluster_value
+      cluster_expected <- pof_fit(x[rows], y[rows], necessity)
+      cluster_observed <- cluster_results[
+        cluster_results$cluster_id == cluster_value,
+        ,
+        drop = FALSE
+      ]
+
+      expect_equal(
+        cluster_observed$consistency,
+        unname(cluster_expected["consistency"])
+      )
+      expect_equal(
+        cluster_observed$coverage,
+        unname(cluster_expected["coverage"])
+      )
+    }
+  }
+})
+
+test_that("cluster.test keeps unit identifiers out of pooled and cluster fit", {
+  skip_if_not_installed("QCA")
+
+  fixture <- qcaert_fixture_cluster()
+
+  baseline <- qcaert_expect_no_warning(cluster.test(
+    data = fixture$data,
+    tt = fixture$truth_table,
+    cluster_id = fixture$cluster_id,
+    unit_id = fixture$unit_id,
+    solution = "conservative",
+    progress = FALSE
+  ))
+
+  missing_unit_data <- fixture$data
+  missing_unit_data[[fixture$unit_id]][4L] <- NA_character_
+  missing_unit <- qcaert_expect_no_warning(cluster.test(
+    data = missing_unit_data,
+    tt = fixture$truth_table,
+    cluster_id = fixture$cluster_id,
+    unit_id = fixture$unit_id,
+    solution = "conservative",
+    progress = FALSE
+  ))
+
+  no_unit <- qcaert_expect_no_warning(cluster.test(
+    data = missing_unit_data,
+    tt = fixture$truth_table,
+    cluster_id = fixture$cluster_id,
+    unit_id = NULL,
+    solution = "conservative",
+    progress = FALSE
+  ))
+
+  overview_fit <- c(
+    "configuration",
+    "pooled_consistency",
+    "pooled_coverage",
+    "max_abs_cluster_delta_consistency",
+    "max_abs_cluster_delta_coverage"
+  )
+  cluster_fit <- c(
+    "configuration",
+    "component",
+    "cluster_id",
+    "cluster_size",
+    "consistency",
+    "coverage",
+    "delta_consistency",
+    "delta_coverage"
+  )
+
+  expect_equal(
+    missing_unit$results$overview[, overview_fit, drop = FALSE],
+    baseline$results$overview[, overview_fit, drop = FALSE]
+  )
+  expect_equal(
+    missing_unit$results$clusters[, cluster_fit, drop = FALSE],
+    baseline$results$clusters[, cluster_fit, drop = FALSE]
+  )
+  expect_equal(
+    no_unit$results$overview[, overview_fit, drop = FALSE],
+    baseline$results$overview[, overview_fit, drop = FALSE]
+  )
+  expect_equal(
+    no_unit$results$clusters[, cluster_fit, drop = FALSE],
+    baseline$results$clusters[, cluster_fit, drop = FALSE]
+  )
+
+  expect_true(all(baseline$results$units$n_clusters == 2L))
+  expect_false("U4" %in% missing_unit$results$units$unit_id)
+  expect_null(no_unit$results$units)
+})

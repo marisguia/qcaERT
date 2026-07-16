@@ -98,16 +98,17 @@ each set's threshold spacing.}
 \item{unit_step_divisor}{Positive number used to compute \code{unit_step}
 automatically when \code{unit_step = NULL}. The default is \code{10}.}
 
-\item{calib_max_steps}{Maximum number of threshold moves away from the
-baseline used when building alternative calibration candidates.}
+\item{calib_max_steps}{Positive integer giving the maximum number of
+threshold moves away from the baseline used when building alternative
+calibration candidates.}
 
 \item{incl.cut}{Baseline inclusion cutoff passed to \code{\link[QCA:truthTable]{QCA::truthTable()}}.}
 
 \item{incl_step}{Positive step size used to build the candidate grid of
 inclusion-cutoff values around \code{incl.cut}.}
 
-\item{incl_max_steps}{Maximum number of stepwise moves away from the
-baseline \code{incl.cut} used to build the candidate grid.}
+\item{incl_max_steps}{Positive integer giving the maximum number of stepwise
+moves away from the baseline \code{incl.cut} used to build the candidate grid.}
 
 \item{n.cut}{Baseline truth table frequency cutoff passed to
 \code{\link[QCA:truthTable]{QCA::truthTable()}}.}
@@ -115,8 +116,8 @@ baseline \code{incl.cut} used to build the candidate grid.}
 \item{ncut_step}{Positive integer step size used to build the candidate grid
 of frequency-cutoff values around \code{n.cut}.}
 
-\item{ncut_max_steps}{Maximum number of stepwise moves away from the
-baseline \code{n.cut} used to build the candidate grid.}
+\item{ncut_max_steps}{Positive integer giving the maximum number of stepwise
+moves away from the baseline \code{n.cut} used to build the candidate grid.}
 
 \item{dir.exp}{Directional expectations used when the monitored solution is
 intermediate.}
@@ -136,16 +137,19 @@ when \code{exclude_mode = "recompute"}.}
 \item{exclude_static}{Already computed exclusion object reused when
 \code{exclude_mode = "static"}.}
 
-\item{n_draws}{Number of random alternative draws to run.}
+\item{n_draws}{Positive integer giving the number of random alternative
+draws to run.}
 
 \item{fit_tol}{Non-negative tolerance used when deciding whether fit values
 changed.}
 
-\item{seed}{Optional integer seed passed to \code{\link[=set.seed]{set.seed()}} before generating
-the random draws.}
+\item{seed}{Optional finite integer seed passed to \code{\link[=set.seed]{set.seed()}} before
+generating the random draws.}
 
 \item{progress}{Logical; if \code{TRUE} and the session is interactive, show a
-text progress bar.}
+varying cosmetic message and a text progress bar. The display uses
+package-private cosmetic state and does not consume the random-number
+stream controlled by \code{seed}.}
 
 \item{verbose}{Logical; if \code{TRUE}, print a completion message after each
 draw.}
@@ -206,6 +210,11 @@ The function first runs a baseline analysis using \code{calib.data},
 \code{incl.cut}, and \code{n.cut}. It then generates \code{n_draws} random alternative
 draws.
 
+Rows in \code{raw.data} and \code{calib.data} are paired before recalibration.
+Informative row names must be unique and identical in the same order on both
+inputs. If both inputs use only default row names (\code{1}, ..., \code{n}), pairing
+is positional and the inputs must not be independently reordered.
+
 Each draw samples:
 \itemize{
 \item one admissible inclusion cutoff from the grid defined by
@@ -221,6 +230,11 @@ set's \code{unit_step}.
 The function rejects a sampled draw if it is identical to the baseline on
 all three dimensions and resamples until it gets a non-baseline draw or
 reaches the internal retry limit.
+
+Progress display is deliberately isolated from analytical randomness.
+Consequently, a fixed \code{seed} produces the same alternative draws and result
+object whether \code{progress} is \code{TRUE} or \code{FALSE}; only the interactive console
+display differs.
 
 The shared solution-control, exclusion, calibration-specification, and
 returned-object conventions are described in \code{?qcaERT_conventions}.

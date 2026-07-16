@@ -39,8 +39,11 @@ must be a single non-empty character string, and the column must contain
 at least two distinct non-missing cluster values.}
 
 \item{unit_id}{Optional name of the column in \code{data} identifying units that
-may appear in more than one cluster. If \code{NULL}, units are treated as row
-positions and within-unit diagnostics are not available across clusters.}
+may appear in more than one cluster. If \code{NULL}, within-unit diagnostics
+are not available. Rows with missing unit identifiers remain eligible for
+pooled and cluster-specific fit, but are excluded from within-unit
+diagnostics. Each non-missing unit-cluster combination must identify at
+most one row.}
 
 \item{solution}{Solution type to evaluate. Accepted values are \code{"all"},
 \code{"con"} or \code{"conservative"}, \code{"par"} or \code{"parsimonious"}, and \code{"int"} or
@@ -137,13 +140,27 @@ minimization for the requested solution type or solution types, extracts the
 selected baseline configurations, and computes pooled fit values for each
 configuration and configuration component.
 
-Cluster-level diagnostics compare the pooled fit of each selected
-configuration with the fit obtained inside each cluster defined by
-\code{cluster_id}.
+Rows in \code{data} and \code{tt$recoded.data} are paired before cluster diagnostics.
+Informative row names must be unique and identical in the same order on both
+inputs. Default row names (\code{1}, ..., \code{n}) are treated as positional because
+\code{\link[QCA:truthTable]{QCA::truthTable()}} materializes them in \code{tt$recoded.data}; positionally
+paired inputs must not be independently reordered.
 
-If \code{unit_id} identifies units that appear in more than one cluster, the
-function also computes within-unit diagnostics by comparing the same unit
-across clusters.
+Pooled fit uses all original rows with non-missing configuration and outcome
+memberships. It does not require non-missing cluster or unit identifiers.
+Cluster-specific fit is computed directly from the eligible original rows
+belonging to each distinct non-missing \code{cluster_id}; missing \code{unit_id}
+values do not remove rows from these calculations. Rows with missing
+\code{cluster_id} remain eligible for pooled fit but cannot contribute to
+cluster-specific or within-unit fit.
+
+Within-unit diagnostics use a separate occurrence table formed from rows
+with non-missing \code{unit_id} and \code{cluster_id}. A unit is repeated when it is
+observed in more than one distinct cluster, regardless of its configuration
+or outcome membership values. Each non-missing unit-cluster combination
+must occur at most once; duplicate combinations are rejected rather than
+having their fuzzy memberships summed. Within-unit fit uses the eligible
+membership pairs among each repeated unit's observed cluster occurrences.
 
 Configuration extraction uses the data-frame \code{pims} component produced by
 \code{\link[QCA:minimize]{QCA::minimize()}}. The shared solution-control, QCA solution-object, and

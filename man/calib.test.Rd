@@ -90,12 +90,13 @@ each set's threshold spacing.}
 \item{unit_step_divisor}{Positive number used to compute \code{unit_step}
 automatically when \code{unit_step = NULL}. The default is \code{10}.}
 
-\item{max_steps}{Maximum number of upward or downward threshold moves to
-attempt for each tested anchor.}
+\item{max_steps}{Positive integer giving the maximum number of upward or
+downward threshold moves to attempt for each tested anchor.}
 
 \item{incl.cut}{Inclusion cutoff passed to \code{\link[QCA:truthTable]{QCA::truthTable()}}.}
 
-\item{n.cut}{Frequency cutoff passed to \code{\link[QCA:truthTable]{QCA::truthTable()}}.}
+\item{n.cut}{Frequency cutoff passed to \code{\link[QCA:truthTable]{QCA::truthTable()}}. This must be an
+integer-like value of at least \code{1}.}
 
 \item{dir.exp}{Directional expectations used when the monitored solution is
 intermediate.}
@@ -188,6 +189,11 @@ The function rebuilds calibrated condition columns, and the outcome when
 \code{test.outcome = TRUE}, from \code{raw.data} using \code{calib_spec}. It then compares
 perturbed analyses against the baseline solution under the selected solution
 type.
+
+Rows in \code{raw.data} and \code{calib.data} are paired before recalibration.
+Informative row names must be unique and identical in the same order on both
+inputs. If both inputs use only default row names (\code{1}, ..., \code{n}), pairing
+is positional and the inputs must not be independently reordered.
 
 When \code{solution = "all"}, conservative, parsimonious, and, when requested,
 intermediate paths are searched independently for each tested set, anchor,
