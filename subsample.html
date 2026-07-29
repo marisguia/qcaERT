@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>10&nbsp; Subsample Diagnostics – A Guide to qcaERT</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./cluster-heterogeneity.html" rel="next">
+<link href="./leave-one-out-diagnostics.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-707d8167ce6003fca903bfe2be84ab7f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-10058ab0c6d3387edda5ec9f53ada30a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-5fb265ea9e9be481d23acbcf801e35e9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-10058ab0c6d3387edda5ec9f53ada30a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="vendor/polyfill-service-3.111.0/polyfill.min.js"></script>
+  <script src="vendor/mathjax-3.2.2/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">A Guide to qcaERT</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./leave-one-out-diagnostics.html">Part III: Case-Composition Diagnostics</a></li><li class="breadcrumb-item"><a href="./subsample.html"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Subsample Diagnostics</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./framing-qca-robustness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What is QCA Robustness</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./qcaert-alongside-setmethods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Raison d’être</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./how-to-read-this-book.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to Read This Book</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part I: Reference Analysis</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./reference-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">The Reference Analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./presenting-the-solutions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Presenting the Solutions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part II: Boundary Diagnostics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./calibration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Calibration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./frequency-cutoff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Frequency Cutoff</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./inclusion-cutoff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inclusion Cutoff</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./alternative-set.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Alternative-Set Diagnostics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part III: Case-Composition Diagnostics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./leave-one-out-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Leave-One-Out Diagnostics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./subsample.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Subsample Diagnostics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part IV: Structured Comparison Diagnostics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cluster-heterogeneity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Cluster Heterogeneity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./theory-comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Theory Comparison</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./conclusion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Conclusion</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#planning-a-subsample-diagnostic" id="toc-planning-a-subsample-diagnostic" class="nav-link active" data-scroll-target="#planning-a-subsample-diagnostic"><span class="header-section-number">10.1</span> Planning a Subsample Diagnostic</a>
+  <ul class="collapse">
+  <li><a href="#deciding-how-many-cases-to-retain" id="toc-deciding-how-many-cases-to-retain" class="nav-link" data-scroll-target="#deciding-how-many-cases-to-retain"><span class="header-section-number">10.1.1</span> Deciding How Many Cases to Retain</a></li>
+  <li><a href="#deciding-how-many-case-compositions-to-examine" id="toc-deciding-how-many-case-compositions-to-examine" class="nav-link" data-scroll-target="#deciding-how-many-case-compositions-to-examine"><span class="header-section-number">10.1.2</span> Deciding How Many Case Compositions to Examine</a></li>
+  <li><a href="#deciding-whether-to-preserve-group-composition" id="toc-deciding-whether-to-preserve-group-composition" class="nav-link" data-scroll-target="#deciding-whether-to-preserve-group-composition"><span class="header-section-number">10.1.3</span> Deciding Whether to Preserve Group Composition</a></li>
+  </ul></li>
+  <li><a href="#what-each-replication-compares" id="toc-what-each-replication-compares" class="nav-link" data-scroll-target="#what-each-replication-compares"><span class="header-section-number">10.2</span> What Each Replication Compares</a></li>
+  <li><a href="#a-first-subsample-diagnostic" id="toc-a-first-subsample-diagnostic" class="nav-link" data-scroll-target="#a-first-subsample-diagnostic"><span class="header-section-number">10.3</span> A First Subsample Diagnostic</a>
+  <ul class="collapse">
+  <li><a href="#reading-the-first-twenty-replications" id="toc-reading-the-first-twenty-replications" class="nav-link" data-scroll-target="#reading-the-first-twenty-replications"><span class="header-section-number">10.3.1</span> Reading the First Twenty Replications</a></li>
+  <li><a href="#investigating-particular-replications" id="toc-investigating-particular-replications" class="nav-link" data-scroll-target="#investigating-particular-replications"><span class="header-section-number">10.3.2</span> Investigating Particular Replications</a></li>
+  <li><a href="#summarizing-recurrence-across-replications" id="toc-summarizing-recurrence-across-replications" class="nav-link" data-scroll-target="#summarizing-recurrence-across-replications"><span class="header-section-number">10.3.3</span> Summarizing Recurrence Across Replications</a></li>
+  </ul></li>
+  <li><a href="#expanding-the-diagnostic" id="toc-expanding-the-diagnostic" class="nav-link" data-scroll-target="#expanding-the-diagnostic"><span class="header-section-number">10.4</span> Expanding the Diagnostic</a>
+  <ul class="collapse">
+  <li><a href="#formula-recurrence-across-solution-types" id="toc-formula-recurrence-across-solution-types" class="nav-link" data-scroll-target="#formula-recurrence-across-solution-types"><span class="header-section-number">10.4.1</span> Formula Recurrence Across Solution Types</a></li>
+  <li><a href="#prime-implicant-recurrence-and-similarity" id="toc-prime-implicant-recurrence-and-similarity" class="nav-link" data-scroll-target="#prime-implicant-recurrence-and-similarity"><span class="header-section-number">10.4.2</span> Prime-Implicant Recurrence and Similarity</a></li>
+  <li><a href="#changes-in-solution-consistency-pri-and-coverage" id="toc-changes-in-solution-consistency-pri-and-coverage" class="nav-link" data-scroll-target="#changes-in-solution-consistency-pri-and-coverage"><span class="header-section-number">10.4.3</span> Changes in Solution Consistency, PRI, and Coverage</a></li>
+  </ul></li>
+  <li><a href="#checking-the-sampling-design" id="toc-checking-the-sampling-design" class="nav-link" data-scroll-target="#checking-the-sampling-design"><span class="header-section-number">10.5</span> Checking the Sampling Design</a>
+  <ul class="collapse">
+  <li><a href="#how-much-of-the-case-universe-should-be-retained" id="toc-how-much-of-the-case-universe-should-be-retained" class="nav-link" data-scroll-target="#how-much-of-the-case-universe-should-be-retained"><span class="header-section-number">10.5.1</span> How Much of the Case Universe Should Be Retained?</a></li>
+  <li><a href="#how-many-replications-are-enough" id="toc-how-many-replications-are-enough" class="nav-link" data-scroll-target="#how-many-replications-are-enough"><span class="header-section-number">10.5.2</span> How Many Replications Are Enough?</a></li>
+  <li><a href="#what-should-stratification-preserve" id="toc-what-should-stratification-preserve" class="nav-link" data-scroll-target="#what-should-stratification-preserve"><span class="header-section-number">10.5.3</span> What Should Stratification Preserve?</a></li>
+  </ul></li>
+  <li><a href="#when-calibration-should-be-recomputed" id="toc-when-calibration-should-be-recomputed" class="nav-link" data-scroll-target="#when-calibration-should-be-recomputed"><span class="header-section-number">10.6</span> When Calibration Should Be Recomputed</a></li>
+  <li><a href="#deciding" id="toc-deciding" class="nav-link" data-scroll-target="#deciding"><span class="header-section-number">10.7</span> Deciding What Matters in a Subsample Diagnostic</a></li>
+  <li><a href="#reporting-and-interpreting-the-diagnostic" id="toc-reporting-and-interpreting-the-diagnostic" class="nav-link" data-scroll-target="#reporting-and-interpreting-the-diagnostic"><span class="header-section-number">10.8</span> Reporting and Interpreting the Diagnostic</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./leave-one-out-diagnostics.html">Part III: Case-Composition Diagnostics</a></li><li class="breadcrumb-item"><a href="./subsample.html"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Subsample Diagnostics</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Subsample Diagnostics</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The comparatively tame leave-one-out diagnostic presented in the preceding chapter shows whether the selected QCA result depends on any single observation. What it cannot do is assess dependence on several cases acting together: a solution formula may survive every individual deletion and still change when a particular collection of cases is removed simultaneously.</p>
+<p>The admittedly punishing <code>subsample.test()</code> addresses that broader form of case-composition sensitivity by repeatedly retaining only part of the case universe and reconstructing the QCA analysis for each sampled composition.</p>
+<p>Beginning from the same complete-data baseline, each replication draws the requested number of cases without replacement, rebuilds the truth table, repeats the requested minimizations, and compares the resulting solution formulas with their complete-data counterparts. The diagnostic then brings the replications together to show how often each baseline formula recurs, which prime implicants reappear, how much the prime-implicant sets overlap, and how the selected solutions’ parameters of fit vary across the sampled case compositions.</p>
+<p>As before, with fixed calibration, removing several countries changes the empirical evidence represented in the truth table while leaving the retained countries’ set memberships untouched. The frequency, consistency of sufficiency, and PRI of truth-table configurations may change; a previously observed configuration may fall below <code>n.cut</code> and become a logical remainder; or another may cross <code>incl.cut</code> and receive a different outcome assignment. Logical minimization then proceeds from this changed truth table, so the selected solution formula may gain, lose, or simplify one or more prime implicants. Parsimonious and intermediate minimization may also receive a different collection of simplifying assumptions.</p>
+<p>Unlike leave-one-out analysis, however, each result concerns the sampled case composition as a whole because repeated subsampling assesses whether the baseline result recurs across many joint perturbations of case composition.</p>
+<blockquote class="blockquote">
+<p>This trial is a very specific diagnostic and, depending on the stablished fit tolerance, may be overkill for the average or even most QCA robustness workflows. A researcher must justify how many cases are retained, how many samples are drawn, and whether any observed group composition should be preserved.</p>
+<p>So, if theoretically plausible boundary diagnostics and a leave-one-out analysis already answer the relevant robustness questions, dozens or hundreds of partial-sample tests may produce more output than insight. <strong>Subsampling earns its place when dependence on joint case composition is itself important to the research design, not because of a weird fetish.</strong></p>
+</blockquote>
+<p>The chapter continues with the 66-country V-Dem analysis, retaining the calibrated outcome, four conditions, truth-table cutoffs, and complete-data solutions established in the reference chapter. If at any point you find yourself wondering about what matters in a subsampling appraisal, check the <a href="#deciding">Deciding What Matters in a Subsample Diagnostic</a> section for some guidance.</p>
+<section id="planning-a-subsample-diagnostic" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="planning-a-subsample-diagnostic"><span class="header-section-number">10.1</span> Planning a Subsample Diagnostic</h2>
+<p>The baseline QCA inputs and solution-selection controls are the same ones used by <code>loo.test()</code>. The new research decisions concern the sampling design: how many countries each replication retains, how many case compositions are examined, and whether the allocation across an observed grouping should remain comparatively stable.</p>
+<section id="deciding-how-many-cases-to-retain" class="level3" data-number="10.1.1">
+<h3 data-number="10.1.1" class="anchored" data-anchor-id="deciding-how-many-cases-to-retain"><span class="header-section-number">10.1.1</span> Deciding How Many Cases to Retain</h3>
+<p>Exactly one of <code>sample_n</code> or <code>sample_prop</code> must define the size of every subsample. Both default to <code>NULL</code> because the function cannot decide how severe the case-composition perturbation should be.</p>
+<ul>
+<li><p><code>sample_n</code> gives the number of retained cases directly. It must be an integer of at least two and smaller than the number of cases in <code>data</code>.</p></li>
+<li><p><code>sample_prop</code> gives a proportion strictly between zero and one. The function multiplies that proportion by the number of cases and rounds the result to obtain the realized sample size. The realized size must satisfy the same bounds as <code>sample_n</code>.</p></li>
+</ul>
+<p>This choice determines how much of the empirical basis of the truth table is removed in each replication. On the one hand, a sample close to the complete dataset tests whether the result survives comparatively modest joint deletions. On the other hand, a smaller sample imposes a more severe perturbation: more truth-table configurations may lose empirical representation, cross the frequency or inclusion cutoff, or cease to support the same minimization.</p>
+<p>Because no subsample proportion is universally appropriate, the retained share should represent a degree of case removal meaningful for the study’s population and case-selection rationale.</p>
+</section>
+<section id="deciding-how-many-case-compositions-to-examine" class="level3" data-number="10.1.2">
+<h3 data-number="10.1.2" class="anchored" data-anchor-id="deciding-how-many-case-compositions-to-examine"><span class="header-section-number">10.1.2</span> Deciding How Many Case Compositions to Examine</h3>
+<p><code>reps</code> gives the number of subsamples and defaults to <code>100</code>. Sampling is without replacement <strong>within</strong> each replication, so a case cannot occupy two positions in the same sample. The same observation may, of course, appear in many different replications. More replications examine more case compositions of the chosen size and reduce the extent to which the observed formula frequencies, prime-implicant appearance rates, and parameter distributions depend on a very small collection of random draws.</p>
+<p><code>seed</code> defaults to <code>NULL</code>, which leaves the realized sampling plan dependent on R’s current random-number state. A reported diagnostic should supply an integer seed so that the same case compositions—and therefore the same numerical results—can be reconstructed, making the sampling plan reproducible.</p>
+</section>
+<section id="deciding-whether-to-preserve-group-composition" class="level3" data-number="10.1.3">
+<h3 data-number="10.1.3" class="anchored" data-anchor-id="deciding-whether-to-preserve-group-composition"><span class="header-section-number">10.1.3</span> Deciding Whether to Preserve Group Composition</h3>
+<p>The <code>stratify</code> argument determines whether every subsample preserves an allocation across observed groups. It defaults to <code>"none"</code>, which samples from the complete case pool without constraining any group count. Two stratified alternatives are available:</p>
+<ul>
+<li><p><code>"outcome"</code> allocates the sample proportionally across the <code>0</code> and <code>1</code> values of a crisp outcome. It is unavailable for a fuzzy outcome because degrees of outcome membership do not define two observed sampling strata.</p></li>
+<li><p><code>"user"</code> allocates the sample proportionally across the groups supplied through <code>strata</code>. In this mode, <code>strata</code> must contain one nonmissing group value for every case. The number drawn from each group remains fixed across replications, while the particular cases selected within each group continue to change.</p></li>
+</ul>
+<p>An unstratified diagnostic allows observed group proportions to vary along with the cases, whereas a stratified diagnostic holds one selected aspect of composition comparatively steady and checks whether the QCA result persists as cases vary within that constraint. Stratification is thus a substantive part of the perturbation design, and neither approach is automatically preferable because they answer different questions.</p>
+<p>The remaining analytical choices should reproduce the QCA specification whose case-composition sensitivity is being examined. The usual suspects are held constant across replications so that changes in the result are not produced by an unnoticed change in the comparison rules: truth-table cutoffs, solution selection, directional expectations, exclusions, and the parameter tolerance. Calibration handling, as before, might be fixed or recomputed.</p>
+</section>
+</section>
+<section id="what-each-replication-compares" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="what-each-replication-compares"><span class="header-section-number">10.2</span> What Each Replication Compares</h2>
+<p>For every solution type successfully obtained from both the complete data and a subsample, the diagnostic connects three levels of evidence.</p>
+<p>At the formula level, a replication counts as an exact match only when it reproduces the complete disjunction of baseline sufficient terms for that solution type; retaining one baseline prime implicant is not enough if another disappears or a new one enters the formula.</p>
+<p>At the prime-implicant level, <code>subsample.test()</code> records how often each baseline and nonbaseline prime implicant appears across successful replications and compares the set of prime implicants in each subsample formula with the corresponding baseline set using the Jaccard coefficient:</p>
+<p><span class="math display">\[
+J(A,B)=\frac{|A \cap B|}{|A \cup B|}
+\]</span></p>
+<p>A Jaccard coefficient of <code>1</code> means that the two formulas contain exactly the same prime implicants, while <code>0</code> means that they share none. Intermediate values indicate partial overlap in the <strong>identities of the minimized terms</strong>, but do not measure overlap in the cases covered by two different prime implicants or in the fuzzy-set memberships represented by the complete solutions.</p>
+<p>As in the leave-one-out diagnostic, the requested solution-level parameters of fit are compared whether or not the formula is preserved. When the formula is identical, differences in solution consistency, PRI, or coverage evaluate the same sufficient expression across different case compositions. When the formula changes, the values belong to different sufficient expressions produced by the same solution type. Formula recurrence and parameter movement must therefore remain separate results.</p>
+<p>All three levels require explicit denominators. A replication may fail to produce one requested solution type even when another remains available, because the overall <code>status</code> is <code>"ok"</code> whenever at least one monitored solution type can still be compared with its baseline counterpart. The <code>exact_solution</code> and <code>similarity</code> summaries report <code>n_successful</code> separately for each solution type. Exact-match proportions and prime-implicant appearance rates are calculated from those solution-type-specific successful comparisons. The number of attempted replications and the number of comparisons available for each solution type must therefore be reported separately.</p>
+</section>
+<section id="a-first-subsample-diagnostic" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="a-first-subsample-diagnostic"><span class="header-section-number">10.3</span> A First Subsample Diagnostic</h2>
+<p>Keeping things simple, we begin with a modest diagnostic so that the evidence from individual replications remains easy to inspect. Each replication retains 90% of the 66-country universe. Rounding produces a sample of 59 countries and a holdout of seven. The samples are unstratified, which allows any regional or other observed group count to vary along with the selected countries.</p>
+<p>For now, calibration remains fixed so that the perturbation operates only through the 59-country case composition, the reconstructed truth table, and conservative minimization. Twenty replications are probably enough here, although far too few to treat the observed recurrence frequencies as settled. The diagnostic uses the same <code>0.005</code> tolerance adopted in the leave-one-out chapter and fixes the sampling plan with seed <code>123</code>.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_unstratified_con <span class="ot">&lt;-</span> <span class="fu">subsample.test</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> vdem_calib,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome =</span> vdem_outcome,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">conditions =</span> vdem_conds,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_prop =</span> <span class="fl">0.90</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">reps =</span> <span class="dv">20</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">123</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">calib =</span> <span class="st">"fixed"</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">incl.cut =</span> vdem_incl_cut,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">n.cut =</span> vdem_n_cut,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">solution =</span> <span class="st">"conservative"</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">fit_measures =</span> <span class="fu">c</span>(<span class="st">"inclS"</span>, <span class="st">"PRI"</span>, <span class="st">"covS"</span>),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">fit_tol =</span> <span class="fl">0.005</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">complete =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">sort.by =</span> <span class="fu">c</span>(<span class="st">"incl"</span>, <span class="st">"n"</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="reading-the-first-twenty-replications" class="level3" data-number="10.3.1">
+<h3 data-number="10.3.1" class="anchored" data-anchor-id="reading-the-first-twenty-replications"><span class="header-section-number">10.3.1</span> Reading the First Twenty Replications</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_unstratified_con</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;subsample_test&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Outcome test: subsample robustness</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Solution: conservative</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Monitored solutions: conservative</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; which_M: 1</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Replications: 20</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Sample size: 59</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Sample proportion: 0.8939394</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Stratification: none</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Fit measures: inclS, PRI, covS</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Result</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  rep n_sample n_holdout status exact_match_baseline term_jaccard_baseline     solution_change fit_changed_types n_fit_deltas max_abs_fit_delta</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    1       59         7     ok                 TRUE             1.0000000                &lt;NA&gt;               CON            3       0.013292602</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    2       59         7     ok                 TRUE             1.0000000                &lt;NA&gt;               CON            3       0.016631413</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    3       59         7     ok                 TRUE             1.0000000                &lt;NA&gt;               CON            3       0.017414324</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    4       59         7     ok                 TRUE             1.0000000                &lt;NA&gt;               CON            1       0.005362976</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    5       59         7     ok                 TRUE             1.0000000                &lt;NA&gt;               CON            3       0.011403805</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    6       59         7     ok                 TRUE             1.0000000                &lt;NA&gt;               CON            3       0.027622280</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    7       59         7     ok                 TRUE             1.0000000                &lt;NA&gt;               CON            1       0.013499065</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    8       59         7     ok                FALSE             0.0000000 CON:formula_changed               CON            3       0.088086564</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    9       59         7     ok                 TRUE             1.0000000                &lt;NA&gt;               CON            2       0.005596942</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   10       59         7     ok                 TRUE             1.0000000                &lt;NA&gt;               CON            3       0.023551104</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   11       59         7     ok                FALSE             0.0000000 CON:formula_changed               CON            3       0.055963528</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   12       59         7     ok                 TRUE             1.0000000                &lt;NA&gt;               CON            3       0.018760648</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   13       59         7     ok                FALSE             0.0000000 CON:formula_changed               CON            3       0.089967714</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   14       59         7     ok                FALSE             0.0000000 CON:formula_changed               CON            3       0.062821763</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   15       59         7     ok                 TRUE             1.0000000                &lt;NA&gt;               CON            3       0.021279578</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   16       59         7     ok                 TRUE             1.0000000                &lt;NA&gt;               CON            1       0.015367530</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   17       59         7     ok                FALSE             0.6666667 CON:formula_changed               CON            1       0.020955373</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   18       59         7     ok                FALSE             0.0000000 CON:formula_changed               CON            3       0.069490677</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   19       59         7     ok                 TRUE             1.0000000                &lt;NA&gt;               CON            3       0.014164128</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   20       59         7     ok                FALSE             0.0000000 CON:formula_changed               CON            3       0.065924042</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Summary</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Successful runs: 20/20</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Runs with any solution change: 7</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Runs with any fit change: 20</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Non-ok runs: 0</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Mean combined term-set Jaccard vs baseline: 0.6833333</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Exact baseline matches by solution type</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  solution_type exact successful proportion</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;            CON    13         20       0.65</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The printed header confirms the sampling and comparison design before presenting one record for each reconstructed 59-country QCA. Below it, <code>n_sample</code> and <code>n_holdout</code> identify the realized case split, while <code>status</code> shows whether at least one monitored solution type could be compared with its complete-data counterpart. This first application monitors only the conservative solution. All twenty replications have <code>status = "ok"</code>, so the conservative minimization is available for every comparison that follows.</p>
+<p><code>exact_match_baseline</code> indicates whether the complete conservative formula is reproduced, while <code>solution_change</code> identifies the monitored solution type when it is not. Thirteen of the twenty replications reproduce the baseline conservative formula and seven produce another formula. The exact-match proportion is therefore <code>13/20 = 0.65</code>, with all twenty successful conservative comparisons in the denominator.</p>
+<p>In this single-solution application, <code>term_jaccard_baseline</code> compares the prime implicants in each conservative formula with the two prime implicants in the baseline conservative one. The mean coefficient is approximately <code>0.683</code>, meaning that the prime-implicant sets retain that degree of overlap on average even though seven complete formulas differ from the baseline.</p>
+<p>Looking at the parameter of fit fields, <code>fit_changed_types</code> identifies the solution types for which at least one requested solution-level parameter differs from its baseline value by, in this case, more than <code>0.005</code>. <code>n_fit_deltas</code> counts how many distinct requested parameters cross that tolerance, and <code>max_abs_fit_delta</code> gives the largest absolute difference among the parameters classified as changed. All twenty replications cross the tolerance for solution consistency, solution PRI, solution coverage, or some combination of the three.</p>
+<p>As stated, thirteen of those twenty replications nevertheless reproduce the conservative formula exactly. The Boolean expression can remain unchanged while its solution-level parameters move because the same sufficient expression is now evaluated across a different collection of countries. Formula recurrence and stability of solution consistency, PRI, and coverage are therefore empirically distinct results in this diagnostic.</p>
+</section>
+<section id="investigating-particular-replications" class="level3" data-number="10.3.2">
+<h3 data-number="10.3.2" class="anchored" data-anchor-id="investigating-particular-replications"><span class="header-section-number">10.3.2</span> Investigating Particular Replications</h3>
+<p>The overview above is normally all we need. But if we decide to conduct a forensic examination of a particular replication because it helps explain an interesting pattern—such as a recurring nonbaseline formula, unusually little overlap with the baseline prime implicants, a large difference in solution consistency, PRI, or coverage, or a failed minimization—we can select and inspect that replication in greater detail.</p>
+<p>We will follow replication 13 because it has the largest absolute difference among the three monitored solution-level parameters of fit. Its conservative formula also changes, and its Jaccard coefficient of <code>0</code> indicates that the subsample and complete-data formulas share no prime implicants. The following code singles it out by number:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_unstratified_con_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  vdem_subsample_unstratified_con</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  vdem_subsample_unstratified_con_df,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  rep <span class="sc">==</span> <span class="dv">13</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    rep n_sample n_holdout status exact_match_baseline term_jaccard_baseline     solution_change fit_changed_types n_fit_deltas max_abs_fit_delta</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 13  13       59         7     ok                FALSE                     0 CON:formula_changed               CON            3        0.08996771</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>As expected, the selected record reports a maximum absolute difference of approximately <code>0.090</code> among the solution’s parameters of fit. And now that the replication has been selected for an analytical reason, we can examine the omitted countries, the two conservative formulas, and the signed differences in solution consistency, PRI, and coverage:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_rep_13 <span class="ot">&lt;-</span> vdem_subsample_unstratified_con<span class="sc">$</span>by_run[[<span class="st">"R13"</span>]]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">list</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">omitted_countries =</span> vdem_subsample_rep_13<span class="sc">$</span>holdout_labels,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">complete_data_formula =</span> vdem_subsample_rep_13<span class="sc">$</span>baseline<span class="sc">$</span>sig<span class="sc">$</span>conservative,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">subsample_formula =</span> vdem_subsample_rep_13<span class="sc">$</span>reduced<span class="sc">$</span>sig<span class="sc">$</span>conservative,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameter_differences =</span> vdem_subsample_rep_13<span class="sc">$</span>fit_delta</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $omitted_countries</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "Ghana"                 "Burkina Faso"          "Nepal"                 "Guinea"                "Chad"                  "Republic of the Congo" "Kyrgyzstan"           </span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $complete_data_formula</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL"</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $subsample_formula</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "FREEXP*GENCL+FREEXP*~PARTY*~JUCON"</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $parameter_differences</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; conservative.inclS   conservative.PRI  conservative.covS </span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        -0.04109442        -0.04784207         0.08996771</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Replication 13 omits Ghana, Burkina Faso, Nepal, Guinea, Chad, the Republic of the Congo, and Kyrgyzstan. The complete-data conservative formula <code>FREEXP*GENCL*JUCON + FREEXP*PARTY*GENCL</code> is replaced by <code>FREEXP*GENCL + FREEXP*~PARTY*~GENCL*~JUCON</code>. Relative to the complete-data conservative solution, the subsample solution also has solution consistency approximately <code>0.041</code> lower, solution PRI approximately <code>0.048</code> lower, and solution coverage approximately <code>0.090</code> higher. Because the Boolean expression changes, the differences in the parameters of fit compare two different sufficient formulas.</p>
+<p>To understand why the formula changes, we can compare the outcome assignments in the complete-data and subsample truth tables. There is no need to inspect every truth-table configuration. The following code retains only the configurations whose <code>OUT</code> assignment differs between the two analyses:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_baseline_tt <span class="ot">&lt;-</span> vdem_subsample_rep_13<span class="sc">$</span>baseline<span class="sc">$</span>tt<span class="sc">$</span>tt</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>vdem_subsample_rep_13_tt <span class="ot">&lt;-</span> vdem_subsample_rep_13<span class="sc">$</span>reduced<span class="sc">$</span>tt<span class="sc">$</span>tt</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>vdem_subsample_changed_rows <span class="ot">&lt;-</span> <span class="fu">which</span>(</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.character</span>(vdem_subsample_baseline_tt<span class="sc">$</span>OUT) <span class="sc">!=</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.character</span>(vdem_subsample_rep_13_tt<span class="sc">$</span>OUT)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>vdem_subsample_tt_columns <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  vdem_conds,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"OUT"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"n"</span>,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"incl"</span>,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"PRI"</span>,</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"cases"</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="fu">list</span>(</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">complete_data =</span> vdem_subsample_baseline_tt[</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    vdem_subsample_changed_rows,</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    vdem_subsample_tt_columns</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  ],</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">subsample =</span> vdem_subsample_rep_13_tt[</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    vdem_subsample_changed_rows,</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    vdem_subsample_tt_columns</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $complete_data</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    FREEXP PARTY GENCL JUCON OUT n              incl               PRI                                                                               cases</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4       0     0     1     1   0 2 0.728405430791534  0.23082177903784                                                                  Egypt,Burkina Faso</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9       1     0     0     0   0 5 0.758526742201357 0.400859177785658 Guinea,Mauritania,Central African Republic,Democratic Republic of the Congo,Somalia</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 11      1     0     1     0   0 6 0.763868402990055 0.542457565776731                                     Angola,Cameroon,Chad,Kyrgyzstan,Madagascar,Togo</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $subsample</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    FREEXP PARTY GENCL JUCON OUT n              incl               PRI                                                                        cases</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4       0     0     1     1   ? 1 0.786595063866544 0.321082113194993                                                                        Egypt</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9       1     0     0     0   1 4 0.858253747996411 0.599616602513265 Mauritania,Central African Republic,Democratic Republic of the Congo,Somalia</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 11      1     0     1     0   1 4 0.848636499443891 0.694083459861076                                              Angola,Cameroon,Madagascar,Togo</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>All three truth-table configurations receive different assignments. The configuration <code>~FREEXP*~PARTY*GENCL*JUCON</code> is empirically represented by Egypt and Burkina Faso in the complete data. Once Burkina Faso is omitted, its frequency falls from two cases to one, below <code>n.cut = 2</code>, so the configuration becomes a logical remainder in the subsample truth table.</p>
+<p>The other two configurations become empirically sufficient for <code>CIVSOC</code> under the selected truth-table cutoffs. The consistency of sufficiency for <code>FREEXP*~PARTY*~GENCL*~JUCON</code> rises from approximately <code>0.759</code> to <code>0.858</code>, while the consistency of sufficiency for <code>FREEXP*~PARTY*GENCL*~JUCON</code> rises from approximately <code>0.764</code> to <code>0.849</code>. Both configurations retain enough cases to meet the frequency cutoff and now exceed <code>incl.cut = 0.80</code>, so their assignments change from <code>OUT = 0</code> to <code>OUT = 1</code>. Conservative minimization consequently begins from a different collection of empirically sufficient configurations and returns the new two-term formula shown above.</p>
+</section>
+<section id="summarizing-recurrence-across-replications" class="level3" data-number="10.3.3">
+<h3 data-number="10.3.3" class="anchored" data-anchor-id="summarizing-recurrence-across-replications"><span class="header-section-number">10.3.3</span> Summarizing Recurrence Across Replications</h3>
+<p>Now, say we want to investigate formula recurrence across the complete collection of sampled case compositions. That is, how often the baseline complete-data conservative solution formula reappears when the QCA is reconstructed for each of the twenty subsamples.</p>
+<blockquote class="blockquote">
+<p>Formula recurrence is an exact criterion: a subsample reproduces the baseline formula only when minimization returns the same complete Boolean expression, containing the same prime implicants. If one baseline prime implicant disappears, a new one enters, or the formula is otherwise simplified or expanded, the complete formula has changed—even when part of the baseline solution remains.</p>
+</blockquote>
+<p><code>exact_solution</code> begins with the complete solution formula. For each monitored solution type, it reports the baseline expression, the number of successful comparisons, the number and proportion of exact matches, and the frequencies of every selected formula observed in those comparisons.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_unstratified_con<span class="sc">$</span>summary<span class="sc">$</span>exact_solution<span class="sc">$</span>conservative</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $baseline_solution_expression</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL"</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $baseline_key</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL"</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $n_successful</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 20</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $n_exact</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 13</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $prop_exact</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.65</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $frequencies</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; keys</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                             FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL                                                      FREEXP*GENCL                                 FREEXP*GENCL+FREEXP*~PARTY*~JUCON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL+FREEXP*~PARTY*~GENCL*~JUCON </span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                13                                                                 4                                                                 2                                                                 1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Because an exact formula match is an all-or-nothing criterion, <code>term_stability</code> records the recurrence of individual prime implicants. Within each solution-type table, <code>term</code> identifies a prime implicant found in the baseline formula or in at least one successful subsample formula. <code>baseline</code> indicates whether that prime implicant belongs to the complete-data formula, while <code>appearance_rate</code> gives the proportion of successful comparisons in which it appears.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_unstratified_con<span class="sc">$</span>summary<span class="sc">$</span>term_stability<span class="sc">$</span>conservative</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                          term baseline appearance_rate</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                FREEXP*GENCL    FALSE            0.30</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2          FREEXP*GENCL*JUCON     TRUE            0.70</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3          FREEXP*PARTY*GENCL     TRUE            0.70</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 FREEXP*~PARTY*~GENCL*~JUCON    FALSE            0.05</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5        FREEXP*~PARTY*~JUCON    FALSE            0.10</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The two baseline prime implicants, <code>FREEXP*GENCL*JUCON</code> and <code>FREEXP*PARTY*GENCL</code>, each appear in 14 of the 20 successful conservative comparisons, for an appearance rate of <code>0.70</code>. Three prime implicants absent from the complete-data formula also appear in the subsample solutions. Among them, <code>FREEXP*GENCL</code> appears in six replications, whereas neither of the other two appears more than twice. The exact formula-match proportion of <code>0.65</code> therefore sits alongside an even recurrence of the two baseline prime implicants and a comparatively frequent alternative term.</p>
+<p>Furthermore, two other summaries describe the numerical and structural variation across replications. <code>fit_stability</code> reports the distribution of each requested solution-level parameter. For each parameter, it gives the complete-data value, the median and interquartile range across successful subsamples for which that parameter of fit is available, and the corresponding distribution of signed differences from the baseline. <code>prop_changed</code> gives the proportion of those comparisons whose absolute difference exceeds <code>fit_tol</code>.</p>
+<p><code>similarity</code> remains at the level of prime-implicant identities. For each solution type, it reports the number of successful comparisons, the mean and median Jaccard coefficient relative to the baseline formula, and the average coefficient across all pairs of successful subsample formulas. The baseline coefficients show how closely the replications resemble the complete-data prime-implicant set, while the pairwise coefficient shows how closely the subsample formulas resemble one another, even when they do not reproduce the baseline.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_unstratified_con<span class="sc">$</span>summary<span class="sc">$</span>fit_stability<span class="sc">$</span>conservative</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              measure  baseline    median       q25       q75 median_delta    q25_delta   q75_delta prop_changed</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1   conservative.PRI 0.8590761 0.8497179 0.8339010 0.8644975 -0.009358191 -0.025175070 0.005421468         0.85</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2  conservative.covS 0.8226760 0.8348848 0.8175801 0.8803541  0.012208820 -0.005095893 0.057678087         0.95</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 conservative.inclS 0.8877605 0.8793460 0.8651711 0.8913846 -0.008414453 -0.022589323 0.003624187         0.75</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>vdem_subsample_unstratified_con<span class="sc">$</span>summary<span class="sc">$</span>similarity</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   solution_type n_successful mean_baseline_jaccard median_baseline_jaccard avg_pairwise_jaccard</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1  conservative           20             0.6833333                       1            0.5140351</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Exact formula recurrence, prime-implicant appearance, prime-implicant-set similarity, and the distributions of solution consistency, PRI, and coverage are related but noninterchangeable results. Appraised in tandem, they show whether the sensitivity concerns the complete solution formula, a particular sufficient term, the broader minimized structure, the consistency, PRI, or coverage of the sufficient relation, or several of these features at once.</p>
+</section>
+</section>
+<section id="expanding-the-diagnostic" class="level2" data-number="10.4">
+<h2 data-number="10.4" class="anchored" data-anchor-id="expanding-the-diagnostic"><span class="header-section-number">10.4</span> Expanding the Diagnostic</h2>
+<p>The twenty-replication diagnostic was tiny by design and restricted to the conservative solution. A fleshed-out evaluation can include not only every solution type, but also enough replications to award us a trip to Monte Carlo. The expanded diagnostic therefore draws 100 samples and compares the conservative, parsimonious, and the sole <code>C1P1</code> intermediate formulas with their respective complete-data baselines.</p>
+<p>Every replication still retains 59 of the 66 countries, but the sampling is now stratified by V-Dem’s six-category politico-geographic classification, retained as <code>region_pol</code>:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_region_composition <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">country =</span> <span class="fu">rownames</span>(vdem_raw),</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">region_pol =</span> vdem_raw<span class="sc">$</span>region_pol</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>vdem_subsample_region_composition <span class="sc">%&gt;%</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(region_pol) <span class="sc">%&gt;%</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">countries =</span> <span class="fu">paste</span>(country, <span class="at">collapse =</span> <span class="st">", "</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 5 x 2</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   region_pol countries                                                                                                                                                                                                                                                                                                                                                                                                                                                         </span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        &lt;dbl&gt; &lt;chr&gt;                                                                                                                                                                                                                                                                                                                                                                                                                                                             </span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1          1 Kyrgyzstan, Tajikistan, Uzbekistan                                                                                                                                                                                                                                                                                                                                                                                                                                </span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2          2 Bolivia, Honduras, Nicaragua                                                                                                                                                                                                                                                                                                                                                                                                                                      </span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3          3 Egypt, Yemen, Lebanon, Jordan, Morocco, Tunisia                                                                                                                                                                                                                                                                                                                                                                                                                   </span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4          4 Ghana, Mali, Senegal, South Sudan, Ethiopia, Kenya, Nigeria, Tanzania, Uganda, Benin, Burkina Faso, Mozambique, Zambia, Zimbabwe, Guinea, Ivory Coast, Mauritania, Burundi, Cape Verde, Central African Republic, Lesotho, Liberia, Malawi, Sierra Leone, Angola, Cameroon, Chad, Democratic Republic of the Congo, Republic of the Congo, Djibouti, The Gambia, Madagascar, Rwanda, Somalia, Eswatini, Togo, Somaliland, Comoros, Sao Tome and Principe, Zanzibar</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5          6 Pakistan, Vietnam, India, North Korea, Philippines, Bhutan, Cambodia, Nepal, Timor-Leste, Papua New Guinea, Laos, Sri Lanka, Solomon Islands, Vanuatu</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The number of countries drawn from each observed region remains fixed across replications, while the identities of the countries selected within those regional allocations vary.</p>
+<p>Under this design, <code>region_pol</code> fixes the number of countries retained from each politico-geographic group while allowing the identities of those countries to change. The retained countries are pooled into one subsample, from which a new truth table and new conservative, parsimonious, and intermediate solutions are produced; the resulting comparisons show whether the selected QCA results persist across joint case removals while regional composition remains comparatively similar to that of the complete case universe.</p>
+<blockquote class="blockquote">
+<p>Regional stratification should not be confused with either statistical control or the cluster diagnostic introduced later in the book. It does not estimate separate regional QCA results or evaluate whether the pooled sufficient relations hold equally well within each region. Its only purpose is to prevent the regional composition of the random subsamples from varying freely while case composition is perturbed. <code>cluster.test()</code>, by contrast, holds the selected pooled solution formula fixed and compares its consistency and coverage across the regional groups.</p>
+</blockquote>
+<p>Calibration remains fixed, and the truth-table cutoffs, model and branch selection, directional expectations, and exclusion rule reproduce the all-solution specification established in the leave-one-out chapter. The case-composition perturbation and the larger replication set are therefore the new analytical ingredients.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_stratified_all <span class="ot">&lt;-</span> <span class="fu">subsample.test</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> vdem_calib,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome =</span> vdem_outcome,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">conditions =</span> vdem_conds,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_prop =</span> <span class="fl">0.90</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">reps =</span> <span class="dv">100</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">stratify =</span> <span class="st">"user"</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">strata =</span> vdem_raw<span class="sc">$</span>region_pol,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">123</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">calib =</span> <span class="st">"fixed"</span>,</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">incl.cut =</span> vdem_incl_cut,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">n.cut =</span> vdem_n_cut,</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">solution =</span> <span class="st">"all"</span>,</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir.exp =</span> vdem_dir_exp,</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">exclude_mode =</span> <span class="st">"recompute"</span>,</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">exclude_recompute =</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="dv">2</span>),</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">which_M =</span> <span class="dv">1</span>,</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">i_mode =</span> <span class="st">"C1P1"</span>,</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">fit_measures =</span> <span class="fu">c</span>(<span class="st">"inclS"</span>, <span class="st">"PRI"</span>, <span class="st">"covS"</span>),</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">fit_tol =</span> <span class="fl">0.005</span>,</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">complete =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">sort.by =</span> <span class="fu">c</span>(<span class="st">"incl"</span>, <span class="st">"n"</span>)</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="formula-recurrence-across-solution-types" class="level3" data-number="10.4.1">
+<h3 data-number="10.4.1" class="anchored" data-anchor-id="formula-recurrence-across-solution-types"><span class="header-section-number">10.4.1</span> Formula Recurrence Across Solution Types</h3>
+<p>Printing the complete object would display 100 replication records. The solution-specific exact-match summary gives the principal formula result more directly while retaining the successful-comparison denominator for each solution type:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_stratified_all<span class="sc">$</span>summary<span class="sc">$</span>exact_solution</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $conservative</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $conservative$baseline_solution_expression</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL"</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $conservative$baseline_key</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL"</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $conservative$n_successful</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 100</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $conservative$n_exact</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 75</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $conservative$prop_exact</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.75</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $conservative$frequencies</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; keys</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                             FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL                                                      FREEXP*GENCL FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL+FREEXP*~PARTY*~GENCL*~JUCON                                                FREEXP*GENCL*JUCON                            FREEXP*GENCL*JUCON+FREEXP*~PARTY*GENCL                                 FREEXP*GENCL+FREEXP*~PARTY*~JUCON </span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                75                                                                10                                                                 7                                                                 6                                                                 1                                                                 1 </span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $parsimonious</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $parsimonious$baseline_solution_expression</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "FREEXP*JUCON+FREEXP*PARTY"</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $parsimonious$baseline_key</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "FREEXP*JUCON+FREEXP*PARTY"</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $parsimonious$n_successful</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 100</span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $parsimonious$n_exact</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 54</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $parsimonious$prop_exact</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.54</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $parsimonious$frequencies</span></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; keys</span></span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                         FREEXP*JUCON+FREEXP*PARTY                             FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL                                                      FREEXP*GENCL                                                      FREEXP*JUCON                           FREEXP*JUCON+FREEXP*PARTY+FREEXP*~GENCL                                                            FREEXP FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL+FREEXP*~PARTY*~GENCL*~JUCON </span></span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                54                                                                21                                                                11                                                                 6                                                                 6                                                                 1                                                                 1 </span></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $intermediate</span></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $intermediate$baseline_solution_expression</span></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "C1P1:FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL"</span></span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $intermediate$baseline_key</span></span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] "C1P1:FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL"</span></span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $intermediate$n_successful</span></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 100</span></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $intermediate$n_exact</span></span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 75</span></span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $intermediate$prop_exact</span></span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.75</span></span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $intermediate$frequencies</span></span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; keys</span></span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                             C1P1:FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL                                                      C1P1:FREEXP*GENCL                                                C1P1:FREEXP*GENCL*JUCON                           C1P1:FREEXP*JUCON+FREEXP*PARTY+FREEXP*~GENCL                                                            C1P1:FREEXP C1P1:FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL+FREEXP*~PARTY*~GENCL*~JUCON </span></span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                                     75                                                                     11                                                                      6                                                                      6                                                                      1                                                                      1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>All 100 replications produce comparable conservative, parsimonious, and intermediate results, so the denominator is 100 for every solution type. The conservative and intermediate formulas each reproduce their respective baselines in 75 replications, whereas the parsimonious formula does so in 54.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_stratified_all_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  vdem_subsample_stratified_all</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  vdem_subsample_stratified_all_df<span class="sc">$</span>solution_change,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">useNA =</span> <span class="st">"ifany"</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; CON:formula_changed | PAR:formula_changed | INT:formula_changed                                             PAR:formula_changed                                                            &lt;NA&gt; </span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                              25                                                              21                                                              54</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Of the 100 replications, 25 change all three solution formulas, 21 change only the parsimonious formula while preserving the conservative and intermediate formulas, and 54 reproduce all three baselines.</p>
+</section>
+<section id="prime-implicant-recurrence-and-similarity" class="level3" data-number="10.4.2">
+<h3 data-number="10.4.2" class="anchored" data-anchor-id="prime-implicant-recurrence-and-similarity"><span class="header-section-number">10.4.2</span> Prime-Implicant Recurrence and Similarity</h3>
+<p>Below, the solution-specific Jaccard coefficients measure the overlap between the prime implicants in each subsample formula and those in the corresponding complete-data formula, including the replications in which exact formula preservation fails:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_stratified_all<span class="sc">$</span>summary<span class="sc">$</span>similarity</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   solution_type n_successful mean_baseline_jaccard median_baseline_jaccard avg_pairwise_jaccard</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1  conservative          100             0.8300000                       1            0.7029798</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2  parsimonious          100             0.6100000                       1            0.4303030</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3  intermediate          100             0.7866667                       1            0.6337374</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The conservative solution has a mean baseline Jaccard coefficient of approximately <code>0.830</code>, and the intermediate solution of approximately <code>0.787</code>. The parsimonious solution has a lower mean of <code>0.610</code>, while the median coefficient is <code>1</code> for all three solution types. Under this sampling design, with its case-composition perturbations, the selected parsimonious formula therefore has less average overlap with its baseline prime-implicant set than the conservative and intermediate formulas do, even though at least half of the replications reproduce each complete baseline set.</p>
+<p>The term summaries identify which prime implicants account for those aggregate differences:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_stratified_all<span class="sc">$</span>summary<span class="sc">$</span>term_stability</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $conservative</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                          term baseline appearance_rate</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                FREEXP*GENCL    FALSE            0.11</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2          FREEXP*GENCL*JUCON     TRUE            0.89</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3          FREEXP*PARTY*GENCL     TRUE            0.82</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4         FREEXP*~PARTY*GENCL    FALSE            0.01</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 FREEXP*~PARTY*~GENCL*~JUCON    FALSE            0.07</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6        FREEXP*~PARTY*~JUCON    FALSE            0.01</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $parsimonious</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                          term baseline appearance_rate</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                      FREEXP    FALSE            0.01</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                FREEXP*GENCL    FALSE            0.11</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3          FREEXP*GENCL*JUCON    FALSE            0.22</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                FREEXP*JUCON     TRUE            0.66</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                FREEXP*PARTY     TRUE            0.60</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6          FREEXP*PARTY*GENCL    FALSE            0.22</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7               FREEXP*~GENCL    FALSE            0.06</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8 FREEXP*~PARTY*~GENCL*~JUCON    FALSE            0.01</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $intermediate</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                          term baseline appearance_rate</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                      FREEXP    FALSE            0.01</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2                FREEXP*GENCL    FALSE            0.11</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3          FREEXP*GENCL*JUCON     TRUE            0.82</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4                FREEXP*JUCON    FALSE            0.06</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5                FREEXP*PARTY    FALSE            0.06</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6          FREEXP*PARTY*GENCL     TRUE            0.76</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7               FREEXP*~GENCL    FALSE            0.06</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8 FREEXP*~PARTY*~GENCL*~JUCON    FALSE            0.01</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The two baseline conservative prime implicants, <code>FREEXP*GENCL*JUCON</code> and <code>FREEXP*PARTY*GENCL</code>, appear in <code>0.89</code> and <code>0.82</code> of successful conservative comparisons. The same prime implicants belong to the baseline intermediate formula and appear in <code>0.82</code> and <code>0.76</code> of the intermediate comparisons. No nonbaseline prime implicant reaches an appearance rate above <code>0.11</code> in either solution type.</p>
+<p>The parsimonious baseline prime implicants, <code>FREEXP*JUCON</code> and <code>FREEXP*PARTY</code>, appear in <code>0.66</code> and <code>0.60</code> of successful comparisons. Two nonbaseline prime implicants recur much more often than the remaining alternatives: <code>FREEXP*GENCL*JUCON</code> and <code>FREEXP*PARTY*GENCL</code> each appear in <code>0.22</code>. These recurring substitutions therefore account for the lower exact-match rate and mean Jaccard coefficient of the parsimonious solution.</p>
+</section>
+<section id="changes-in-solution-consistency-pri-and-coverage" class="level3" data-number="10.4.3">
+<h3 data-number="10.4.3" class="anchored" data-anchor-id="changes-in-solution-consistency-pri-and-coverage"><span class="header-section-number">10.4.3</span> Changes in Solution Consistency, PRI, and Coverage</h3>
+<p>Although formula recurrence tells us if a subsample produces the same minimized expression as the complete-data analysis, it does not identify whether that expression displays the same empirical strength and relevance once the case composition changes. For instance, two replications may reproduce exactly the same formula while assigning somewhat different values to its parameters of fit. If any of these values moves across sampled case compositions, we want to know <strong>which one moved, in which direction, and by how much</strong>.</p>
+<p><code>fit_stability</code> reports the parameter-specific distributions for each solution type:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_stratified_all<span class="sc">$</span>summary<span class="sc">$</span>fit_stability</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $conservative</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              measure  baseline    median       q25       q75 median_delta    q25_delta   q75_delta prop_changed</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1   conservative.PRI 0.8590761 0.8576341 0.8454294 0.8693473 -0.001441933 -0.013646683 0.010271207         0.80</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2  conservative.covS 0.8226760 0.8259231 0.8168761 0.8404819  0.003247042 -0.005799916 0.017805836         0.73</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 conservative.inclS 0.8877605 0.8866253 0.8781671 0.8951215 -0.001135165 -0.009593305 0.007361019         0.74</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $parsimonious</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              measure  baseline    median       q25       q75 median_delta   q25_delta   q75_delta prop_changed</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1   parsimonious.PRI 0.8613564 0.8582797 0.8473175 0.8715575 -0.003076733 -0.01403897 0.010201070         0.78</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2  parsimonious.covS 0.8437745 0.8414141 0.8317520 0.8514743 -0.002360336 -0.01202246 0.007699889         0.74</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 parsimonious.inclS 0.8892891 0.8872879 0.8790403 0.8966004 -0.002001136 -0.01024874 0.007311329         0.72</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $intermediate</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                   measure  baseline    median       q25       q75 median_delta    q25_delta   q75_delta prop_changed</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1   intermediate.C1P1.PRI 0.8590761 0.8576341 0.8452456 0.8693473 -0.001441933 -0.013830456 0.010271207         0.81</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2  intermediate.C1P1.covS 0.8226760 0.8259231 0.8168761 0.8412341  0.003247042 -0.005799916 0.018558092         0.73</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 intermediate.C1P1.inclS 0.8877605 0.8866253 0.8781532 0.8951215 -0.001135165 -0.009607248 0.007361019         0.74</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>For each solution type, the output reports complete-data and subsample values for every parameter of fit. <code>baseline</code> gives the value from the complete 66-country analysis, while <code>median</code>, <code>q25</code>, and <code>q75</code> summarize the parameter across successful subsample replications; the corresponding <code>*_delta</code> columns summarize signed differences from the baseline, with positive values indicating higher values in the subsamples and negative values indicating lower ones.</p>
+<p>The final column, <code>prop_changed</code>, reports, among the successful comparisons for which the parameter of fit is available, the proportion whose absolute difference from the baseline exceeds the <code>fit_tol = 0.005</code> threshold selected for this diagnostic. All three parameters are available in all 100 replications here, so the denominator is 100 in every row of the three tables. This proportion allows us to count tolerance crossings, although it ignores their direction and magnitude. A change from <code>0.810</code> to <code>0.816</code> and a change from <code>0.810</code> to <code>0.900</code> both cross that threshold, even though they would hardly receive the same substantive interpretation. For that reason, <code>prop_changed</code> should always be read together with the observed distribution and its signed differences.</p>
+<p><code>fit_stability</code> shows that, depending on the solution type and parameter, the proportion of replications exceeding the <code>0.005</code> tolerance ranges from <code>0.72</code> to <code>0.81</code>. That sounds a bit dramatic. Yet the median difference remains smaller than <code>0.005</code> in absolute terms for all nine comparisons. The largest median difference is approximately <code>0.00325</code> for conservative and intermediate solution coverage: their complete-data coverage is about <code>0.823</code>, while the median across the subsamples is about <code>0.826</code>. These findings show that the tolerance is crossed frequently in individual replications depending on the set value, but the movements occur on both sides of the complete-data value, and often narrowly, leaving the center of each subsample distribution quite close to its baseline.</p>
+<blockquote class="blockquote">
+<p>The relevant conclusion is therefore not simply that the parameters of fit “changed” and QCA is inherently fickle. Rather, solution consistency, PRI, and coverage often differ from their baselines by more than the deliberately narrow tolerance of <code>0.005</code>, while their typical values remain close to those obtained from the complete data.</p>
+</blockquote>
+</section>
+</section>
+<section id="checking-the-sampling-design" class="level2" data-number="10.5">
+<h2 data-number="10.5" class="anchored" data-anchor-id="checking-the-sampling-design"><span class="header-section-number">10.5</span> Checking the Sampling Design</h2>
+<p>Every result in a subsampling diagnostic is conditional on how the samples were constructed. For example, in the appraisal presented above, each replication retains 90% of the observations while preserving the regional composition of the 66-country case universe reasonably well. Of course, the resulting recurrence rates do not describe what would happen under every plausible removal of cases, but simply what happens under this particular sampling design.</p>
+<section id="how-much-of-the-case-universe-should-be-retained" class="level3" data-number="10.5.1">
+<h3 data-number="10.5.1" class="anchored" data-anchor-id="how-much-of-the-case-universe-should-be-retained"><span class="header-section-number">10.5.1</span> How Much of the Case Universe Should Be Retained?</h3>
+<p><code>sample_prop</code> determines the severity of the perturbation: retaining 90% removes seven countries in each replication, whereas retaining 70% would remove many more and could produce much larger changes in configuration frequencies, parameters of fit, outcome assignments, available logical remainders, and minimized solutions.</p>
+<p>The exact-match rate therefore depends on how much stress we are willing to put the analysis through, so researchers should choose a retention level that represents a substantively plausible challenge to their model.</p>
+</section>
+<section id="how-many-replications-are-enough" class="level3" data-number="10.5.2">
+<h3 data-number="10.5.2" class="anchored" data-anchor-id="how-many-replications-are-enough"><span class="header-section-number">10.5.2</span> How Many Replications Are Enough?</h3>
+<p>The <code>reps</code> argument controls how many sampled case compositions are examined; more replications provide a sturdier description of the recurrence pattern generated by the chosen sampling design, but there is no universally sufficient number that fits every analysis.</p>
+<p>To appraise the number of replications, <em>(1)</em> run the planned diagnostic; <em>(2)</em> repeat it with more replications while leaving the retention level, stratification rule, and QCA specifications unchanged; and <em>(3)</em> compare exact formula recurrence, prime-implicant appearance, solution similarity, and the distributions of solution consistency, PRI, and coverage.</p>
+<p>If those summaries continue to move appreciably, the smaller run was not yet giving a stable account of the sampling exercise; if they remain materially similar, the additional replications reinforce the observed pattern.</p>
+<blockquote class="blockquote">
+<p>This check concerns the finite random exercise conducted by <code>subsample.test()</code>. It does not create “confidence intervals” for a QCA solution, nor does it turn the observed countries into a probability sample from an external population.</p>
+</blockquote>
+</section>
+<section id="what-should-stratification-preserve" class="level3" data-number="10.5.3">
+<h3 data-number="10.5.3" class="anchored" data-anchor-id="what-should-stratification-preserve"><span class="header-section-number">10.5.3</span> What Should Stratification Preserve?</h3>
+<p>Stratification constrains which case compositions the diagnostic is allowed to generate. In the present example, regional stratification keeps the number of sampled countries from each region comparatively stable. The diagnostic consequently focuses on whether the QCA results recur across joint case removals that continue to represent the regional composition of the case universe reasonably well.</p>
+<p>An unstratified diagnostic, then, would allow the regional composition to vary. Outcome stratification would instead preserve the allocation of cases across the crisp outcome groups. Another user-defined grouping would preserve whatever structure that variable represents. None of these alternatives is automatically more rigorous than the others, each one defining a different family of admissible subsamples and, thus, a different robustness question.</p>
+</section>
+</section>
+<section id="when-calibration-should-be-recomputed" class="level2" data-number="10.6">
+<h2 data-number="10.6" class="anchored" data-anchor-id="when-calibration-should-be-recomputed"><span class="header-section-number">10.6</span> When Calibration Should Be Recomputed</h2>
+<p>All examples so far use <code>calib = "fixed"</code>. The countries retained in each subsample therefore keep the set-membership scores assigned in the complete-data analysis. This is the appropriate design when the qualitative anchors are treated as fixed features of the research design. It also gives the perturbation a clear scope: cases are jointly removed, and the truth table and selected solutions are reconstructed from the remaining calibrated memberships.</p>
+<blockquote class="blockquote">
+<p>Crucially, as in <code>loo.test()</code>, recomputation is not <code>calib = "fixed"</code>’s cleverer, more sophisticated cousin—the one its developer keeps comparing it to. It is most directly justified when data-guided threshold estimation with <code>QCA::findTh()</code> formed part of the original calibration procedure and the researcher wants to examine the stability of that complete procedure. Then, removing several observations may change those estimated anchors and, consequently, the calibrated memberships of cases that remain in the sample. Setting <code>calib = "recompute"</code> allows both parts of that analytical sequence to vary: the case composition used to estimate the anchors and the case composition supplied to truth-table analysis.</p>
+<p>If the original memberships were calibrated from substantively established anchors, keeping those anchors fixed usually represents the original research design more faithfully.</p>
+</blockquote>
+<p>The following example extends the four-group threshold search used in the reference analysis to the subsampling diagnostic.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_recal_spec <span class="ot">&lt;-</span> vdem_calib_spec_with_outcome</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>vdem_subsample_recal_spec<span class="sc">$</span>CIVSOC<span class="sc">$</span>findTh <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">groups =</span> <span class="dv">4</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>vdem_subsample_recal_spec<span class="sc">$</span>FREEXP<span class="sc">$</span>findTh <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">groups =</span> <span class="dv">4</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>vdem_subsample_recal_spec<span class="sc">$</span>PARTY<span class="sc">$</span>findTh <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">groups =</span> <span class="dv">4</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>vdem_subsample_recal_spec<span class="sc">$</span>GENCL<span class="sc">$</span>findTh <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">groups =</span> <span class="dv">4</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>vdem_subsample_recal_spec<span class="sc">$</span>JUCON<span class="sc">$</span>findTh <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">groups =</span> <span class="dv">4</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>vdem_subsample_recomputed_con <span class="ot">&lt;-</span> <span class="fu">subsample.test</span>(</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> vdem_calib,</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">raw.data =</span> vdem_raw,</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome =</span> vdem_outcome,</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">conditions =</span> vdem_conds,</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_prop =</span> <span class="fl">0.90</span>,</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">reps =</span> <span class="dv">100</span>,</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">stratify =</span> <span class="st">"user"</span>,</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">strata =</span> vdem_raw<span class="sc">$</span>region_pol,</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">123</span>,</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">calib =</span> <span class="st">"recompute"</span>,</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">calib_spec =</span> vdem_subsample_recal_spec,</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">incl.cut =</span> vdem_incl_cut,</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">n.cut =</span> vdem_n_cut,</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">solution =</span> <span class="st">"conservative"</span>,</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">fit_measures =</span> <span class="fu">c</span>(<span class="st">"inclS"</span>, <span class="st">"PRI"</span>, <span class="st">"covS"</span>),</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">fit_tol =</span> <span class="fl">0.005</span>,</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">complete =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">sort.by =</span> <span class="fu">c</span>(<span class="st">"incl"</span>, <span class="st">"n"</span>)</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>As in the leave-one-out appraisal, a changed solution formula under this design may result from joint case removal, recalibration of the countries that remain, or both. Alongside the recurrence, similarity, and parameter-of-fit summaries introduced above, the diagnostic allows the recalibration itself to be examined directly:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>vdem_subsample_recomputed_con<span class="sc">$</span>summary<span class="sc">$</span>calibration</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>To assess the stability of the calibration stage, the summary reports one record for every anchor of every recalibrated set, including the complete-data value in <code>baseline</code>, the median and interquartile range estimated across successful replications, and <code>prop_diff_baseline</code>, the proportion of those replications in which the estimated anchor differs from its complete-data value.</p>
+</section>
+<section id="deciding" class="level2" data-number="10.7">
+<h2 data-number="10.7" class="anchored" data-anchor-id="deciding"><span class="header-section-number">10.7</span> Deciding What Matters in a Subsample Diagnostic</h2>
+<blockquote class="blockquote">
+<p>Okay… phew! By this point, you have been bombarded with a host of new parameters for subsample evaluation, including exact formula recurrence, prime-implicant appearance rates, Jaccard coefficients, and changes in solution consistency, PRI, and coverage. So you are probably wondering, “That’s all well and good, but which of these is <strong>really</strong> relevant?”</p>
+<p>Honestly, the gist of it is that these measures do not compete to deliver a single verdict. Each one addresses a different part of the QCA result, and they should not receive equal weight merely because the function calculates them all.</p>
+</blockquote>
+<p>In the <strong>usual</strong> subsampling appraisal, the principal question is whether each selected baseline solution formula reappears across the sampled case compositions. The exact-match count and its successful-comparison denominator should therefore come first. This result tells us how often the complete Boolean expression is reproduced for the conservative, parsimonious, or intermediate solution. It does not require a universal acceptance threshold: the recurrence rate becomes meaningful in relation to the severity and substantive plausibility of the sampling design.</p>
+<p><strong>When the complete formula is not reproduced,</strong> prime-implicant recurrence explains what changed. The <code>term_stability</code> summary shows whether the sufficient terms from the baseline formula continue to appear and which nonbaseline terms recur in their place. This evidence may be especially important when the substantive argument centers on one particular sufficient term, since it can recur even when another term enters or leaves the complete solution formula.</p>
+<p>The <strong>Jaccard coefficient</strong> compresses some of this term-level evidence into one number, but its meaning is considerably narrower. It compares prime implicants as literal identities. Thus, <code>FREEXP*GENCL</code> and <code>FREEXP*GENCL*JUCON</code> share no identical prime implicant and receive a coefficient of <code>0</code>, even though the latter is a more restrictive conjunction contained within the former. Jaccard similarity does not evaluate that logical relation, the overlap in cases covered, or the similarity between the complete solutions’ fuzzy-set memberships. It can serve as a supplementary description of literal prime-implicant overlap, but should not displace the exact formulas and term appearance rates.</p>
+<p>Changes in solution consistency, solution PRI, and solution coverage form a separate part of the appraisal. When a subsample reproduces the baseline formula, the comparison evaluates the same sufficient expression across a different case composition. When the formula changes, however, the parameters of fit belong to different sufficient expressions obtained under the same solution type. The current <code>fit_stability</code> summary includes both kinds of successful replication. It therefore describes the distribution of the parameters attached to the selected subsample solutions, but it should not be presented as an apples-to-apples assessment of the baseline formula’s parameters of fit unless the comparison is restricted to exact formula matches.</p>
+<p>The selected <code>fit_tol</code> provides a screening rule, not really a measure of robustness. <code>prop_changed</code> reports how often the absolute difference in a parameter of fit exceeds that tolerance, while <code>max_abs_fit_delta</code> identifies the largest absolute difference among the parameters that cross it in an individual replication. Neither quantity measures distance from the tolerance itself. Because the proportion of crossings depends directly on where the tolerance is placed, it must be interpreted alongside the signed differences and the observed distributions of solution consistency, PRI, and coverage.</p>
+<p>The evidence can therefore be read in a practical order:</p>
+<ol type="1">
+<li>Establish how many replications produce a comparable result for each solution type, since those successful comparisons provide the denominator for the remaining summaries.</li>
+<li>Report how often each complete baseline solution formula is reproduced.</li>
+<li>If formulas change, examine which baseline prime implicants persist and which alternative terms or complete formulas recur.</li>
+<li>Evaluate solution consistency, PRI, and coverage separately, distinguishing comparisons of an identical formula from comparisons involving different sufficient expressions.</li>
+<li>Use Jaccard coefficients and tolerance-crossing classifications only when their summaries add something useful to the formula-, term-, and parameter-specific evidence.</li>
+</ol>
+</section>
+<section id="reporting-and-interpreting-the-diagnostic" class="level2" data-number="10.8">
+<h2 data-number="10.8" class="anchored" data-anchor-id="reporting-and-interpreting-the-diagnostic"><span class="header-section-number">10.8</span> Reporting and Interpreting the Diagnostic</h2>
+<p>A useful report begins with the perturbation that was actually performed. In <code>vdem_subsample_stratified_all</code>, <code>subsample.test()</code> generated 100 reproducible, region-stratified samples, each retaining 59 of the 66 countries. Calibration remained fixed, and every sample was analyzed with the reference truth-table cutoffs, directional expectations, exclusion rule, and solution-selection settings. All 100 replications produced comparable conservative, parsimonious, and intermediate solutions.</p>
+<p>The substantive results can then be reported at the level required by the claim. In the expanded example, the conservative and <code>C1P1</code> intermediate formulas each recur in 75 of the 100 replications, whereas the parsimonious formula recurs in 54. The corresponding mean Jaccard similarities are approximately <code>0.830</code>, <code>0.787</code>, and <code>0.610</code>, respectively. The baseline conservative prime implicants recur in 89% and 82% of the replications; the baseline intermediate prime implicants recur in 82% and 76%; and the baseline parsimonious prime implicants recur in 66% and 60%. These results show that the conservative and intermediate solutions are reproduced more frequently, and remain more similar to their baselines when they change, than the parsimonious solution.</p>
+<p>Depending on the solution type and parameter, between 72% and 81% of the successful comparisons move solution consistency, solution PRI, or solution coverage by more than <code>0.005</code> from the corresponding baseline value, yet the median difference for every parameter remains smaller than <code>0.005</code> in absolute terms. Crossings of this narrow tolerance are therefore common even though the center of each parameter distribution remains close to the complete-data result.</p>
+<p>All in all, these findings support a surprisingly rich and nuanced conclusion. The formulas do not recur equally often across solution types, and the parsimonious solution is especially sensitive to the sampled case composition. At the same time, the typical values of solution consistency, PRI, and coverage remain close to their baselines, even though individual replications often cross the selected tolerance. Neither part of this conclusion, by itself, should be collapsed into a single declaration that the analysis is—or is not—robust.</p>
+<p>These results remain conditional on the observed countries, the 90% retention level, the regional stratification rule, the fixed calibration, the QCA specifications, and the 100 sampled case compositions. They do not, of course, estimate the probability that a solution is true in some external population, and they do not provide a confidence level for a QCA solution.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./leave-one-out-diagnostics.html" class="pagination-link" aria-label="Leave-One-Out Diagnostics">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Leave-One-Out Diagnostics</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./cluster-heterogeneity.html" class="pagination-link" aria-label="Cluster Heterogeneity">
+        <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Cluster Heterogeneity</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

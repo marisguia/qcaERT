@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>5&nbsp; Calibration – A Guide to qcaERT</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./frequency-cutoff.html" rel="next">
+<link href="./presenting-the-solutions.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-707d8167ce6003fca903bfe2be84ab7f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-10058ab0c6d3387edda5ec9f53ada30a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-5fb265ea9e9be481d23acbcf801e35e9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-10058ab0c6d3387edda5ec9f53ada30a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="vendor/polyfill-service-3.111.0/polyfill.min.js"></script>
+  <script src="vendor/mathjax-3.2.2/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">A Guide to qcaERT</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./calibration.html">Part II: Boundary Diagnostics</a></li><li class="breadcrumb-item"><a href="./calibration.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Calibration</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./framing-qca-robustness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What is QCA Robustness</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./qcaert-alongside-setmethods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Raison d’être</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./how-to-read-this-book.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to Read This Book</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part I: Reference Analysis</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./reference-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">The Reference Analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./presenting-the-solutions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Presenting the Solutions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part II: Boundary Diagnostics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./calibration.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Calibration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./frequency-cutoff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Frequency Cutoff</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./inclusion-cutoff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inclusion Cutoff</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./alternative-set.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Alternative-Set Diagnostics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part III: Case-Composition Diagnostics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./leave-one-out-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Leave-One-Out Diagnostics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./subsample.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Subsample Diagnostics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part IV: Structured Comparison Diagnostics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cluster-heterogeneity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Cluster Heterogeneity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./theory-comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Theory Comparison</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./conclusion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Conclusion</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#how-calib.test-works" id="toc-how-calib.test-works" class="nav-link active" data-scroll-target="#how-calib.test-works"><span class="header-section-number">5.1</span> How calib.test() Works</a>
+  <ul class="collapse">
+  <li><a href="#initial-requirements" id="toc-initial-requirements" class="nav-link" data-scroll-target="#initial-requirements"><span class="header-section-number">5.1.1</span> Initial Requirements</a></li>
+  <li><a href="#selecting-sets-and-calibration-anchors" id="toc-selecting-sets-and-calibration-anchors" class="nav-link" data-scroll-target="#selecting-sets-and-calibration-anchors"><span class="header-section-number">5.1.2</span> Selecting Sets and Calibration Anchors</a></li>
+  <li><a href="#defining-the-search-grid" id="toc-defining-the-search-grid" class="nav-link" data-scroll-target="#defining-the-search-grid"><span class="header-section-number">5.1.3</span> Defining the Search Grid</a></li>
+  <li><a href="#holding-the-qca-comparison-constant" id="toc-holding-the-qca-comparison-constant" class="nav-link" data-scroll-target="#holding-the-qca-comparison-constant"><span class="header-section-number">5.1.4</span> Holding the QCA Comparison Constant</a></li>
+  <li><a href="#inspecting-the-returned-evidence" id="toc-inspecting-the-returned-evidence" class="nav-link" data-scroll-target="#inspecting-the-returned-evidence"><span class="header-section-number">5.1.5</span> Inspecting the Returned Evidence</a></li>
+  </ul></li>
+  <li><a href="#narrow-diagnostic" id="toc-narrow-diagnostic" class="nav-link" data-scroll-target="#narrow-diagnostic"><span class="header-section-number">5.2</span> A Narrow First Diagnostic</a>
+  <ul class="collapse">
+  <li><a href="#reading-the-boundary-table" id="toc-reading-the-boundary-table" class="nav-link" data-scroll-target="#reading-the-boundary-table"><span class="header-section-number">5.2.1</span> Reading the Boundary Table</a></li>
+  </ul></li>
+  <li><a href="#expanding-the-diagnostic-scan" id="toc-expanding-the-diagnostic-scan" class="nav-link" data-scroll-target="#expanding-the-diagnostic-scan"><span class="header-section-number">5.3</span> Expanding the Diagnostic Scan</a>
+  <ul class="collapse">
+  <li><a href="#comparing-solution-types" id="toc-comparing-solution-types" class="nav-link" data-scroll-target="#comparing-solution-types"><span class="header-section-number">5.3.1</span> Comparing Solution Types</a></li>
+  </ul></li>
+  <li><a href="#plotting-calibration-paths" id="toc-plotting-calibration-paths" class="nav-link" data-scroll-target="#plotting-calibration-paths"><span class="header-section-number">5.4</span> Plotting Calibration Paths</a>
+  <ul class="collapse">
+  <li><a href="#heatmap" id="toc-heatmap" class="nav-link" data-scroll-target="#heatmap"><span class="header-section-number">5.4.1</span> Heatmap</a></li>
+  <li><a href="#interval-plot" id="toc-interval-plot" class="nav-link" data-scroll-target="#interval-plot"><span class="header-section-number">5.4.2</span> Interval Plot</a></li>
+  <li><a href="#trace-plot" id="toc-trace-plot" class="nav-link" data-scroll-target="#trace-plot"><span class="header-section-number">5.4.3</span> Trace Plot</a></li>
+  </ul></li>
+  <li><a href="#interpretive-boundaries" id="toc-interpretive-boundaries" class="nav-link" data-scroll-target="#interpretive-boundaries"><span class="header-section-number">5.5</span> Interpretive Boundaries</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./calibration.html">Part II: Boundary Diagnostics</a></li><li class="breadcrumb-item"><a href="./calibration.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Calibration</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Calibration</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>For our first—and arguably one of the most important—single-diagnostic appraisals, <code>calib.test()</code> examines how one or more selected QCA solution formulas respond to changes in the qualitative anchors used for calibration. A single function call may include several condition sets, the outcome set, multiple eligible anchors, and multiple solution types. It then expands this request into separate lower and upper diagnostic paths for every selected set–anchor combination and every monitored solution formula. Each path records the last tested anchor value that preserves the corresponding baseline formula and, when one exists, the first proposed value at which the formula changes or another stopping condition is encountered.</p>
+<p>The diagnostic addresses the sensitivity of the set memberships established through calibration. Moving an anchor changes one or more cases’ membership scores in the selected set. Those changes may alter the cases’ membership in truth-table configurations, the configurations’ consistency of sufficiency and outcome assignments, the distinction between observed configurations and logical remainders, and, ultimately, the solution formula obtained through minimization <span class="citation" data-cites="ragin2008redesigning schneiderWagemann2012set">(<a href="references.html#ref-ragin2008redesigning" role="doc-biblioref">Ragin 2008</a>; <a href="references.html#ref-schneiderWagemann2012set" role="doc-biblioref">Schneider and Wagemann 2012</a>)</span>.</p>
+<p>At every tested anchor value, <code>calib.test()</code> therefore recalibrates the selected set, reconstructs the truth table, repeats the requested minimization, and compares the selected solution formula with its baseline counterpart.</p>
+<p>Although one call can generate many diagnostic paths, <strong>each path is evaluated independently.</strong> <code>calib.test()</code> does not evaluate the consequences of moving several anchors simultaneously. Indeed, in such cases, the full Cartesian product grows exponentially and quickly becomes unmanageable. With <span class="math inline">\(k\)</span> movable anchors and <span class="math inline">\(m\)</span> candidate values per anchor, there are <span class="math inline">\(m^k\)</span> combinations before even considering alternative inclusion cutoffs, frequency cutoffs, or solution types.</p>
+<p>Consider a simple and relatively constrained example: if only four anchors are each allowed to take five candidate values, this produces <span class="math inline">\(5^4=625\)</span> joint calibration specifications. But if four sets are tested across all three qualitative anchors, the resulting twelve-dimensional search contains <span class="math inline">\(5^{12}=244,140,625\)</span> specifications. This combinatorial growth makes exhaustive joint testing impractical even for moderately sized analyses. More on this in the Alternative-Set Diagnostics chapter.</p>
+<p>For now, within a particular path, only one anchor moves in one direction; the remaining anchor thresholds, the calibrated memberships of the untested sets, the cases, truth-table cutoffs, and minimization and solution-selection rules remain fixed. The resulting collection therefore maps one-at-a-time formula-preservation boundaries across all the sets, anchors, directions, and solution types requested by the user.</p>
+<ul>
+<li><strong>Example:</strong> The expanded application later in this chapter selects all four condition sets and the outcome set, requests the full-nonmembership, crossover, and full-membership anchors, and monitors the conservative, parsimonious, and intermediate solutions. <code>calib.test()</code> generates the complete collection of lower and upper paths from that single call; the user does not need a separate call for every set, anchor, direction, or solution type.</li>
+</ul>
+<section id="how-calib.test-works" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="how-calib.test-works"><span class="header-section-number">5.1</span> How calib.test() Works</h2>
+<blockquote class="blockquote">
+<p>This subsection describes the function at length. If you’re the kind of person who learns more from getting your hands dirty than from reading boring manuals, feel free to skip ahead to <a href="#narrow-diagnostic">A Narrow First Diagnostic</a>. If anything still seems nebulous or difficult to grasp, come back to this subsection and read it carefully.</p>
+</blockquote>
+<section id="initial-requirements" class="level3" data-number="5.1.1">
+<h3 data-number="5.1.1" class="anchored" data-anchor-id="initial-requirements"><span class="header-section-number">5.1.1</span> Initial Requirements</h3>
+<p>Changing a calibration anchor requires access to the raw empirical values from which set memberships were originally calculated. For this reason, <code>calib.test()</code> requires both <code>raw.data</code> and <code>calib.data</code>, together with <code>outcome</code>, <code>conditions</code>, and <code>calib_spec</code>. The two data frames serve different purposes, as <code>raw.data</code> provides the empirical values that will be recalibrated, and <code>calib.data</code> supplies the analysis frame into which the reconstructed memberships are placed. The calibrated data frame also retains the calibrated outcome when the outcome calibration is not being tested, along with any additional columns needed by the QCA workflow.</p>
+<p>The <code>outcome</code> argument identifies one calibrated outcome column in <code>calib.data</code>, while <code>conditions</code> identifies the complete nonempty collection of calibrated condition columns used to construct the truth table. The outcome can be supplied as a character string or an unquoted column name; the conditions can likewise be supplied as a character vector or as unquoted names. The outcome must remain outside <code>conditions</code>, even when its own calibration will be tested later in the call.</p>
+<p>Before moving any anchor, <code>calib.test()</code> reconstructs the baseline memberships of every condition named in <code>conditions</code>. It does so by applying the corresponding instructions in <code>calib_spec</code> to the values in <code>raw.data</code>. When <code>test.outcome = TRUE</code>, the function reconstructs the outcome memberships in the same way. It is the calibration instructions supplied through <code>calib_spec</code>—including the baseline thresholds—and not the condition memberships already stored in <code>calib.data</code> that define the reconstructed baseline calibration. Those instructions should reproduce the intended reference memberships; otherwise, the diagnostic would begin from a different calibrated analysis before the first anchor movement is even attempted!</p>
+<p>This reconstruction also explains why the rows of <code>raw.data</code> and <code>calib.data</code> must refer to the same cases in the same order. For each case, the function takes an empirical value from <code>raw.data</code>, calculates a new set-membership score, and places that score in the corresponding position of the analysis frame. Accordingly, the two data frames must contain the same number of cases. If they use informative row names, those names must be unique and identical in the same order. When both inputs retain only the default row names <code>1, ..., n</code>, the pairing is purely positional, so neither data frame may be reordered independently after the raw and calibrated versions have been constructed.</p>
+<p>The <code>calib_spec</code> argument supplies the complete instructions for that reconstruction through a named list containing one calibration entry for every set that the function must rebuild. For a condition-only diagnostic, the list must contain exactly one entry for every condition in <code>conditions</code>, including conditions whose anchors will remain fixed throughout the search. When the outcome calibration is also tested, <code>calib_spec</code> must contain those condition entries plus one entry named after the outcome. The outcome itself remains separate from <code>conditions</code>, preserving the distinction between the outcome set and the condition sets used to construct the truth table.</p>
+<p>Each calibration entry contains the following elements:</p>
+<ul>
+<li><code>raw</code> is required and names the column in <code>raw.data</code> from which membership will be calculated.</li>
+<li><code>type</code> is likewise needed, and accepts <code>"fuzzy"</code> or <code>"f"</code> for a fuzzy set and <code>"crisp"</code> or <code>"c"</code> for a crisp set.</li>
+<li><code>thresholds</code> is also required and supplies the baseline qualitative anchors. Crisp calibration requires one threshold. Direct fuzzy calibration requires either three or six consistently ordered thresholds, while indirect fuzzy calibration accepts one or more distinct, finite thresholds, which the function orders and labels <code>T1</code>, <code>T2</code>, and so forth.</li>
+<li><code>method</code> is optional. Fuzzy calibration accepts <code>"direct"</code>, the default, or <code>"indirect"</code>; crisp calibration is direct.</li>
+<li><code>calibrate</code> is also optional and accepts a named list of additional arguments passed to <code>QCA::calibrate()</code>. The function itself supplies the raw vector, calibration type, and thresholds, so <code>calibrate</code> cannot replace <code>x</code>, <code>type</code>, or <code>thresholds</code>.</li>
+</ul>
+<p>The reference analysis uses direct fuzzy calibration with three qualitative anchors for every condition and for the outcome. The first object below is sufficient when only condition calibrations may be tested. The second extends that specification with the outcome calibration needed by <code>test.outcome = TRUE</code>:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>vdem_calib_spec <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">FREEXP =</span> <span class="fu">list</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">raw =</span> <span class="st">"FREEXP"</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">"fuzzy"</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"direct"</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">thresholds =</span> FREEXP_th</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">PARTY =</span> <span class="fu">list</span>(</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">raw =</span> <span class="st">"PARTY"</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">"fuzzy"</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"direct"</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">thresholds =</span> PARTY_th</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">GENCL =</span> <span class="fu">list</span>(</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">raw =</span> <span class="st">"GENCL"</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">"fuzzy"</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"direct"</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">thresholds =</span> GENCL_th</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">JUCON =</span> <span class="fu">list</span>(</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">raw =</span> <span class="st">"JUCON"</span>,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">"fuzzy"</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"direct"</span>,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">thresholds =</span> JUCON_th</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>vdem_calib_spec_with_outcome <span class="ot">&lt;-</span> vdem_calib_spec</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>vdem_calib_spec_with_outcome<span class="sc">$</span>CIVSOC <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">raw =</span> <span class="st">"CIVSOC"</span>,</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"fuzzy"</span>,</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"direct"</span>,</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">thresholds =</span> CIVSOC_th</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Every condition remains in <code>vdem_calib_spec</code> even when only one of them will have its anchors moved. This is because <code>calib.test()</code> first reconstructs the complete baseline condition matrix and only then begins the perturbation search. The next set of arguments determines which parts of that reconstructed calibration are allowed to change.</p>
+</section>
+<section id="selecting-sets-and-calibration-anchors" class="level3" data-number="5.1.2">
+<h3 data-number="5.1.2" class="anchored" data-anchor-id="selecting-sets-and-calibration-anchors"><span class="header-section-number">5.1.2</span> Selecting Sets and Calibration Anchors</h3>
+<p>Once the complete calibration specification is available, <code>test.conditions</code> and <code>test.outcome</code> define the scope of the perturbation, determining which calibrated sets may change. <code>test.conditions</code> defaults to the complete <code>conditions</code> vector and accepts any nonempty subset of those names. Conditions omitted from <code>test.conditions</code> remain in every reconstructed truth table, but their calibration anchors remain fixed at the baseline thresholds. <code>test.outcome</code> is a single logical value that defaults to <code>FALSE</code>. Setting it to <code>TRUE</code> adds the outcome calibration to the search without adding the outcome to <code>conditions</code>.</p>
+<p>Together, these two arguments permit condition-only, mixed, and outcome-only diagnostics. To examine only the outcome calibration, use:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>test.conditions <span class="ot">=</span> <span class="cn">NULL</span>,</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>test.outcome <span class="ot">=</span> <span class="cn">TRUE</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>test.conditions = NULL</code> is accepted only in this outcome-only arrangement, and every call must select at least one calibrated set for perturbation.</p>
+<p>After the sets have been selected, <code>anchors_to_test</code> determines which qualitative anchors within those sets will generate search paths. Its default, <code>NULL</code>, tests every anchor implied by each selected set’s calibration form. Supplying a character vector narrows the search to the named anchors that are eligible for each selected set:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Calibration form</th>
+<th>Eligible anchors</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Crisp calibration</td>
+<td><code>T</code></td>
+</tr>
+<tr class="even">
+<td>Direct fuzzy calibration with three thresholds</td>
+<td><code>E</code>, <code>C</code>, <code>I</code></td>
+</tr>
+<tr class="odd">
+<td>Direct fuzzy calibration with six thresholds</td>
+<td><code>E1</code>, <code>C1</code>, <code>I1</code>, <code>I2</code>, <code>C2</code>, <code>E2</code></td>
+</tr>
+<tr class="even">
+<td>Indirect fuzzy calibration</td>
+<td><code>T1</code>, <code>T2</code>, …</td>
+</tr>
+</tbody>
+</table>
+<p>For the three-threshold direct fuzzy calibration used in the reference analysis, <code>E</code> marks the threshold for full nonmembership, or the exclusion anchor; <code>C</code>, the crossover at which membership is neither more in nor more out of the set; and <code>I</code>, the threshold for full membership, or the inclusion anchor. When <code>anchors_to_test</code> is supplied explicitly, it must include at least one eligible label for each selected set. This requirement prevents a set from being selected for perturbation without generating any diagnostic path.</p>
+</section>
+<section id="defining-the-search-grid" class="level3" data-number="5.1.3">
+<h3 data-number="5.1.3" class="anchored" data-anchor-id="defining-the-search-grid"><span class="header-section-number">5.1.3</span> Defining the Search Grid</h3>
+<p>Each selected anchor produces two diagnostic paths. The lower path repeatedly subtracts the chosen movement size from the baseline threshold, while the upper one (shockingly) repeatedly adds it. Throughout either path, only the selected anchor moves; the remaining anchors of that set stay at their baseline thresholds.</p>
+<p>The size of each movement is controlled by <code>unit_step</code>, whose default is <code>NULL</code>. Under this default, qcaERT calculates a separate scale-aware increment for every set in the complete calibration specification. For a fuzzy set, the function finds the smallest distinct gap among the baseline thresholds and divides that gap by <code>unit_step_divisor</code>, which defaults to <code>10</code>. For a crisp set, it takes the shorter distance from the threshold to either limit of the observed raw-data range and divides that distance by the same divisor. Because <code>unit_step_divisor</code> is used only for this automatic calculation, it matters only when <code>unit_step = NULL</code>; in that setting, it must be a single positive finite number.</p>
+<p>A positive numeric value supplied through <code>unit_step</code> replaces the automatic calculation. A single value applies the same movement size to every set in the calibration specification. A vector instead supplies set-specific increments and must follow the order of all <code>conditions</code>; when <code>test.outcome = TRUE</code>, the vector must also include the outcome increment in its final position. The vector is therefore aligned with the complete calibration specification, not merely with the subset selected through <code>test.conditions</code>.</p>
+<p>The other part of the search grid is its length. <code>max_steps</code> is a positive integer that defaults to <code>20</code> and limits the number of proposed movements separately for every anchor, direction, and monitored solution type. Movement size and path length should be considered together. Smaller increments inspect the raw scale more finely but may require more steps to reach a substantively meaningful distance from the baseline. Conversely, larger increments cover the scale more quickly, although the values between successive movements remain untested.</p>
+<p>After each admissible threshold has been evaluated, the current path continues until one of the following occurs:</p>
+<ul>
+<li>the selected solution formula differs from its baseline counterpart;</li>
+<li>truth-table construction, exclusion, or minimization fails;</li>
+<li>the next proposed value would cross another anchor or leave the observed raw-data range; or</li>
+<li>the path uses all movements permitted by <code>max_steps</code>.</li>
+</ul>
+<p>When anchor ordering or the raw-data range blocks the next movement, the proposed value is recorded as a feasibility boundary. It is not submitted to calibration, truth-table construction, or minimization because it would not constitute an admissible calibration specification.</p>
+</section>
+<section id="holding-the-qca-comparison-constant" class="level3" data-number="5.1.4">
+<h3 data-number="5.1.4" class="anchored" data-anchor-id="holding-the-qca-comparison-constant"><span class="header-section-number">5.1.4</span> Holding the QCA Comparison Constant</h3>
+<p>The purpose of a calibration diagnostic is to change the calibration while holding the remaining QCA comparison rules constant. The <code>solution</code>, <code>which_M</code><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, and <code>i_mode</code> selectors retain the meanings established in the preceding chapter. Here, their calibration-specific consequence is that the same solution type, stored model position, and intermediate-branch selection rule are applied after every admissible anchor movement. Applying the same selectors repeatedly makes the comparisons reproducible, but, of course, it does <strong>not</strong> resolve model ambiguity when a minimization returns more than one admissible model—the function can’t have all the fun, after all.</p>
+<p>With its default <code>solution = "all"</code>, <code>calib.test()</code> monitors conservative and parsimonious solutions. The <code>dir.exp</code> argument defaults to <code>NULL</code>; supplying directional expectations through it adds the intermediate solution to an all-solution diagnostic. These expectations must correspond to the order of <code>conditions</code> and can be supplied as a character vector, a single minimize-style character string, or a matrix or data frame with one column per condition. An intermediate-only diagnostic requires <code>dir.exp</code>, whereas conservative-only and parsimonious-only diagnostics require it to remain <code>NULL</code>.</p>
+<p>Then, every monitored solution type receives an independent path. A change in the conservative formula therefore stops only the conservative search for that set, anchor, and direction. The parsimonious and intermediate searches continue until each reaches its own stopping point.</p>
+<p>For ordinary calibration diagnostics, <code>include</code> should be left at its default of <code>NULL</code>. The function will then apply the minimization convention appropriate to each requested solution type: conservative minimization uses <code>include = ""</code> and does not admit logical remainders as simplifying assumptions, while parsimonious and intermediate minimization use <code>include = "?"</code>. When only one solution type is monitored, the corresponding value may also be supplied explicitly: <code>include = ""</code> is accepted for a conservative-only diagnostic, and <code>include = "?"</code> for a parsimonious- or intermediate-only diagnostic. Neither value changes the analysis already implied by <code>solution</code>; an incompatible value produces an error. With <code>solution = "all"</code>, <code>include</code> must remain <code>NULL</code> so that the function can apply the appropriate convention separately to each solution type.</p>
+<blockquote class="blockquote">
+<p>The presence of <code>include</code> is purposefully redundant, since, once the solution type has been selected, include cannot independently change the analysis. An explicit value can therefore only confirm the convention already implied by solution; an incompatible value produces an error. The argument remains visible for didactic reasons, as the treatment of logical remainders is too important to disappear silently behind the solution label. Even when <strong><em>qcaERT</em></strong> determines the value, the researcher should understand why conservative minimization excludes logical remainders from the minimization and why parsimonious and intermediate minimization admit them as potential simplifying assumptions. For these last two solutions, the exclusion controls determine how untenable simplifying assumptions are handled as recalibration changes the truth table.</p>
+</blockquote>
+<p>The central choice is whether the exclusion rule should follow each reconstructed truth table, one fixed exclusion object should be reused, or no simplifying assumptions should be excluded.</p>
+<ul>
+<li><code>"recompute"</code> reruns <code>QCA::findRows()</code> on every perturbed truth table, preserving the exclusion rule while allowing the particular excluded configurations to change. Its companion <code>exclude_recompute</code> is a named list of arguments for <code>QCA::findRows()</code> and defaults to <code>list(type = 2)</code>, which identifies contradictory simplifying assumptions. The less common exclusion rules are shown later, when the expanded diagnostic makes their syntax concrete.</li>
+<li><code>"static"</code> reuses the exact exclusion object supplied through <code>exclude_static</code>. It preserves the baseline pool of excluded configurations even when the perturbed truth table would classify those configurations differently.</li>
+<li><code>"none"</code> applies no exclusion rule and therefore permits every simplifying assumption otherwise admitted through <code>include = "?"</code>.</li>
+</ul>
+<blockquote class="blockquote">
+<p>“W-wait, the default is <code>list(type = 2)</code>?” you ask. Yes, this is an intentional, slightly opinionated methodological choice. Whenever parsimonious or intermediate solutions are monitored, <strong><em>qcaERT</em></strong> applies <code>QCA::findRows(type = 2)</code> to the baseline truth table and excludes the contradictory simplifying assumptions it identifies. Researchers who do not want contradictory simplifying assumptions excluded must state that choice explicitly by setting <code>exclude_mode = "none"</code>.</p>
+</blockquote>
+<p>The truth-table arguments <code>incl.cut</code> and <code>n.cut</code> remain fixed throughout the calibration search, and both default to <code>1</code>. Holding them fixed here is essential, since the diagnostic is intended to trace the consequences of changing calibration anchors without modifying truth-table assignment rules at the same time. Leave this task to the <code>altset.test()</code> function!</p>
+<p>Additional truth-table and minimization arguments supplied through <code>...</code> are held constant across every reconstructed analysis. In the reference application, this allows settings such as <code>complete</code> and <code>sort.by</code> to govern all perturbed truth tables in the same way.</p>
+<p>The <code>progress</code> argument is a logical display control that defaults to <code>TRUE</code> and, in an interactive R session, shows a (definitely always funny) text progress bar. The bar advances when a complete set-anchor-direction-solution path finishes, not after each movement within that path.</p>
+</section>
+<section id="inspecting-the-returned-evidence" class="level3" data-number="5.1.5">
+<h3 data-number="5.1.5" class="anchored" data-anchor-id="inspecting-the-returned-evidence"><span class="header-section-number">5.1.5</span> Inspecting the Returned Evidence</h3>
+<p>After the search is complete, the resulting <code>calib_test</code> object can be inspected in three ordinary ways. Printing the object provides an overview of the diagnostic and its formula-preservation boundaries, <code>as.data.frame()</code> returns the complete reporting table, and <code>plot()</code> presents the same diagnostic evidence as interval, heatmap, or trace views. None of these inspection methods recalibrates a set or repeats the QCA analysis.</p>
+<p>When <code>solution = "all"</code>, <code>result_shape</code> determines how the reporting table organizes the independently monitored solution types. Its default, <code>"wide"</code>, keeps one record for each set–anchor–direction path and places the boundaries for the different solution types in separate prefixed columns. The alternative <code>"long"</code> layout gives each solution type its own record for the same set–anchor–direction path. The object also retains the stepwise and baseline records behind those boundaries. They are useful when an unusual boundary or stopping reason requires closer examination, but they are not needed for the first interpretation.</p>
+</section>
+</section>
+<section id="narrow-diagnostic" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="narrow-diagnostic"><span class="header-section-number">5.2</span> A Narrow First Diagnostic</h2>
+<p>With the function’s main choices now established, we can begin with a limited, friendly application. The first diagnostic perturbs the full-nonmembership, crossover, and full-membership anchors of <code>GENCL</code>, the set of women’s civil liberties, while monitoring only the conservative solution.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>vdem_calib_gencl_con <span class="ot">&lt;-</span> <span class="fu">calib.test</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">raw.data =</span> vdem_raw,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">calib.data =</span> vdem_calib,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome =</span> vdem_outcome,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">conditions =</span> vdem_conds,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">calib_spec =</span> vdem_calib_spec,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">test.conditions =</span> <span class="st">"GENCL"</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">anchors_to_test =</span> <span class="fu">c</span>(<span class="st">"E"</span>, <span class="st">"C"</span>, <span class="st">"I"</span>),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">unit_step =</span> <span class="cn">NULL</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">unit_step_divisor =</span> <span class="dv">10</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">max_steps =</span> <span class="dv">5</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">incl.cut =</span> vdem_incl_cut,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">n.cut =</span> vdem_n_cut,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">solution =</span> <span class="st">"conservative"</span>,</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">which_M =</span> <span class="dv">1</span>,</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">complete =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">sort.by =</span> <span class="fu">c</span>(<span class="st">"incl"</span>, <span class="st">"n"</span>)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Because three anchors are tested in two directions, this call produces six independent paths. It retains the reference truth-table cutoffs, calculates the movement size automatically with a divisor of <code>10</code>, and permits five attempted movements in each direction. This smaller search gives us enough evidence to learn how the boundary table works before expanding to the complete scan.</p>
+<p>For <code>GENCL</code>, the smallest gap among the three baseline thresholds is:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>vdem_gencl_anchor_gap <span class="ot">&lt;-</span> <span class="fu">min</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">diff</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sort</span>(vdem_calib_spec<span class="sc">$</span>GENCL<span class="sc">$</span>thresholds)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>vdem_gencl_anchor_gap</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.3025</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>And dividing that gap by <code>10</code> produces a movement size of <code>0.03025</code>:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>vdem_gencl_anchor_gap <span class="sc">/</span> <span class="dv">10</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 0.03025</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The same increment is then applied independently along the lower and upper paths of each selected anchor.</p>
+<section id="reading-the-boundary-table" class="level3" data-number="5.2.1">
+<h3 data-number="5.2.1" class="anchored" data-anchor-id="reading-the-boundary-table"><span class="header-section-number">5.2.1</span> Reading the Boundary Table</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>vdem_calib_gencl_con</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;calib_test&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Outcome test: calibration robustness</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Solution: conservative</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Monitored solutions: conservative</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; which_M: 1</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Test conditions: GENCL</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Anchors tested: E, C, I</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Max steps: 5</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Result</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  condition type method anchor direction  start last_safe first_failing step_unit steps total_delta pct_raw_range               reason</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      GENCL    f direct      E     lower 0.0900   0.02950      -0.00075   0.03025     2    -0.06050      6.744705 feasibility_boundary</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      GENCL    f direct      E     upper 0.0900   0.24125            NA   0.03025     5     0.15125     16.861761 run_budget_exhausted</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      GENCL    f direct      C     lower 0.3925   0.30175       0.27150   0.03025     3    -0.09075     10.117057  CON:formula_changed</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      GENCL    f direct      C     upper 0.3925   0.48325       0.51350   0.03025     3     0.09075     10.117057  CON:formula_changed</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      GENCL    f direct      I     lower 0.7155   0.56425            NA   0.03025     5    -0.15125     16.861761 run_budget_exhausted</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      GENCL    f direct      I     upper 0.7155   0.86675            NA   0.03025     5     0.15125     16.861761 run_budget_exhausted</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Summary</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Rows: 6</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Conditions covered: GENCL</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Bounds are available in x$bounds.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>As you can see, printing the object directly provides a clear overview of the diagnostic, identifying the monitored conservative solution, the selected condition and anchors, and the five-step path budget. The six displayed records correspond to the lower and upper paths for <code>E</code>, <code>C</code>, and <code>I</code>. To keep this console view compact, the print method omits <code>set</code> and <code>role</code> and labels the raw source column as <code>condition</code>.</p>
+<p>Now, the <code>as.data.frame()</code> method below exposes the complete table in all its redundant glory.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.frame</span>(vdem_calib_gencl_con)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     set      role   raw type method anchor direction  start last_safe first_failing step_unit steps total_delta pct_raw_range               reason</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 GENCL condition GENCL    f direct      E     lower 0.0900   0.02950      -0.00075   0.03025     2    -0.06050      6.744705 feasibility_boundary</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 GENCL condition GENCL    f direct      E     upper 0.0900   0.24125            NA   0.03025     5     0.15125     16.861761 run_budget_exhausted</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 GENCL condition GENCL    f direct      C     lower 0.3925   0.30175       0.27150   0.03025     3    -0.09075     10.117057  CON:formula_changed</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 GENCL condition GENCL    f direct      C     upper 0.3925   0.48325       0.51350   0.03025     3     0.09075     10.117057  CON:formula_changed</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 GENCL condition GENCL    f direct      I     lower 0.7155   0.56425            NA   0.03025     5    -0.15125     16.861761 run_budget_exhausted</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 GENCL condition GENCL    f direct      I     upper 0.7155   0.86675            NA   0.03025     5     0.15125     16.861761 run_budget_exhausted</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>In this full table, <code>set</code> names the calibrated set under perturbation, <code>role</code> distinguishes a condition from the outcome, and <code>raw</code> names the empirical source column. The columns <code>type</code>, <code>method</code>, and <code>anchor</code> identify the calibration form and the qualitative anchor being moved. The type codes <code>f</code> and <code>c</code> denote fuzzy and crisp calibrations. Together with <code>direction</code>, these columns identify one set–anchor–direction path for the selected conservative solution.</p>
+<p>The remaining columns report how the search developed along that path:</p>
+<ul>
+<li><code>start</code> is the baseline threshold from which the path begins, while <code>last_safe</code> is the furthest tested threshold that still preserves the selected baseline formula.</li>
+<li><code>first_failing</code> records the next proposed value when the path encounters a formula change, a computational failure, or a feasibility boundary. It remains missing when the search budget is exhausted before any such stopping point is reached. In the case of a feasibility boundary, this value was proposed but not analyzed.</li>
+<li><code>step_unit</code> gives the threshold increment, and <code>steps</code> counts the movements that were actually analyzed and preserved the formula.</li>
+<li><code>total_delta</code> is calculated as <code>last_safe - start</code>, so it is negative along a lower path and positive along an upper path. <code>pct_raw_range</code> expresses the absolute magnitude of that movement as a percentage of the observed raw-data range for the selected set.</li>
+<li><code>reason</code> identifies why the path stopped, allowing the numerical boundary to be interpreted as a formula change, a computational problem, a feasibility limit, or an exhausted search budget.</li>
+</ul>
+<p>We can now read the six paths anchor by anchor. For the full-nonmembership anchor <code>E</code>, the lower path preserves the conservative formula through two movements, from <code>0.09000</code> to <code>0.02950</code>. The next proposed value, <code>-0.00075</code>, lies beyond the observed raw-data range. It is therefore recorded as a <code>feasibility_boundary</code> without being recalibrated or submitted to the QCA workflow.</p>
+<p>In the upper direction, the path reaches <code>0.24125</code> after all five movements without changing the formula. The <code>run_budget_exhausted</code> reason therefore tells us that the formula was preserved throughout the tested values, but no upper formula-changing or feasibility boundary was located within the five-step search.</p>
+<p>The crossover paths locate the nearest formula-changing thresholds observed in this one-at-a-time search. From the baseline crossover of <code>0.39250</code>, the lower path preserves the conservative formula through <code>0.30175</code> and first changes it at <code>0.27150</code>; the upper path preserves it through <code>0.48325</code> and first changes it at <code>0.51350</code>. The two <code>CON:formula_changed</code> reasons refer, as indicated by <code>CON:</code>, specifically to a change in the selected conservative solution formula.</p>
+<p>The full-membership paths present a different pattern, as both exhaust their five-step budgets without a formula change, reaching last-safe values of <code>0.56425</code> below and <code>0.86675</code> above the baseline anchor of <code>0.71550</code>. The evidence therefore distinguishes the located crossover formula changes from an explored full-membership interval in which no stopping boundary was reached.</p>
+<p>Throughout these six paths, preservation is assessed through the selected Boolean solution formula rather than through its parameters of fit. Recalibrating <code>GENCL</code> changes cases’ membership in that set even when the minimized formula remains unchanged. Those membership changes can alter membership in the prime implicants and in their union, the complete solution. Prime-implicant consistency, PRI, raw coverage, and unique coverage may therefore move within a formula-preserving path, as may solution consistency, solution PRI, and solution coverage.</p>
+</section>
+</section>
+<section id="expanding-the-diagnostic-scan" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="expanding-the-diagnostic-scan"><span class="header-section-number">5.3</span> Expanding the Diagnostic Scan</h2>
+<p>The narrow application contains only six paths, but the number grows quickly once more conditions and solution types are included. For each of the <span class="math inline">\(S\)</span> selected sets, let <span class="math inline">\(A_s\)</span> denote the number of eligible anchors included in the search. Because every anchor is examined in two directions and every monitored solution type receives an independent path, the maximum number of perturbed QCA analyses is:</p>
+<p><span class="math display">\[
+\left(\sum_{s=1}^{S} A_s\right)
+\times 2\text{ directions}
+\times \text{monitored solution types}
+\times \text{maximum steps}.
+\]</span></p>
+<p>Writing the expression as a sum allows different sets to contribute different numbers of eligible anchors, as would occur if crisp, three-threshold fuzzy, six-threshold fuzzy, or indirect calibrations appeared in the same analysis.</p>
+<p>In the expanded application below, each of the four conditions and the outcome contributes three eligible anchors. Substituting these values into the expression above gives <span class="math inline">\((5 \times 3 \times 2 \times 3 = 90)\)</span> directional solution paths. With <code>max_steps = 20</code>, the function may therefore attempt as many as <span class="math inline">\((90 \times 20 = 1{,}800)\)</span> perturbed QCA analyses after reconstructing the baselines.</p>
+<blockquote class="blockquote">
+<p>As expected, this may lead to longer runtimes. Using <code>progress = TRUE</code> is therefore recommended so that you can follow the calculations and, consequently, keep your cortisol levels in check.</p>
+</blockquote>
+<p>Before running that larger diagnostic, the following forms show how to supply the three previously established exclusion modes to the function. Recomputing contradictory simplifying assumptions preserves the exclusion criterion while allowing the particular excluded configurations to follow each perturbed truth table:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>exclude_mode <span class="ot">=</span> <span class="st">"recompute"</span>,</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>exclude_recompute <span class="ot">=</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A static exclusion object instead preserves the exact configurations excluded from the reference truth table, regardless of how recalibration alters the reconstructed truth table, thereby emulating the approach used by the <strong>SetMethods</strong> package as of version 4.1:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>exclude_mode <span class="ot">=</span> <span class="st">"static"</span>,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>exclude_static <span class="ot">=</span> <span class="fu">findRows</span>(vdem_tt, <span class="at">type =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>To apply no exclusion rule to the simplifying assumptions admitted by parsimonious or intermediate minimization, use:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>exclude_mode <span class="ot">=</span> <span class="st">"none"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>If a research design calls for another <code>QCA::findRows()</code> rule, the recomputation mode can apply it as well. The following less common forms are included as a reference; none is needed for the current application. Type <code>1</code> requires the Boolean expression whose subset configurations should be excluded:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>exclude_mode <span class="ot">=</span> <span class="st">"recompute"</span>,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>exclude_recompute <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="dv">1</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">expression =</span> <span class="st">"FREEXP*PARTY*~GENCL"</span> <span class="co"># any supplied expression</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Type <code>3</code> requests simultaneous subset relations:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>exclude_mode <span class="ot">=</span> <span class="st">"recompute"</span>,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>exclude_recompute <span class="ot">=</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Type <code>0</code> requests every category and therefore also requires an expression for its type-<code>1</code> component:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>exclude_mode <span class="ot">=</span> <span class="st">"recompute"</span>,</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>exclude_recompute <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="dv">0</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">expression =</span> <span class="st">"FREEXP*PARTY*~GENCL"</span> <span class="co"># any supplied expression</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Selected categories can be combined explicitly:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>exclude_mode <span class="ot">=</span> <span class="st">"recompute"</span>,</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>exclude_recompute <span class="ot">=</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The reference scan uses the first rule, recomputing contradictory simplifying assumptions for every perturbed truth table. It also retains the long reporting layout so that the boundary of each solution type remains a separate record:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>vdem_calib_sets_all <span class="ot">&lt;-</span> <span class="fu">calib.test</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">raw.data =</span> vdem_raw,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">calib.data =</span> vdem_calib,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome =</span> vdem_outcome,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">conditions =</span> vdem_conds,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">calib_spec =</span> vdem_calib_spec_with_outcome,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">test.conditions =</span> vdem_conds,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">test.outcome =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">anchors_to_test =</span> <span class="fu">c</span>(<span class="st">"E"</span>, <span class="st">"C"</span>, <span class="st">"I"</span>),</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">unit_step =</span> <span class="cn">NULL</span>,</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">unit_step_divisor =</span> <span class="dv">10</span>,</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">max_steps =</span> <span class="dv">20</span>,</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">incl.cut =</span> vdem_incl_cut,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">n.cut =</span> vdem_n_cut,</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">solution =</span> <span class="st">"all"</span>,</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir.exp =</span> vdem_dir_exp,</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">exclude_mode =</span> <span class="st">"recompute"</span>,</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">exclude_recompute =</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="dv">2</span>),</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">which_M =</span> <span class="dv">1</span>,</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">i_mode =</span> <span class="st">"C1P1"</span>,</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">result_shape =</span> <span class="st">"long"</span>,</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">complete =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">sort.by =</span> <span class="fu">c</span>(<span class="st">"incl"</span>, <span class="st">"n"</span>)</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="comparing-solution-types" class="level3" data-number="5.3.1">
+<h3 data-number="5.3.1" class="anchored" data-anchor-id="comparing-solution-types"><span class="header-section-number">5.3.1</span> Comparing Solution Types</h3>
+<p>The complete scan contains ninety path records, so we will first isolate the six <code>GENCL</code> crossover records (“C”). They allow the conservative, parsimonious, and intermediate formulas to be compared under the same lower and upper anchor movements:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>vdem_calib_sets_all_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(vdem_calib_sets_all)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  vdem_calib_sets_all_df,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  set <span class="sc">==</span> <span class="st">"GENCL"</span> <span class="sc">&amp;</span> anchor <span class="sc">==</span> <span class="st">"C"</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    solution_type   set      role   raw type method anchor direction  start last_safe first_failing step_unit steps total_delta pct_raw_range              reason</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 15  conservative GENCL condition GENCL    f direct      C     lower 0.3925   0.30175       0.27150   0.03025     3    -0.09075      10.11706 CON:formula_changed</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 16  conservative GENCL condition GENCL    f direct      C     upper 0.3925   0.48325       0.51350   0.03025     3     0.09075      10.11706 CON:formula_changed</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 45  parsimonious GENCL condition GENCL    f direct      C     lower 0.3925   0.39250       0.36225   0.03025     0     0.00000       0.00000 PAR:formula_changed</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 46  parsimonious GENCL condition GENCL    f direct      C     upper 0.3925   0.48325       0.51350   0.03025     3     0.09075      10.11706 PAR:formula_changed</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 75  intermediate GENCL condition GENCL    f direct      C     lower 0.3925   0.30175       0.27150   0.03025     3    -0.09075      10.11706 INT:formula_changed</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 76  intermediate GENCL condition GENCL    f direct      C     upper 0.3925   0.48325       0.51350   0.03025     3     0.09075      10.11706 INT:formula_changed</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>All six paths begin at the crossover of <code>0.39250</code>. The conservative and intermediate formulas share the same observed lower and upper boundaries: each lower path preserves its baseline formula through <code>0.30175</code> and changes at <code>0.27150</code>, while each upper path preserves the formula through <code>0.48325</code> and changes at <code>0.51350</code>. The parsimonious upper path reaches the same boundary, but its lower path changes on the first attempted movement to <code>0.36225</code>; its <code>last_safe</code> value consequently remains at the baseline crossover and <code>steps</code> is zero.</p>
+<p>The different lower boundary cannot be inferred merely from whether <code>GENCL</code> appears in a displayed formula. The conservative and intermediate solutions contain <code>GENCL</code>, whereas parsimonious minimization has removed it from both prime implicants through simplifying assumptions. Recalibrating <code>GENCL</code> nevertheless changes set memberships and truth-table assignments and may alter the logical remainders and exclusions entering parsimonious minimization. The parsimonious formula can therefore change even though <code>GENCL</code> is absent from its baseline prime implicants.</p>
+<p>The complete tables—<code>vdem_calib_sets_all</code> and the newly created <code>vdem_calib_sets_all_df</code>—remain available for inspecting the full appraisal.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>vdem_calib_sets_all</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;calib_test&gt;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Outcome test: calibration robustness</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Solution: all</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Monitored solutions: conservative, parsimonious, intermediate</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; which_M: 1</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; i_mode: C1P1</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Test conditions: FREEXP, PARTY, GENCL, JUCON</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Test outcome: CIVSOC</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Anchors tested: E, C, I</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Max steps: 20</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Result</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  solution_type condition type method anchor direction  start last_safe first_failing step_unit steps total_delta pct_raw_range               reason</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative    FREEXP    f direct      E     lower 0.3055   0.03950            NA   0.01330    20    -0.26600     30.090498 run_budget_exhausted</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative    FREEXP    f direct      E     upper 0.3055   0.43850       0.45180   0.01330    10     0.13300     15.045249 feasibility_boundary</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative    FREEXP    f direct      C     lower 0.4385   0.30550       0.29220   0.01330    10    -0.13300     15.045249 feasibility_boundary</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative    FREEXP    f direct      C     upper 0.4385   0.49170       0.50500   0.01330     4     0.05320      6.018100  CON:formula_changed</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative    FREEXP    f direct      I     lower 0.7450   0.47900            NA   0.01330    20    -0.26600     30.090498 run_budget_exhausted</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative    FREEXP    f direct      I     upper 0.7450   0.89130       0.90460   0.01330    11     0.14630     16.549774 feasibility_boundary</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     PARTY    f direct      E     lower 0.2385   0.10200       0.08250   0.01950     7    -0.13650     19.279661 feasibility_boundary</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     PARTY    f direct      E     upper 0.2385   0.47250       0.49200   0.01950    12     0.23400     33.050847 feasibility_boundary</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     PARTY    f direct      C     lower 0.4890   0.39150       0.37200   0.01950     5    -0.09750     13.771186  CON:formula_changed</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     PARTY    f direct      C     upper 0.4890   0.54750       0.56700   0.01950     3     0.05850      8.262712  CON:formula_changed</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     PARTY    f direct      I     lower 0.6840   0.48900       0.46950   0.01950    10    -0.19500     27.542373 feasibility_boundary</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     PARTY    f direct      I     upper 0.6840   0.80100       0.82050   0.01950     6     0.11700     16.525424 feasibility_boundary</span></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     GENCL    f direct      E     lower 0.0900   0.02950      -0.00075   0.03025     2    -0.06050      6.744705 feasibility_boundary</span></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     GENCL    f direct      E     upper 0.0900   0.36225       0.39250   0.03025     9     0.27225     30.351171 feasibility_boundary</span></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     GENCL    f direct      C     lower 0.3925   0.30175       0.27150   0.03025     3    -0.09075     10.117057  CON:formula_changed</span></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     GENCL    f direct      C     upper 0.3925   0.48325       0.51350   0.03025     3     0.09075     10.117057  CON:formula_changed</span></span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     GENCL    f direct      I     lower 0.7155   0.41300       0.38275   0.03025    10    -0.30250     33.723523 feasibility_boundary</span></span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     GENCL    f direct      I     upper 0.7155   0.89700       0.92725   0.03025     6     0.18150     20.234114 feasibility_boundary</span></span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     JUCON    f direct      E     lower 0.1370   0.02525       0.00290   0.02235     5    -0.11175     12.684449 feasibility_boundary</span></span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     JUCON    f direct      E     upper 0.1370   0.33815       0.36050   0.02235     9     0.20115     22.832009 feasibility_boundary</span></span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     JUCON    f direct      C     lower 0.3605   0.29345       0.27110   0.02235     3    -0.06705      7.610670  CON:formula_changed</span></span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     JUCON    f direct      C     upper 0.3605   0.69575       0.71810   0.02235    15     0.33525     38.053348 feasibility_boundary</span></span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     JUCON    f direct      I     lower 0.6965   0.36125       0.33890   0.02235    15    -0.33525     38.053348 feasibility_boundary</span></span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative     JUCON    f direct      I     upper 0.6965   0.87530       0.89765   0.02235     8     0.17880     20.295119 feasibility_boundary</span></span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative    CIVSOC    f direct      E     lower 0.1670   0.07440       0.05125   0.02315     4    -0.09260      9.840595  CON:formula_changed</span></span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative    CIVSOC    f direct      E     upper 0.1670   0.35220       0.37535   0.02315     8     0.18520     19.681190  CON:formula_changed</span></span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative    CIVSOC    f direct      C     lower 0.5275   0.48120       0.45805   0.02315     2    -0.04630      4.920298  CON:formula_changed</span></span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative    CIVSOC    f direct      C     upper 0.5275   0.64325       0.66640   0.02315     5     0.11575     12.300744  CON:formula_changed</span></span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative    CIVSOC    f direct      I     lower 0.7590   0.55065       0.52750   0.02315     9    -0.20835     22.141339 feasibility_boundary</span></span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   conservative    CIVSOC    f direct      I     upper 0.7590   0.94420       0.96735   0.02315     8     0.18520     19.681190 feasibility_boundary</span></span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious    FREEXP    f direct      E     lower 0.3055   0.25230       0.23900   0.01330     4    -0.05320      6.018100  PAR:formula_changed</span></span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious    FREEXP    f direct      E     upper 0.3055   0.43850       0.45180   0.01330    10     0.13300     15.045249 feasibility_boundary</span></span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious    FREEXP    f direct      C     lower 0.4385   0.30550       0.29220   0.01330    10    -0.13300     15.045249 feasibility_boundary</span></span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious    FREEXP    f direct      C     upper 0.4385   0.49170       0.50500   0.01330     4     0.05320      6.018100  PAR:formula_changed</span></span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious    FREEXP    f direct      I     lower 0.7450   0.47900            NA   0.01330    20    -0.26600     30.090498 run_budget_exhausted</span></span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious    FREEXP    f direct      I     upper 0.7450   0.89130       0.90460   0.01330    11     0.14630     16.549774 feasibility_boundary</span></span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     PARTY    f direct      E     lower 0.2385   0.10200       0.08250   0.01950     7    -0.13650     19.279661 feasibility_boundary</span></span>
+<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     PARTY    f direct      E     upper 0.2385   0.47250       0.49200   0.01950    12     0.23400     33.050847 feasibility_boundary</span></span>
+<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     PARTY    f direct      C     lower 0.4890   0.45000       0.43050   0.01950     2    -0.03900      5.508475  PAR:formula_changed</span></span>
+<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     PARTY    f direct      C     upper 0.4890   0.54750       0.56700   0.01950     3     0.05850      8.262712  PAR:formula_changed</span></span>
+<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     PARTY    f direct      I     lower 0.6840   0.48900       0.46950   0.01950    10    -0.19500     27.542373 feasibility_boundary</span></span>
+<span id="cb17-56"><a href="#cb17-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     PARTY    f direct      I     upper 0.6840   0.80100       0.82050   0.01950     6     0.11700     16.525424 feasibility_boundary</span></span>
+<span id="cb17-57"><a href="#cb17-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     GENCL    f direct      E     lower 0.0900   0.02950      -0.00075   0.03025     2    -0.06050      6.744705 feasibility_boundary</span></span>
+<span id="cb17-58"><a href="#cb17-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     GENCL    f direct      E     upper 0.0900   0.36225       0.39250   0.03025     9     0.27225     30.351171 feasibility_boundary</span></span>
+<span id="cb17-59"><a href="#cb17-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     GENCL    f direct      C     lower 0.3925   0.39250       0.36225   0.03025     0     0.00000      0.000000  PAR:formula_changed</span></span>
+<span id="cb17-60"><a href="#cb17-60" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     GENCL    f direct      C     upper 0.3925   0.48325       0.51350   0.03025     3     0.09075     10.117057  PAR:formula_changed</span></span>
+<span id="cb17-61"><a href="#cb17-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     GENCL    f direct      I     lower 0.7155   0.41300       0.38275   0.03025    10    -0.30250     33.723523 feasibility_boundary</span></span>
+<span id="cb17-62"><a href="#cb17-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     GENCL    f direct      I     upper 0.7155   0.89700       0.92725   0.03025     6     0.18150     20.234114 feasibility_boundary</span></span>
+<span id="cb17-63"><a href="#cb17-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     JUCON    f direct      E     lower 0.1370   0.02525       0.00290   0.02235     5    -0.11175     12.684449 feasibility_boundary</span></span>
+<span id="cb17-64"><a href="#cb17-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     JUCON    f direct      E     upper 0.1370   0.33815       0.36050   0.02235     9     0.20115     22.832009 feasibility_boundary</span></span>
+<span id="cb17-65"><a href="#cb17-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     JUCON    f direct      C     lower 0.3605   0.29345       0.27110   0.02235     3    -0.06705      7.610670  PAR:formula_changed</span></span>
+<span id="cb17-66"><a href="#cb17-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     JUCON    f direct      C     upper 0.3605   0.69575       0.71810   0.02235    15     0.33525     38.053348 feasibility_boundary</span></span>
+<span id="cb17-67"><a href="#cb17-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     JUCON    f direct      I     lower 0.6965   0.47300       0.45065   0.02235    10    -0.22350     25.368899  PAR:formula_changed</span></span>
+<span id="cb17-68"><a href="#cb17-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious     JUCON    f direct      I     upper 0.6965   0.87530       0.89765   0.02235     8     0.17880     20.295119 feasibility_boundary</span></span>
+<span id="cb17-69"><a href="#cb17-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious    CIVSOC    f direct      E     lower 0.1670   0.07440       0.05125   0.02315     4    -0.09260      9.840595  PAR:formula_changed</span></span>
+<span id="cb17-70"><a href="#cb17-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious    CIVSOC    f direct      E     upper 0.1670   0.32905       0.35220   0.02315     7     0.16205     17.221041  PAR:formula_changed</span></span>
+<span id="cb17-71"><a href="#cb17-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious    CIVSOC    f direct      C     lower 0.5275   0.48120       0.45805   0.02315     2    -0.04630      4.920298  PAR:formula_changed</span></span>
+<span id="cb17-72"><a href="#cb17-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious    CIVSOC    f direct      C     upper 0.5275   0.52750       0.55065   0.02315     0     0.00000      0.000000  PAR:formula_changed</span></span>
+<span id="cb17-73"><a href="#cb17-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious    CIVSOC    f direct      I     lower 0.7590   0.59695       0.57380   0.02315     7    -0.16205     17.221041  PAR:formula_changed</span></span>
+<span id="cb17-74"><a href="#cb17-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   parsimonious    CIVSOC    f direct      I     upper 0.7590   0.75900       0.78215   0.02315     0     0.00000      0.000000  PAR:formula_changed</span></span>
+<span id="cb17-75"><a href="#cb17-75" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate    FREEXP    f direct      E     lower 0.3055   0.03950            NA   0.01330    20    -0.26600     30.090498 run_budget_exhausted</span></span>
+<span id="cb17-76"><a href="#cb17-76" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate    FREEXP    f direct      E     upper 0.3055   0.43850       0.45180   0.01330    10     0.13300     15.045249 feasibility_boundary</span></span>
+<span id="cb17-77"><a href="#cb17-77" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate    FREEXP    f direct      C     lower 0.4385   0.30550       0.29220   0.01330    10    -0.13300     15.045249 feasibility_boundary</span></span>
+<span id="cb17-78"><a href="#cb17-78" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate    FREEXP    f direct      C     upper 0.4385   0.49170       0.50500   0.01330     4     0.05320      6.018100  INT:formula_changed</span></span>
+<span id="cb17-79"><a href="#cb17-79" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate    FREEXP    f direct      I     lower 0.7450   0.47900            NA   0.01330    20    -0.26600     30.090498 run_budget_exhausted</span></span>
+<span id="cb17-80"><a href="#cb17-80" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate    FREEXP    f direct      I     upper 0.7450   0.89130       0.90460   0.01330    11     0.14630     16.549774 feasibility_boundary</span></span>
+<span id="cb17-81"><a href="#cb17-81" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     PARTY    f direct      E     lower 0.2385   0.10200       0.08250   0.01950     7    -0.13650     19.279661 feasibility_boundary</span></span>
+<span id="cb17-82"><a href="#cb17-82" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     PARTY    f direct      E     upper 0.2385   0.47250       0.49200   0.01950    12     0.23400     33.050847 feasibility_boundary</span></span>
+<span id="cb17-83"><a href="#cb17-83" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     PARTY    f direct      C     lower 0.4890   0.39150       0.37200   0.01950     5    -0.09750     13.771186  INT:formula_changed</span></span>
+<span id="cb17-84"><a href="#cb17-84" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     PARTY    f direct      C     upper 0.4890   0.54750       0.56700   0.01950     3     0.05850      8.262712  INT:formula_changed</span></span>
+<span id="cb17-85"><a href="#cb17-85" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     PARTY    f direct      I     lower 0.6840   0.48900       0.46950   0.01950    10    -0.19500     27.542373 feasibility_boundary</span></span>
+<span id="cb17-86"><a href="#cb17-86" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     PARTY    f direct      I     upper 0.6840   0.80100       0.82050   0.01950     6     0.11700     16.525424 feasibility_boundary</span></span>
+<span id="cb17-87"><a href="#cb17-87" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     GENCL    f direct      E     lower 0.0900   0.02950      -0.00075   0.03025     2    -0.06050      6.744705 feasibility_boundary</span></span>
+<span id="cb17-88"><a href="#cb17-88" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     GENCL    f direct      E     upper 0.0900   0.36225       0.39250   0.03025     9     0.27225     30.351171 feasibility_boundary</span></span>
+<span id="cb17-89"><a href="#cb17-89" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     GENCL    f direct      C     lower 0.3925   0.30175       0.27150   0.03025     3    -0.09075     10.117057  INT:formula_changed</span></span>
+<span id="cb17-90"><a href="#cb17-90" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     GENCL    f direct      C     upper 0.3925   0.48325       0.51350   0.03025     3     0.09075     10.117057  INT:formula_changed</span></span>
+<span id="cb17-91"><a href="#cb17-91" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     GENCL    f direct      I     lower 0.7155   0.41300       0.38275   0.03025    10    -0.30250     33.723523 feasibility_boundary</span></span>
+<span id="cb17-92"><a href="#cb17-92" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     GENCL    f direct      I     upper 0.7155   0.89700       0.92725   0.03025     6     0.18150     20.234114 feasibility_boundary</span></span>
+<span id="cb17-93"><a href="#cb17-93" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     JUCON    f direct      E     lower 0.1370   0.02525       0.00290   0.02235     5    -0.11175     12.684449 feasibility_boundary</span></span>
+<span id="cb17-94"><a href="#cb17-94" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     JUCON    f direct      E     upper 0.1370   0.33815       0.36050   0.02235     9     0.20115     22.832009 feasibility_boundary</span></span>
+<span id="cb17-95"><a href="#cb17-95" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     JUCON    f direct      C     lower 0.3605   0.29345       0.27110   0.02235     3    -0.06705      7.610670  INT:formula_changed</span></span>
+<span id="cb17-96"><a href="#cb17-96" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     JUCON    f direct      C     upper 0.3605   0.69575       0.71810   0.02235    15     0.33525     38.053348 feasibility_boundary</span></span>
+<span id="cb17-97"><a href="#cb17-97" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     JUCON    f direct      I     lower 0.6965   0.36125       0.33890   0.02235    15    -0.33525     38.053348 feasibility_boundary</span></span>
+<span id="cb17-98"><a href="#cb17-98" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate     JUCON    f direct      I     upper 0.6965   0.87530       0.89765   0.02235     8     0.17880     20.295119 feasibility_boundary</span></span>
+<span id="cb17-99"><a href="#cb17-99" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate    CIVSOC    f direct      E     lower 0.1670   0.07440       0.05125   0.02315     4    -0.09260      9.840595  INT:formula_changed</span></span>
+<span id="cb17-100"><a href="#cb17-100" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate    CIVSOC    f direct      E     upper 0.1670   0.35220       0.37535   0.02315     8     0.18520     19.681190  INT:formula_changed</span></span>
+<span id="cb17-101"><a href="#cb17-101" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate    CIVSOC    f direct      C     lower 0.5275   0.48120       0.45805   0.02315     2    -0.04630      4.920298  INT:formula_changed</span></span>
+<span id="cb17-102"><a href="#cb17-102" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate    CIVSOC    f direct      C     upper 0.5275   0.64325       0.66640   0.02315     5     0.11575     12.300744  INT:formula_changed</span></span>
+<span id="cb17-103"><a href="#cb17-103" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate    CIVSOC    f direct      I     lower 0.7590   0.55065       0.52750   0.02315     9    -0.20835     22.141339 feasibility_boundary</span></span>
+<span id="cb17-104"><a href="#cb17-104" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   intermediate    CIVSOC    f direct      I     upper 0.7590   0.94420       0.96735   0.02315     8     0.18520     19.681190 feasibility_boundary</span></span>
+<span id="cb17-105"><a href="#cb17-105" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-106"><a href="#cb17-106" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Summary</span></span>
+<span id="cb17-107"><a href="#cb17-107" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Rows: 90</span></span>
+<span id="cb17-108"><a href="#cb17-108" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Conditions covered: FREEXP, PARTY, GENCL, JUCON, CIVSOC</span></span>
+<span id="cb17-109"><a href="#cb17-109" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Bounds are available in x$bounds.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="plotting-calibration-paths" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="plotting-calibration-paths"><span class="header-section-number">5.4</span> Plotting Calibration Paths</h2>
+<p>Uhum, that is one big table. But fret not: once the numerical boundaries have been examined, the <code>plot()</code> method for a <code>calib_test</code> object can reorganize the same diagnostic evidence for visual inspection. The method requires <code>ggplot2</code> and returns a <code>ggplot</code> without recalibrating any set or repeating any minimization. Its <code>type</code> argument defaults to <code>"interval"</code> and also accepts <code>"heatmap"</code> and <code>"trace"</code>. Because <code>vdem_calib_sets_all</code> contains more than one monitored solution type, <code>solution_type</code> must select the conservative, parsimonious, or intermediate paths to be displayed. <code>"all"</code> is not accepted here because each chart presents one solution type at a time.</p>
+<p>The three views serve different presentation needs. The interval plot retains each anchor’s original measurement scale, the heatmap helps us scan many set–anchor paths at once, and the trace plot shows the tested thresholds in the order in which the diagnostic evaluated them. The controls needed for each view are introduced with the corresponding example below.</p>
+<section id="heatmap" class="level3" data-number="5.4.1">
+<h3 data-number="5.4.1" class="anchored" data-anchor-id="heatmap"><span class="header-section-number">5.4.1</span> Heatmap</h3>
+<p>The heatmap is a useful starting point when several sets and anchors must be compared at once. The following call selects the conservative paths and uses <code>metric = "pct"</code> to express the absolute displacement from <code>start</code> to <code>last_safe</code> along each path as a percentage of the corresponding raw-data range. These percentage displacements are already stored as absolute values, so <code>abs_delta = TRUE</code> only makes that intention explicit here; it does not change the displayed values. Finally, <code>show_text = TRUE</code> prints the percentage inside each cell:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  vdem_calib_sets_all,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">solution_type =</span> <span class="st">"conservative"</span>,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"heatmap"</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">metric =</span> <span class="st">"pct"</span>,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">abs_delta =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_text =</span> <span class="cn">TRUE</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="calibration_files/figure-html/calib-sets-all-heatmap-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A small heatmap value can have more than one meaning. The selected formula may have changed near the baseline, or anchor ordering or the observed raw-data range may have prevented further movement. Similarly, a path ending in <code>run_budget_exhausted</code> reports only the interval already explored, regardless of whether a more distant formula change exists. This means that the heatmap is useful for locating short explored intervals, but the corresponding table record remains necessary for identifying the stopping mechanism.</p>
+<p>In the complete scan, ten conservative paths and ten intermediate paths stop at formula changes, compared with fourteen parsimonious paths. Three parsimonious paths change formula on their first attempted movements: the lower <code>GENCL</code> crossover path and the upper <code>CIVSOC</code> crossover and full-membership paths. These counts describe formula-changing paths among the thirty paths evaluated for each solution type; they do not describe changes in parameters of fit within formula-preserving paths.</p>
+</section>
+<section id="interval-plot" class="level3" data-number="5.4.2">
+<h3 data-number="5.4.2" class="anchored" data-anchor-id="interval-plot"><span class="header-section-number">5.4.2</span> Interval Plot</h3>
+<p>Whereas the percentage heatmap places movements from different raw scales on a common metric, the interval view returns each set to its original threshold scale:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  vdem_calib_sets_all,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">solution_type =</span> <span class="st">"conservative"</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"interval"</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="calibration_files/figure-html/calib-sets-all-interval-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>For every displayed set and anchor with finite lower and upper <code>last_safe</code> values, the segment connects those two observed bounds, while a separate point marks the baseline threshold between or at the edge of them. This form of presentation is useful when you want to expose the raw meaning of the calibration anchors, because, unlike the percentage heatmap, it preserves the original measurement scale and does not invite direct numerical comparison among sets measured in different units.</p>
+</section>
+<section id="trace-plot" class="level3" data-number="5.4.3">
+<h3 data-number="5.4.3" class="anchored" data-anchor-id="trace-plot"><span class="header-section-number">5.4.3</span> Trace Plot</h3>
+<p>The interval view summarizes the two observed bounds but suppresses the sequence of movements that produced them. Below, the trace view restores that sequence for one selected path:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  vdem_calib_sets_all,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">solution_type =</span> <span class="st">"conservative"</span>,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"trace"</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">set =</span> <span class="st">"GENCL"</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">anchor =</span> <span class="st">"C"</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">"lower"</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="calibration_files/figure-html/calib-sets-all-trace-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This trace marks the baseline <code>GENCL</code> crossover of <code>0.39250</code> with a horizontal reference line, then shows the three lower movements that preserve the conservative formula and the formula-changing movement to <code>0.27150</code>. The trace therefore adds the order of the tested thresholds: the reader can see the successive formula-preserving movements before the stopping point. The preservation criterion itself has not changed, as the trace presents the same path recorded in the table instead of calculating a new diagnostic result.</p>
+</section>
+</section>
+<section id="interpretive-boundaries" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="interpretive-boundaries"><span class="header-section-number">5.5</span> Interpretive Boundaries</h2>
+<p>The boundaries reported by <code>calib.test()</code> remain conditional on the one-at-a-time design established at the beginning of the chapter. Their precise location depends on the movement size, the observed raw-data range, anchor ordering, the search budget, the selected solution type, model position, intermediate-branch selection rule, and exclusion rule. They should therefore be read as boundaries found under one stated diagnostic design, never as “properties” of the calibrated set in isolation.</p>
+<p>The reason a path stops is part of that interpretation. A <code>run_budget_exhausted</code> path establishes formula preservation only for the anchor values actually tested; it leaves the location of any more distant formula change unresolved. A <code>feasibility_boundary</code> instead records that the next proposed value would violate the observed raw-data range or the ordering of the calibration anchors. Neither stopping point supplies a substantively warranted calibration threshold.</p>
+<p>Finally, as the narrow diagnostic already showed, preserving the selected Boolean solution formula does not mean preserving its parameters of fit. Recalibration may change the cases’ memberships in the sufficient terms, their union, and the outcome even while the Boolean expression remains identical.</p>
+<p>Conversely, a formula-changing threshold does not establish that the alternative calibration is conceptually plausible or better.</p>
+<blockquote class="blockquote">
+<p>Evaluating that plausibility requires the substantive definition of the set and, in an ideal—if not idealized—QCA scenario, substantive qualitative knowledge of the cases whose memberships change around the proposed anchor.</p>
+</blockquote>
+<p>The next two chapters hold the calibrated memberships fixed and move the truth table’s frequency and inclusion cutoffs. Joint movements across calibration anchors and truth-table cutoffs are taken up later through the alternative-set diagnostic.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-ragin2008redesigning" class="csl-entry" role="listitem">
+Ragin, Charles C. 2008. <em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em>. Chicago: University of Chicago Press.
+</div>
+<div id="ref-schneiderWagemann2012set" class="csl-entry" role="listitem">
+Schneider, Carsten Q., and Claudius Wagemann. 2012. <em>Set-Theoretic Methods for the Social Sciences: A Guide to Qualitative Comparative Analysis</em>. Cambridge: Cambridge University Press. <a href="https://doi.org/10.1017/CBO9781139004244">https://doi.org/10.1017/CBO9781139004244</a>.
+</div>
+</div>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p><code>which_M</code> selects a stored model position, not a particular solution formula. In the perturbation diagnostics, the same position is selected independently from every minimization. With <code>which_M = 1</code>, for example, the function compares the formula stored as M1 at baseline with the formula stored as M1 after each perturbation. It does not search the complete collection of admissible models for the original formula. Consequently, the diagnostic reports a formula change if the baseline formula remains available but moves from M1 to M2; conversely, it reports preservation if M1 remains unchanged while other admissible models change or disappear. This positional rule makes the comparison reproducible, but it provides only a weak treatment of model ambiguity. Whenever a minimization returns several admissible models, the researcher should inspect their prime implicants and report how the choice of <code>which_M</code> limits the formula-preservation claim.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./presenting-the-solutions.html" class="pagination-link" aria-label="Presenting the Solutions">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Presenting the Solutions</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./frequency-cutoff.html" class="pagination-link" aria-label="Frequency Cutoff">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Frequency Cutoff</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

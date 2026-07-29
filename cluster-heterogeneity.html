@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>11&nbsp; Cluster Heterogeneity – A Guide to qcaERT</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./theory-comparison.html" rel="next">
+<link href="./subsample.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-707d8167ce6003fca903bfe2be84ab7f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-10058ab0c6d3387edda5ec9f53ada30a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-5fb265ea9e9be481d23acbcf801e35e9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-10058ab0c6d3387edda5ec9f53ada30a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="vendor/polyfill-service-3.111.0/polyfill.min.js"></script>
+  <script src="vendor/mathjax-3.2.2/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">A Guide to qcaERT</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./cluster-heterogeneity.html">Part IV: Structured Comparison Diagnostics</a></li><li class="breadcrumb-item"><a href="./cluster-heterogeneity.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Cluster Heterogeneity</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./framing-qca-robustness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What is QCA Robustness</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./qcaert-alongside-setmethods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Raison d’être</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./how-to-read-this-book.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to Read This Book</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part I: Reference Analysis</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./reference-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">The Reference Analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./presenting-the-solutions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Presenting the Solutions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part II: Boundary Diagnostics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./calibration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Calibration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./frequency-cutoff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Frequency Cutoff</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./inclusion-cutoff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inclusion Cutoff</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./alternative-set.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Alternative-Set Diagnostics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part III: Case-Composition Diagnostics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./leave-one-out-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Leave-One-Out Diagnostics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./subsample.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Subsample Diagnostics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part IV: Structured Comparison Diagnostics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cluster-heterogeneity.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Cluster Heterogeneity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./theory-comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Theory Comparison</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./conclusion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Conclusion</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#following-one-baseline-set-relation-across-groups" id="toc-following-one-baseline-set-relation-across-groups" class="nav-link active" data-scroll-target="#following-one-baseline-set-relation-across-groups"><span class="header-section-number">11.1</span> Following One Baseline Set Relation Across Groups</a></li>
+  <li><a href="#preparing-a-substantively-meaningful-grouping" id="toc-preparing-a-substantively-meaningful-grouping" class="nav-link" data-scroll-target="#preparing-a-substantively-meaningful-grouping"><span class="header-section-number">11.2</span> Preparing a Substantively Meaningful Grouping</a></li>
+  <li><a href="#evaluating-the-conservative-solution-across-regions" id="toc-evaluating-the-conservative-solution-across-regions" class="nav-link" data-scroll-target="#evaluating-the-conservative-solution-across-regions"><span class="header-section-number">11.3</span> Evaluating the Conservative Solution Across Regions</a>
+  <ul class="collapse">
+  <li><a href="#start-with-the-complete-solution" id="toc-start-with-the-complete-solution" class="nav-link" data-scroll-target="#start-with-the-complete-solution"><span class="header-section-number">11.3.1</span> Start with the Complete Solution</a></li>
+  <li><a href="#inspect-the-comparison-in-a-reusable-table" id="toc-inspect-the-comparison-in-a-reusable-table" class="nav-link" data-scroll-target="#inspect-the-comparison-in-a-reusable-table"><span class="header-section-number">11.3.2</span> Inspect the Comparison in a Reusable Table</a></li>
+  <li><a href="#determine-which-prime-implicant-produces-the-regional-pattern" id="toc-determine-which-prime-implicant-produces-the-regional-pattern" class="nav-link" data-scroll-target="#determine-which-prime-implicant-produces-the-regional-pattern"><span class="header-section-number">11.3.3</span> Determine Which Prime Implicant Produces the Regional Pattern</a></li>
+  </ul></li>
+  <li><a href="#expanding-across-solution-types" id="toc-expanding-across-solution-types" class="nav-link" data-scroll-target="#expanding-across-solution-types"><span class="header-section-number">11.4</span> Expanding Across Solution Types</a></li>
+  <li><a href="#comparing-annual-clusters-and-summarizing-countries" id="toc-comparing-annual-clusters-and-summarizing-countries" class="nav-link" data-scroll-target="#comparing-annual-clusters-and-summarizing-countries"><span class="header-section-number">11.5</span> Comparing Annual Clusters and Summarizing Countries</a></li>
+  <li><a href="#extending-the-analysis-across-years" id="toc-extending-the-analysis-across-years" class="nav-link" data-scroll-target="#extending-the-analysis-across-years"><span class="header-section-number">11.6</span> Extending the Analysis Across Years</a>
+  <ul class="collapse">
+  <li><a href="#building-a-comparable-repeated-case-universe" id="toc-building-a-comparable-repeated-case-universe" class="nav-link" data-scroll-target="#building-a-comparable-repeated-case-universe"><span class="header-section-number">11.6.1</span> Building a Comparable Repeated-Case Universe</a></li>
+  <li><a href="#calibrating-the-panel" id="toc-calibrating-the-panel" class="nav-link" data-scroll-target="#calibrating-the-panel"><span class="header-section-number">11.6.2</span> Calibrating the Panel</a></li>
+  <li><a href="#establishing-the-panel-reference-analysis" id="toc-establishing-the-panel-reference-analysis" class="nav-link" data-scroll-target="#establishing-the-panel-reference-analysis"><span class="header-section-number">11.6.3</span> Establishing the Panel Reference Analysis</a></li>
+  <li><a href="#appraising-annual-clusters" id="toc-appraising-annual-clusters" class="nav-link" data-scroll-target="#appraising-annual-clusters"><span class="header-section-number">11.6.4</span> Appraising Annual Clusters</a></li>
+  <li><a href="#case-specific-summaries-and-where-to-find-them" id="toc-case-specific-summaries-and-where-to-find-them" class="nav-link" data-scroll-target="#case-specific-summaries-and-where-to-find-them"><span class="header-section-number">11.6.5</span> Case-Specific Summaries and Where to Find Them</a></li>
+  </ul></li>
+  <li><a href="#analytical-choices-and-data-requirements" id="toc-analytical-choices-and-data-requirements" class="nav-link" data-scroll-target="#analytical-choices-and-data-requirements"><span class="header-section-number">11.7</span> Analytical Choices and Data Requirements</a>
+  <ul class="collapse">
+  <li><a href="#keeping-the-data-and-truth-table-aligned" id="toc-keeping-the-data-and-truth-table-aligned" class="nav-link" data-scroll-target="#keeping-the-data-and-truth-table-aligned"><span class="header-section-number">11.7.1</span> Keeping the Data and Truth Table Aligned</a></li>
+  <li><a href="#knowing-which-observations-enter-each-calculation" id="toc-knowing-which-observations-enter-each-calculation" class="nav-link" data-scroll-target="#knowing-which-observations-enter-each-calculation"><span class="header-section-number">11.7.2</span> Knowing Which Observations Enter Each Calculation</a></li>
+  <li><a href="#when-a-solution-type-cannot-be-evaluated" id="toc-when-a-solution-type-cannot-be-evaluated" class="nav-link" data-scroll-target="#when-a-solution-type-cannot-be-evaluated"><span class="header-section-number">11.7.3</span> When a Solution Type Cannot Be Evaluated</a></li>
+  </ul></li>
+  <li><a href="#what-the-diagnostic-can-support" id="toc-what-the-diagnostic-can-support" class="nav-link" data-scroll-target="#what-the-diagnostic-can-support"><span class="header-section-number">11.8</span> What the Diagnostic Can Support</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./cluster-heterogeneity.html">Part IV: Structured Comparison Diagnostics</a></li><li class="breadcrumb-item"><a href="./cluster-heterogeneity.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Cluster Heterogeneity</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Cluster Heterogeneity</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Suppose your cases belong to substantively meaningful groups like regions, periods, institutional settings, or some other division warranted by the research design. Does a sufficient relation identified in the (pooled) baseline analysis display similar parameters of fit in each of those groups, or does its empirical performance depend heavily on where it is evaluated?</p>
+<p><code>cluster.test()</code> addresses this empirical dread while holding the baseline solution formula fixed. It does <strong>not</strong> construct and minimize a separate truth table for every cluster. Instead, it minimizes the supplied baseline truth table, obtains the membership of every case in the selected solution formula and its prime implicants, and recalculates their parameters of fit among the cases belonging to each group. This distinction is the heart of the diagnostic, because we are examining the heterogeneity of one pooled set relation, not searching for a different causal recipe inside every region.</p>
+<p>The first application returns to the 66-country V-Dem cross-section and uses a custom regional grouping derived from V-Dem’s finer geographic categories. We will use this country-year panel to compare the baseline relation across five annual clusters and, because the same countries appear in every year, introduces the optional unit-specific output, which calculates one consistency and coverage value from each country’s five observations.</p>
+<section id="following-one-baseline-set-relation-across-groups" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="following-one-baseline-set-relation-across-groups"><span class="header-section-number">11.1</span> Following One Baseline Set Relation Across Groups</h2>
+<p>The supplied baseline truth table remains the analytical starting point, for it fixes the calibrated outcome and condition sets, the frequency and inclusion cutoffs, and the outcome assignments used in minimization. From that pooled analysis, <code>cluster.test()</code> selects the requested solution formula. If the formula contains several prime implicants, the function retains the membership of each prime implicant as well as membership in their fuzzy union.</p>
+<blockquote class="blockquote">
+<p>If you are reading this book, you are probably familiar with (versions of) the consistency and coverage formulas for sufficiency below. Still, let’s go over them once more as a refresher.</p>
+</blockquote>
+<p>Let <span class="math inline">\(S_i\)</span> denote case <span class="math inline">\(i\)</span>’s membership in the complete solution and <span class="math inline">\(Y_i\)</span> its membership in the outcome. The two solution-level parameters of fit are:</p>
+<p><span class="math display">\[
+\operatorname{Cons}_{S \subseteq Y}
+=
+\frac{\sum_i \min(S_i,Y_i)}{\sum_i S_i},
+\qquad
+\operatorname{Cov}_{S \subseteq Y}
+=
+\frac{\sum_i \min(S_i,Y_i)}{\sum_i Y_i}.
+\]</span></p>
+<p>If consistency of sufficiency evaluates the degree to which membership in the solution is contained within outcome membership; solution coverage checks how much outcome membership is covered by the fuzzy union of the sufficient terms. When one prime implicant is evaluated separately, the corresponding coverage is its <strong>raw coverage</strong>: overlap with the other prime implicants is not removed.</p>
+<p>In this chapter, the same quantities are calculated over different collections of observations:</p>
+<ul>
+<li><p><strong>Baseline parameters of fit</strong> use every eligible observation and serve as the common reference.</p></li>
+<li><p><strong>Cluster-specific parameters of fit</strong> restrict the sums in the numerator and denominator to the observations in one cluster, while keeping the baseline expression unchanged.</p></li>
+<li><p><strong>Unit-specific parameters of fit</strong> restrict those sums to all observations belonging to one unit across more than one cluster. The resulting consistency and coverage values summarize that collection of observations; they do not show how the relation changes from one cluster to the next.</p></li>
+</ul>
+<p>The differences reported by the function are always calculated against the baseline parameter. For example, <code>delta_consistency</code> is the cluster- or unit-specific consistency minus pooled baseline consistency. A negative value therefore means that the selected expression is less consistent with sufficiency in that cluster or unit; a positive value means that it is more consistent there.</p>
+<p><code>delta_coverage</code> follows the same direction, but whenever the output reports a <strong>maximum absolute</strong> difference, the sign is removed and the value identifies the largest departure from the pooled fit regardless of direction. The detailed comparison must then be inspected to determine whether that departure is upward or downward.</p>
+<p>As descriptive set-theoretic comparisons, the calculations show how far the consistency and coverage of the fixed baseline solution formula and its prime implicants vary across clusters relative to their pooled values. The researcher can then decide whether particular prime implicants, cases, or group definitions require closer examination.</p>
+<blockquote class="blockquote">
+<p>In other words, we are not estimating panel effects or conducting a statistical test of group differences. We are evaluating whether one baseline sufficient expression displays comparable consistency and coverage across substantively defined empirical scopes. The calculation is numerical, as QCA parameters of fit necessarily are, but its logic, object, and inferential scope remain set-theoretic and descriptive.</p>
+<p>In the following examples, the appraisal neither resolves the dependence created by repeated country-years nor establishes that a particular year or country causes the observed difference. It certainly does not show that a difference of, say, <code>0.20</code> is statistically significant, nor does it warrant generalization beyond the observed case universe.</p>
+</blockquote>
+</section>
+<section id="preparing-a-substantively-meaningful-grouping" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="preparing-a-substantively-meaningful-grouping"><span class="header-section-number">11.2</span> Preparing a Substantively Meaningful Grouping</h2>
+<blockquote class="blockquote">
+<p>It goes without saying that the grouping variable should divide the cases in a way that matters for the research question and design as a whole. But, of course, the CCMs police will not raid your office if you check a few clusters inductively out of curiosity. Who knows? You might even raise some interesting questions for further analysis.</p>
+</blockquote>
+<p>Here, “region” is plausible because the baseline pooled relation may operate against different political histories and institutional environments across broad parts of the world. That does not mean, however, that the first regional variable offered by the dataset must be accepted without examining how it divides the cases actually included in the analysis.</p>
+<p>V-Dem’s <code>region_pol</code> classification combines geographical proximity with regional traditions in democratization research, whereas <code>region_geo</code> uses nineteen categories defined from geographical location alone <span class="citation" data-cites="coppedgeEtAl2025vdemCodebook">(Coppedge et al. <a href="references.html#ref-coppedgeEtAl2025vdemCodebook" role="doc-biblioref">2025</a>)</span>. Both were retained when the reference data were prepared. We will begin by preserving the six <code>region_pol</code> categories exactly as supplied, adding their labels and examining how they divide the 66 countries:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>vdem_cluster_region_pol_labels <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Eastern Europe and Central Asia"</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Latin America and the Caribbean"</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Middle East and North Africa"</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Sub-Saharan Africa"</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Western Europe and North America"</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Asia and Pacific"</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>vdem_cluster_region_data <span class="ot">&lt;-</span> vdem_calib</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>vdem_cluster_region_data<span class="sc">$</span>region_pol <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  vdem_raw<span class="sc">$</span>region_pol,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels =</span> vdem_cluster_region_pol_labels</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(vdem_cluster_region_data<span class="sc">$</span>region_pol)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Eastern Europe and Central Asia  Latin America and the Caribbean     Middle East and North Africa               Sub-Saharan Africa Western Europe and North America                 Asia and Pacific </span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                3                                3                                6                               40                                0                               14</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>In the restricted case universe, the original classification leaves Western Europe and North America empty, assigns 40 of the 66 countries to Sub-Saharan Africa and another 14 to Asia and the Pacific, but only three to Latin America and the Caribbean. The three countries assigned to “Eastern Europe and Central Asia” are Kyrgyzstan, Tajikistan, and Uzbekistan, so the category contains Central Asia but no Eastern Europe at all. Moreover, the fourteen-country Asian and Pacific cluster places South Asian countries such as India and Pakistan alongside North Korea, Southeast Asian countries, and Pacific island states.</p>
+<p><code>region_pol</code> is therefore a poor analytical grouping for this particular population, and merely renaming its categories would conceal the problem because the underlying allocation of countries would remain unchanged.</p>
+<p>Conversely, the finer <code>region_geo</code> classification gives us better building blocks for the present analysis. We can start by combining adjacent categories into seven clusters that fit this case universe more sensibly. The custom <code>region</code> variable below combines Northern Africa with Western Asia; Central Asia with Southern Asia; and Eastern Asia, Southeast Asia, and Oceania. Within Africa, it further distinguishes Western, Central, and Eastern and Southern Africa instead of placing forty countries in one cluster. Central America, South America, and the Caribbean remain together because the income-restricted universe contains only three Latin American countries:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>vdem_cluster_region_data<span class="sc">$</span>region <span class="ot">&lt;-</span> <span class="fu">case_when</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  vdem_cluster_region_data<span class="sc">$</span>region_geo <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">17</span>, <span class="dv">18</span>, <span class="dv">19</span>) <span class="sc">~</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Latin America and the Caribbean"</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  vdem_cluster_region_data<span class="sc">$</span>region_geo <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">10</span>) <span class="sc">~</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Middle East and North Africa"</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  vdem_cluster_region_data<span class="sc">$</span>region_geo <span class="sc">==</span> <span class="dv">6</span> <span class="sc">~</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"West Africa"</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  vdem_cluster_region_data<span class="sc">$</span>region_geo <span class="sc">==</span> <span class="dv">7</span> <span class="sc">~</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Central Africa"</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  vdem_cluster_region_data<span class="sc">$</span>region_geo <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="dv">9</span>) <span class="sc">~</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Eastern and Southern Africa"</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  vdem_cluster_region_data<span class="sc">$</span>region_geo <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">11</span>, <span class="dv">14</span>) <span class="sc">~</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"South and Central Asia"</span>,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  vdem_cluster_region_data<span class="sc">$</span>region_geo <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">13</span>, <span class="dv">15</span>) <span class="sc">~</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"East and Southeast Asia and the Pacific"</span>,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>vdem_cluster_region_data<span class="sc">$</span>region <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  vdem_cluster_region_data<span class="sc">$</span>region,</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Latin America and the Caribbean"</span>,</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Middle East and North Africa"</span>,</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">"West Africa"</span>,</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Central Africa"</span>,</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Eastern and Southern Africa"</span>,</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"South and Central Asia"</span>,</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">"East and Southeast Asia and the Pacific"</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>vdem_cluster_region_cases <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">country =</span> <span class="fu">rownames</span>(vdem_cluster_region_data),</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">region =</span> vdem_cluster_region_data<span class="sc">$</span>region</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>vdem_cluster_region_cases <span class="sc">%&gt;%</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(region) <span class="sc">%&gt;%</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">countries =</span> <span class="fu">paste</span>(country, <span class="at">collapse =</span> <span class="st">", "</span>)</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 7 x 2</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   region                                  countries                                                                                                                                                                             </span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   &lt;fct&gt;                                   &lt;chr&gt;                                                                                                                                                                                 </span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 Latin America and the Caribbean         Bolivia, Honduras, Nicaragua                                                                                                                                                          </span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 Middle East and North Africa            Egypt, Yemen, Lebanon, Jordan, Morocco, Tunisia                                                                                                                                       </span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3 West Africa                             Ghana, Mali, Senegal, Nigeria, Benin, Burkina Faso, Guinea, Ivory Coast, Mauritania, Cape Verde, Liberia, Sierra Leone, The Gambia, Togo                                              </span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4 Central Africa                          Central African Republic, Angola, Cameroon, Chad, Democratic Republic of the Congo, Republic of the Congo, Sao Tome and Principe                                                      </span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 Eastern and Southern Africa             South Sudan, Ethiopia, Kenya, Tanzania, Uganda, Mozambique, Zambia, Zimbabwe, Burundi, Lesotho, Malawi, Djibouti, Madagascar, Rwanda, Somalia, Eswatini, Somaliland, Comoros, Zanzibar</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 South and Central Asia                  Pakistan, India, Bhutan, Nepal, Kyrgyzstan, Sri Lanka, Tajikistan, Uzbekistan                                                                                                         </span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7 East and Southeast Asia and the Pacific Vietnam, North Korea, Philippines, Cambodia, Timor-Leste, Papua New Guinea, Laos, Solomon Islands, Vanuatu</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(vdem_cluster_region_data<span class="sc">$</span>region)</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         Latin America and the Caribbean            Middle East and North Africa                             West Africa                          Central Africa             Eastern and Southern Africa                  South and Central Asia East and Southeast Asia and the Pacific </span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                       3                                       6                                      14                                       7                                      19                                       8                                       9</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The seven analytical clusters contain between three and nineteen countries. Eastern and Southern Africa is the largest, with 19, followed by West Africa with 14. East and Southeast Asia and the Pacific contains nine countries, South and Central Asia contains eight, Central Africa contains seven, and the Middle East and North Africa contains six. Latin America and the Caribbean still contains only three countries because no defensible recoding can conjure additional Latin American cases from this population.</p>
+<blockquote class="blockquote">
+<p>The more even distribution is helpful, but balance alone does not justify a grouping. The advantage of <code>region_geo</code> in this application is that its finer geographic categories allow us to manipulate visibly inappropriate combinations in <code>region_pol</code> while preserving regional aggregates that can be interpreted in relation to our objectives. In this book, the regional analysis remains exploratory; but in a confirmatory application, the grouping and its substantive rationale should be established before inspecting the cluster-specific parameters of fit.</p>
+</blockquote>
+</section>
+<section id="evaluating-the-conservative-solution-across-regions" class="level2" data-number="11.3">
+<h2 data-number="11.3" class="anchored" data-anchor-id="evaluating-the-conservative-solution-across-regions"><span class="header-section-number">11.3</span> Evaluating the Conservative Solution Across Regions</h2>
+<p>We will begin with the conservative solution. The immediate robustness question asks: does the baseline conservative formula display comparable consistency of sufficiency and solution coverage across the seven regions, or is the original result sustained much more strongly in some parts of the case universe than in others?</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>vdem_cluster_region_con <span class="ot">&lt;-</span> <span class="fu">cluster.test</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> vdem_cluster_region_data,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">tt =</span> vdem_tt,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster_id =</span> <span class="st">"region"</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">solution =</span> <span class="st">"conservative"</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>With the complete reference truth table and <code>region</code> as the cluster identifier, the diagnostic calculates the parameters of fit for the selected conservative formula across all 66 countries and then within each regional cluster. The cross-section contains one observation per country, so there is no repeated-unit comparison.</p>
+<section id="start-with-the-complete-solution" class="level3" data-number="11.3.1">
+<h3 data-number="11.3.1" class="anchored" data-anchor-id="start-with-the-complete-solution"><span class="header-section-number">11.3.1</span> Start with the Complete Solution</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>vdem_cluster_region_con</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;cluster_test&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Outcome test: cluster heterogeneity</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Solution: conservative</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Monitored solutions: conservative</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; which_M: 1</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Cluster id: region</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Overview</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  solution_type                         configuration status pooled_cons pooled_cov    worst_consistency_cluster max_delta_cons          worst_coverage_cluster max_delta_cov  within_units</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;            CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL     ok       0.888      0.823 Middle East and North Africa          0.272 Latin America and the Caribbean         0.136 not available</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Cluster details</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                               cluster_id  n consistency delta_consistency coverage delta_coverage</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                           Central Africa  7       0.890            +0.002    0.736         -0.087</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  East and Southeast Asia and the Pacific  9       1.000            +0.112    0.901         +0.078</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              Eastern and Southern Africa 19       0.853            -0.035    0.777         -0.045</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          Latin America and the Caribbean  3       0.976            +0.088    0.958         +0.136</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             Middle East and North Africa  6       0.616            -0.272    0.829         +0.007</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                   South and Central Asia  8       0.823            -0.065    0.891         +0.069</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                              West Africa 14       0.965            +0.077    0.802         -0.021</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Within-unit diagnostics</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Not available: no unit id was supplied.</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Summary</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Configurations evaluated: 1</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Successful configurations: 1</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Non-ok configurations: 0</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Detailed tables: x$results$overview, x$results$clusters</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The selected conservative formula contains two prime implicants:</p>
+<p><span class="math display">\[
+\text{FREEXP} * \text{GENCL} * \text{JUCON}
++
+\text{FREEXP} * \text{PARTY} * \text{GENCL}
+\rightarrow \text{CIVSOC}.
+\]</span></p>
+<p>The baseline consistency of sufficiency is <code>0.888</code>, and across all 66 countries, membership in the fuzzy disjunction of these two prime implicants is therefore highly, although not perfectly, contained within membership in the robust civil society outcome. The baseline solution coverage is also <code>0.823</code>, meaning that the complete formula covers a substantial share of the countries’ total membership in <code>CIVSOC</code>. Every regional comparative difference that follows uses these two pooled values as its reference.</p>
+<p>The regional consistencies of sufficiency range from <code>1</code> in East and Southeast Asia and the Pacific to <code>0.616</code> in the Middle East and North Africa. Latin America and the Caribbean (<code>0.976</code>) and West Africa (<code>0.965</code>) also have consistencies above the baseline value of <code>0.888</code>, while Central Africa is almost identical to it at <code>0.890</code>. The baseline formula is less consistent with sufficiency in Eastern and Southern Africa (<code>0.853</code>) and South and Central Asia (<code>0.823</code>), but the largest negative difference appears in the six-country Middle East and North Africa cluster: <code>0.616 - 0.888 = -0.272</code>.</p>
+<p>For solution coverage, the Middle East and North Africa region scores <code>0.829</code>, only <code>0.007</code> above the baseline coverage of <code>0.823</code>; the formula thus covers approximately the same share of outcome membership as it does in the complete case universe, even though membership in the formula is much less consistently contained within membership in robust civil society. The largest absolute coverage difference instead appears in Latin America and the Caribbean, where solution coverage is <code>0.958</code>, or <code>0.136</code> above the baseline value.</p>
+</section>
+<section id="inspect-the-comparison-in-a-reusable-table" class="level3" data-number="11.3.2">
+<h3 data-number="11.3.2" class="anchored" data-anchor-id="inspect-the-comparison-in-a-reusable-table"><span class="header-section-number">11.3.2</span> Inspect the Comparison in a Reusable Table</h3>
+<p>Printing the object is, as always, more than enough for an initial reading when only one formula is monitored. But if the comparison must be sorted, combined with other diagnostic evidence, or incorporated into a reproducible report, <code>as.data.frame()</code> returns one overview record for each selected solution formula:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>vdem_cluster_region_con_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(vdem_cluster_region_con)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>vdem_cluster_region_con_df</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   solution_type                         configuration components status pooled_consistency pooled_coverage max_abs_cluster_delta_consistency max_abs_cluster_delta_coverage worst_cluster_consistency_id       worst_cluster_coverage_id within_available n_units_repeated</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1           CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL          2     ok          0.8877605        0.822676                         0.2720198                      0.1357548 Middle East and North Africa Latin America and the Caribbean            FALSE                0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Here, the <code>configuration</code> column identifies the minimized conservative formula, the value 2 in <code>components</code> records its two prime implicants, and <code>status</code> “ok” confirms that the formula was successfully evaluated. <code>pooled_consistency</code> and <code>pooled_coverage</code> contain the two baseline parameters just interpreted, while <code>max_abs_cluster_delta_consistency</code> and <code>max_abs_cluster_delta_coverage</code> report the magnitudes of the largest regional departures and the corresponding <code>worst_cluster_*_id</code> columns identify the regions in which those departures occur.</p>
+<p>In this application, the two largest departures belong to different regions. <code>worst_cluster_consistency_id</code> identifies the Middle East and North Africa, where consistency is lower than the baseline value, whereas <code>worst_cluster_coverage_id</code> identifies Latin America and the Caribbean, where coverage is higher. Note that the word <code>worst</code> in those column names requires a little care. The function selects the cluster with the greatest <strong>absolute</strong> difference from the baseline parameter of fit, which could be either a negative or a positive difference. The overview helps locate the largest departure, but the signed regional comparison is still needed to establish its direction. If the typical magnitude across all clusters also matters, <code>diagnostics</code> adds the mean absolute differences to these maxima.</p>
+</section>
+<section id="determine-which-prime-implicant-produces-the-regional-pattern" class="level3" data-number="11.3.3">
+<h3 data-number="11.3.3" class="anchored" data-anchor-id="determine-which-prime-implicant-produces-the-regional-pattern"><span class="header-section-number">11.3.3</span> Determine Which Prime Implicant Produces the Regional Pattern</h3>
+<p>The low consistency of the complete conservative formula in the Middle East and North Africa does not tell us whether its prime implicants display the same weakness. <code>results$clusters</code> supplies the required term-specific evidence:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>vdem_cluster_region_con<span class="sc">$</span>results<span class="sc">$</span>clusters</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    solution_type                         configuration          component                              cluster_id cluster_size consistency  coverage delta_consistency delta_coverage</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1            CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL           solution                          Central Africa            7   0.8898750 0.7356976       0.002114545   -0.086978473</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2            CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL           solution East and Southeast Asia and the Pacific            9   1.0000000 0.9005509       0.112239548    0.077874903</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3            CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL           solution             Eastern and Southern Africa           19   0.8525078 0.7774064      -0.035252610   -0.045269586</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4            CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL           solution         Latin America and the Caribbean            3   0.9755814 0.9584308       0.087820920    0.135754810</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5            CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL           solution            Middle East and North Africa            6   0.6157406 0.8293291      -0.272019803    0.006653067</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6            CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL           solution                  South and Central Asia            8   0.8232238 0.8912377      -0.064536691    0.068561667</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7            CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL           solution                             West Africa           14   0.9650427 0.8018226       0.077282268   -0.020853380</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8            CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL FREEXP*GENCL*JUCON                          Central Africa            7   0.9727140 0.5079881       0.076725803   -0.259138154</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9            CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL FREEXP*GENCL*JUCON East and Southeast Asia and the Pacific            9   1.0000000 0.9005509       0.104011761    0.133424638</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10           CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL FREEXP*GENCL*JUCON             Eastern and Southern Africa           19   0.8730750 0.7195914      -0.022913289   -0.047534870</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 11           CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL FREEXP*GENCL*JUCON         Latin America and the Caribbean            3   1.0000000 0.6520501       0.104011761   -0.115076226</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 12           CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL FREEXP*GENCL*JUCON            Middle East and North Africa            6   0.6157406 0.8293291      -0.280247590    0.062202802</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 13           CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL FREEXP*GENCL*JUCON                  South and Central Asia            8   0.8232238 0.8912377      -0.072764479    0.124111402</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 14           CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL FREEXP*GENCL*JUCON                             West Africa           14   0.9638934 0.7753751       0.067905164    0.008248835</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 15           CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL FREEXP*PARTY*GENCL                          Central Africa            7   0.8545444 0.5339913      -0.058098989   -0.075814260</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 16           CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL FREEXP*PARTY*GENCL East and Southeast Asia and the Pacific            9   1.0000000 0.2758704       0.087356572   -0.333935131</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 17           CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL FREEXP*PARTY*GENCL             Eastern and Southern Africa           19   0.9041596 0.6171358      -0.008483818    0.007330290</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 18           CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL FREEXP*PARTY*GENCL         Latin America and the Caribbean            3   0.9705151 0.7896244       0.057871632    0.179818902</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 19           CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL FREEXP*PARTY*GENCL            Middle East and North Africa            6   0.7243124 0.8293291      -0.188331026    0.219523574</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 20           CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL FREEXP*PARTY*GENCL                  South and Central Asia            8   0.8662834 0.8524996      -0.046360011    0.242694130</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 21           CON FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL FREEXP*PARTY*GENCL                             West Africa           14   1.0000000 0.6137290       0.087356572    0.003923499</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>For each region, records with <code>component = "solution"</code> evaluate the complete formula—the fuzzy union of both prime implicants. The remaining records evaluate <code>FREEXP*GENCL*JUCON</code> and <code>FREEXP*PARTY*GENCL</code> separately. Their consistency values are the consistencies of sufficiency of the individual prime implicants, and their coverage values are raw coverages. The <code>cluster_size</code> column keeps the number of cases contributing to each calculation visible.</p>
+<p>Both prime implicants are less consistent with sufficiency in the Middle East and North Africa than in the pooled data: <code>FREEXP*GENCL*JUCON</code> falls from <code>0.896</code> to <code>0.616</code>, while <code>FREEXP*PARTY*GENCL</code> performs somewhat better within the region at <code>0.724</code> but remains well below its baseline consistency of <code>0.913</code>. Each prime implicant has a regional raw coverage of <code>0.829</code>.</p>
+<p>The complete formula has the same regional consistency and coverage as <code>FREEXP*GENCL*JUCON</code>: <code>0.616</code> and <code>0.829</code>, respectively. The low consistency of the conservative solution in the Middle East and North Africa is therefore most directly reflected in that prime implicant, although the second one also displays a substantial negative consistency difference from its baseline value.</p>
+<p>The printed object and <code>results$clusters</code> usually suffice for substantive interpretation. A detailed appendix or reporting routine can instead use <code>by_cluster</code>, which groups the same evidence by selected formula and adds the maximum and mean absolute departures for the solution and each prime implicant:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>vdem_cluster_region_con<span class="sc">$</span>by_cluster[[</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"conservative:FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL"</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>]]<span class="sc">$</span>heterogeneity</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $solution</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   max_abs_delta_consistency max_abs_delta_coverage mean_abs_delta_consistency mean_abs_delta_coverage</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1                 0.2720198              0.1357548                 0.09303805              0.06313513</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; $terms</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;            component max_abs_delta_consistency max_abs_delta_coverage mean_abs_delta_consistency mean_abs_delta_coverage</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1 FREEXP*GENCL*JUCON                 0.2802476              0.2591382                 0.10408284               0.1071053</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2 FREEXP*PARTY*GENCL                 0.1883310              0.3339351                 0.07626552               0.1518628</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>This is handy when, beyond the largest departure, we also want to report how much each prime implicant varies across the full collection of clusters.</p>
+</section>
+</section>
+<section id="expanding-across-solution-types" class="level2" data-number="11.4">
+<h2 data-number="11.4" class="anchored" data-anchor-id="expanding-across-solution-types"><span class="header-section-number">11.4</span> Expanding Across Solution Types</h2>
+<p>Yes, you know what comes next. We expand our analysis and ask whether the regional heterogeneity is peculiar to the conservative formula or remains when logical remainders contribute to parsimonious and intermediate minimization. To find out, we can evaluate all three solution types over the same regional clusters:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>vdem_cluster_region_all <span class="ot">&lt;-</span> <span class="fu">cluster.test</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> vdem_cluster_region_data,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">tt =</span> vdem_tt,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster_id =</span> <span class="st">"region"</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">solution =</span> <span class="st">"all"</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir.exp =</span> vdem_dir_exp,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">exclude =</span> vdem_excluded_rows,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">which_M =</span> <span class="dv">1</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">i_mode =</span> <span class="st">"C1P1"</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The solution-selection arguments reproduce the reference analysis. In particular, the parsimonious and <code>C1P1</code> intermediate formulas use the previously identified exclusion set. As already stated, nothing is recomputed separately by region because the analytical object remains each solution formula selected from the baseline truth table.</p>
+<p>The overview presents the pooled reference values alongside the largest regional departure for each solution type:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>vdem_cluster_region_all<span class="sc">$</span>results<span class="sc">$</span>overview</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   solution_type                              configuration components status pooled_consistency pooled_coverage max_abs_cluster_delta_consistency max_abs_cluster_delta_coverage worst_cluster_consistency_id       worst_cluster_coverage_id within_available n_units_repeated</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1           CON      FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL          2     ok          0.8877605       0.8226760                         0.2720198                      0.1357548 Middle East and North Africa Latin America and the Caribbean            FALSE                0</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2           PAR                  FREEXP*JUCON+FREEXP*PARTY          2     ok          0.8892891       0.8437745                         0.2575361                      0.1414525 Middle East and North Africa Latin America and the Caribbean            FALSE                0</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3           INT C1P1:FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL          2     ok          0.8877605       0.8226760                         0.2720198                      0.1357548 Middle East and North Africa Latin America and the Caribbean            FALSE                0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The conservative and <code>C1P1</code> intermediate minimizations return the same two prime implicants. They therefore define the same fuzzy union and necessarily have the same baseline and regional parameters of fit in this analysis. The parsimonious formula is a reduced expression:</p>
+<p><span class="math display">\[
+\text{FREEXP} * \text{JUCON}
++
+\text{FREEXP} * \text{PARTY}
+\rightarrow \text{CIVSOC},
+\]</span></p>
+<p>with baseline consistency of sufficiency <code>0.889</code> and solution coverage <code>0.844</code>. All three formulas have their largest absolute consistency differences in the Middle East and North Africa. Those disparities are approximately <code>0.272</code> for the conservative and intermediate formulas, and <code>0.258</code> for the parsimonious one. By contrast, all three largest absolute coverage differences occur in Latin America and the Caribbean: approximately <code>0.136</code> and <code>0.141</code>, respectively. Across all three solution types, the region with the largest consistency departure is therefore not the one with the largest coverage departure.</p>
+<p>To establish the direction of those departures and compare all seven regions, we need the solution-level records:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  vdem_cluster_region_all<span class="sc">$</span>results<span class="sc">$</span>clusters,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  component <span class="sc">==</span> <span class="st">"solution"</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    solution_type                              configuration component                              cluster_id cluster_size consistency  coverage delta_consistency delta_coverage</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1            CON      FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL  solution                          Central Africa            7   0.8898750 0.7356976      0.0021145446   -0.086978473</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2            CON      FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL  solution East and Southeast Asia and the Pacific            9   1.0000000 0.9005509      0.1122395483    0.077874903</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3            CON      FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL  solution             Eastern and Southern Africa           19   0.8525078 0.7774064     -0.0352526096   -0.045269586</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4            CON      FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL  solution         Latin America and the Caribbean            3   0.9755814 0.9584308      0.0878209200    0.135754810</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5            CON      FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL  solution            Middle East and North Africa            6   0.6157406 0.8293291     -0.2720198029    0.006653067</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6            CON      FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL  solution                  South and Central Asia            8   0.8232238 0.8912377     -0.0645366914    0.068561667</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 7            CON      FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL  solution                             West Africa           14   0.9650427 0.8018226      0.0772822676   -0.020853380</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 22           PAR                  FREEXP*JUCON+FREEXP*PARTY  solution                          Central Africa            7   0.8898750 0.7356976      0.0005859397   -0.108076903</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 23           PAR                  FREEXP*JUCON+FREEXP*PARTY  solution East and Southeast Asia and the Pacific            9   1.0000000 0.9336324      0.1107109434    0.089857962</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 24           PAR                  FREEXP*JUCON+FREEXP*PARTY  solution             Eastern and Southern Africa           19   0.8532380 0.7878408     -0.0360510860   -0.055933682</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 25           PAR                  FREEXP*JUCON+FREEXP*PARTY  solution         Latin America and the Caribbean            3   0.9762297 0.9852269      0.0869406640    0.141452490</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 26           PAR                  FREEXP*JUCON+FREEXP*PARTY  solution            Middle East and North Africa            6   0.6317529 0.8878948     -0.2575361146    0.044120335</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 27           PAR                  FREEXP*JUCON+FREEXP*PARTY  solution                  South and Central Asia            8   0.8273373 0.9504369     -0.0619518007    0.106662433</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 28           PAR                  FREEXP*JUCON+FREEXP*PARTY  solution                             West Africa           14   0.9653996 0.8103920      0.0761105206   -0.033382505</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 43           INT C1P1:FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL  solution                          Central Africa            7   0.8898750 0.7356976      0.0021145446   -0.086978473</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 44           INT C1P1:FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL  solution East and Southeast Asia and the Pacific            9   1.0000000 0.9005509      0.1122395483    0.077874903</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 45           INT C1P1:FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL  solution             Eastern and Southern Africa           19   0.8525078 0.7774064     -0.0352526096   -0.045269586</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 46           INT C1P1:FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL  solution         Latin America and the Caribbean            3   0.9755814 0.9584308      0.0878209200    0.135754810</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 47           INT C1P1:FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL  solution            Middle East and North Africa            6   0.6157406 0.8293291     -0.2720198029    0.006653067</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 48           INT C1P1:FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL  solution                  South and Central Asia            8   0.8232238 0.8912377     -0.0645366914    0.068561667</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 49           INT C1P1:FREEXP*GENCL*JUCON+FREEXP*PARTY*GENCL  solution                             West Africa           14   0.9650427 0.8018226      0.0772822676   -0.020853380</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The parsimonious formula’s regional consistency ranges from <code>0.632</code> in the Middle East and North Africa to <code>1</code> in East and Southeast Asia and the Pacific. In the Middle East and North Africa, its consistency is <code>0.258</code> below the baseline value of <code>0.889</code>, while solution coverage is <code>0.888</code>, or <code>0.044</code> above the baseline coverage of <code>0.844</code>.</p>
+</section>
+<section id="comparing-annual-clusters-and-summarizing-countries" class="level2" data-number="11.5">
+<h2 data-number="11.5" class="anchored" data-anchor-id="comparing-annual-clusters-and-summarizing-countries"><span class="header-section-number">11.5</span> Comparing Annual Clusters and Summarizing Countries</h2>
+<p>So far, we have examined whether the reference solution formulas and their prime implicants display similar consistency and coverage across regional clusters in the 2024 cross-section. The panel constructed below instead uses years as clusters. For each year, <code>cluster.test()</code> recalculates consistency and coverage from the 64 country-year observations belonging to that annual cluster and compares them with the corresponding parameters calculated from all 320 country-years.</p>
+<p>Because the same countries recur across all five years, supplying <code>country</code> through <code>unit_id</code> pools each country’s observations and calculates one consistency and one coverage value for the complete 2020-2024 period. The Yemen calculation, for example, uses Yemen in 2020, 2021, 2022, 2023, and 2024, without including observations from any other country. But it does <strong>not</strong> calculate five annual parameters of fit for Yemen or show how Yemen’s memberships evolve over time.</p>
+</section>
+<section id="extending-the-analysis-across-years" class="level2" data-number="11.6">
+<h2 data-number="11.6" class="anchored" data-anchor-id="extending-the-analysis-across-years"><span class="header-section-number">11.6</span> Extending the Analysis Across Years</h2>
+<section id="building-a-comparable-repeated-case-universe" class="level3" data-number="11.6.1">
+<h3 data-number="11.6.1" class="anchored" data-anchor-id="building-a-comparable-repeated-case-universe"><span class="header-section-number">11.6.1</span> Building a Comparable Repeated-Case Universe</h3>
+<p>From this point through the end of the chapter, we will expand the number of observations in the analysis to construct each annual cluster. We begin by building an extended baseline panel that retains the same countries classified as low- or lower-middle-income under the World Bank’s FY2025 categories, but now also covering the period from 2020 through 2024.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>vdem_panel_raw <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"2025 V-Dem-CY-Full+Others-v15.rds"</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    year <span class="sc">%in%</span> <span class="dv">2020</span><span class="sc">:</span><span class="dv">2024</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    country_text_id <span class="sc">%in%</span> wb_fy25_low_lower_middle_income</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">case =</span> <span class="fu">paste</span>(country_name, year, <span class="at">sep =</span> <span class="st">", "</span>),</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">country =</span> country_name,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">year =</span> <span class="fu">factor</span>(year),</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">CIVSOC =</span> v2xcs_ccsi,</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">FREEXP =</span> v2x_freexp_altinf,</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">PARTY =</span> v2xps_party,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">GENCL =</span> v2x_gencl,</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">JUCON =</span> v2x_jucon</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(country) <span class="sc">%&gt;%</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">n</span>() <span class="sc">==</span> <span class="dv">5</span>L,</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">n_distinct</span>(year) <span class="sc">==</span> <span class="dv">5</span>L</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">column_to_rownames</span>(<span class="st">"case"</span>)</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(vdem_panel_raw<span class="sc">$</span>year)</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2020 2021 2022 2023 2024 </span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   64   64   64   64   64</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>After countries with incomplete data are removed, the balanced panel contains 64 countries observed over five years, yielding 320 country-years, each uniquely identified by <code>case</code>. Guinea and Tunisia, unfortunately, were lost because <code>PARTY</code> information was missing for 2021 and 2022, respectively. They will be fondly remembered.</p>
+</section>
+<section id="calibrating-the-panel" class="level3" data-number="11.6.2">
+<h3 data-number="11.6.2" class="anchored" data-anchor-id="calibrating-the-panel"><span class="header-section-number">11.6.2</span> Calibrating the Panel</h3>
+<p>The reference chapter used <code>findTh()</code> to obtain data-guided anchors from the 66 countries observed in 2024. This new panel contains a different case universe and, consequently, a different distribution of raw scores. We therefore estimate another set of anchors from all 320 country-years before calibrating the panel.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>CIVSOC_panel_th <span class="ot">&lt;-</span> <span class="fu">findTh</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  vdem_panel_raw<span class="sc">$</span>CIVSOC,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">groups =</span> <span class="dv">4</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>FREEXP_panel_th <span class="ot">&lt;-</span> <span class="fu">findTh</span>(</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  vdem_panel_raw<span class="sc">$</span>FREEXP,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">groups =</span> <span class="dv">4</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>PARTY_panel_th <span class="ot">&lt;-</span> <span class="fu">findTh</span>(</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  vdem_panel_raw<span class="sc">$</span>PARTY,</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">groups =</span> <span class="dv">4</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>GENCL_panel_th <span class="ot">&lt;-</span> <span class="fu">findTh</span>(</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  vdem_panel_raw<span class="sc">$</span>GENCL,</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">groups =</span> <span class="dv">4</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>JUCON_panel_th <span class="ot">&lt;-</span> <span class="fu">findTh</span>(</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  vdem_panel_raw<span class="sc">$</span>JUCON,</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">groups =</span> <span class="dv">4</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>vdem_panel <span class="ot">&lt;-</span> vdem_panel_raw</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>vdem_panel<span class="sc">$</span>CIVSOC <span class="ot">&lt;-</span> <span class="fu">calibrate</span>(</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>  vdem_panel_raw<span class="sc">$</span>CIVSOC,</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"fuzzy"</span>,</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">thresholds =</span> CIVSOC_panel_th</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>vdem_panel<span class="sc">$</span>FREEXP <span class="ot">&lt;-</span> <span class="fu">calibrate</span>(</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>  vdem_panel_raw<span class="sc">$</span>FREEXP,</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"fuzzy"</span>,</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>  <span class="at">thresholds =</span> FREEXP_panel_th</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>vdem_panel<span class="sc">$</span>PARTY <span class="ot">&lt;-</span> <span class="fu">calibrate</span>(</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>  vdem_panel_raw<span class="sc">$</span>PARTY,</span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"fuzzy"</span>,</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>  <span class="at">thresholds =</span> PARTY_panel_th</span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>vdem_panel<span class="sc">$</span>GENCL <span class="ot">&lt;-</span> <span class="fu">calibrate</span>(</span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>  vdem_panel_raw<span class="sc">$</span>GENCL,</span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"fuzzy"</span>,</span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>  <span class="at">thresholds =</span> GENCL_panel_th</span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>vdem_panel<span class="sc">$</span>JUCON <span class="ot">&lt;-</span> <span class="fu">calibrate</span>(</span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>  vdem_panel_raw<span class="sc">$</span>JUCON,</span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"fuzzy"</span>,</span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>  <span class="at">thresholds =</span> JUCON_panel_th</span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a>vdem_panel_thresholds <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>  <span class="at">CIVSOC =</span> CIVSOC_panel_th,</span>
+<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>  <span class="at">FREEXP =</span> FREEXP_panel_th,</span>
+<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a>  <span class="at">PARTY =</span> PARTY_panel_th,</span>
+<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a>  <span class="at">GENCL =</span> GENCL_panel_th,</span>
+<span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a>  <span class="at">JUCON =</span> JUCON_panel_th</span>
+<span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(vdem_panel_thresholds) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"E"</span>, <span class="st">"C"</span>, <span class="st">"I"</span>)</span>
+<span id="cb12-67"><a href="#cb12-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-68"><a href="#cb12-68" aria-hidden="true" tabindex="-1"></a>vdem_panel_thresholds</span>
+<span id="cb12-69"><a href="#cb12-69" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             E      C      I</span></span>
+<span id="cb12-70"><a href="#cb12-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; CIVSOC 0.2325 0.4900 0.7130</span></span>
+<span id="cb12-71"><a href="#cb12-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; FREEXP 0.2925 0.5075 0.6910</span></span>
+<span id="cb12-72"><a href="#cb12-72" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; PARTY  0.3060 0.4470 0.6280</span></span>
+<span id="cb12-73"><a href="#cb12-73" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; GENCL  0.1970 0.3850 0.6605</span></span>
+<span id="cb12-74"><a href="#cb12-74" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; JUCON  0.1750 0.3955 0.6985</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Each anchor vector is estimated once from the complete panel and then applied unchanged to every country-year. The panel crossovers are <code>0.490</code> for <code>CIVSOC</code>, <code>0.508</code> for <code>FREEXP</code>, <code>0.447</code> for <code>PARTY</code>, <code>0.385</code> for <code>GENCL</code>, and <code>0.396</code> for <code>JUCON</code>.</p>
+</section>
+<section id="establishing-the-panel-reference-analysis" class="level3" data-number="11.6.3">
+<h3 data-number="11.6.3" class="anchored" data-anchor-id="establishing-the-panel-reference-analysis"><span class="header-section-number">11.6.3</span> Establishing the Panel Reference Analysis</h3>
+<p>With the panel calibrated, we can settle the extended baseline analysis. The truth table uses the same four conditions and the inclusion and frequency cutoffs already introduced in the reference chapter, but its empirical configurations, outcome assignments, and logical remainders are determined by the 320 calibrated country-years:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>vdem_panel_tt <span class="ot">&lt;-</span> <span class="fu">truthTable</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  vdem_panel,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome =</span> vdem_outcome,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">conditions =</span> vdem_conds,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">incl.cut =</span> vdem_incl_cut,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">n.cut =</span> vdem_n_cut,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">complete =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">show.cases =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">sort.by =</span> <span class="fu">c</span>(<span class="st">"incl"</span>, <span class="st">"n"</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>vdem_panel_tt</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   OUT: output value</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     n: number of cases in configuration</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  incl: sufficiency inclusion score</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   PRI: proportional reduction in inconsistency</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      FREEXP PARTY GENCL JUCON   OUT    n    incl  PRI  </span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 12     1      0     1     1      1     46   0.970 0.961</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 13     1      1     0     0      1     3    0.940 0.798</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 16     1      1     1     1      1     120  0.935 0.921</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 15     1      1     1     0      1     21   0.897 0.809</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 11     1      0     1     0      1     19   0.876 0.790</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  9     1      0     0     0      0     10   0.794 0.449</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4     0      0     1     1      0     5    0.741 0.274</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  8     0      1     1     1      0     7    0.732 0.246</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3     0      0     1     0      0     23   0.599 0.265</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  7     0      1     1     0      0     21   0.551 0.198</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5     0      1     0     0      0     15   0.390 0.049</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1     0      0     0     0      0     29   0.332 0.031</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  6     0      1     0     1      ?     1    0.724 0.265</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2     0      0     0     1      ?     0      -     -  </span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10     1      0     0     1      ?     0      -     -  </span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 14     1      1     0     1      ?     0      -     -</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Compared with <code>vdem_tt</code>, <code>vdem_panel_tt</code> reorganizes the empirical diversity represented in the truth table rather than merely reducing the number of logical remainders, as one would naively believe. The configurations <code>FREEXP*~PARTY*~GENCL*JUCON</code> and <code>FREEXP*PARTY*~GENCL*JUCON</code> remain empty in both analyses. By contrast, <code>FREEXP*PARTY*~GENCL*~JUCON</code> (<code>OUT = 1</code>) and <code>~FREEXP*PARTY*GENCL*JUCON</code> (<code>OUT = 0</code>), which did not have observations in 2024, now contain three and seven country-years in the panel, respectively.</p>
+<p>More interestingly, <code>~FREEXP*~PARTY*~GENCL*JUCON</code> goes from one case in 2024 to none in the panel, whereas <code>~FREEXP*PARTY*~GENCL*JUCON</code> goes from none to one country-year, but remains below <code>n.cut = 2</code>. Finally, <code>FREEXP*~PARTY*GENCL*~JUCON</code> expands from six cases to nineteen country-years and changes from <code>OUT = 0</code> to <code>OUT = 1</code> as its consistency of sufficiency rises from <code>0.764</code> to <code>0.876</code>.</p>
+<p>The expanded truth table therefore changes both which configurations have sufficient empirical representation and which of them are submitted to minimization as sufficient for <code>CIVSOC</code>.</p>
+<blockquote class="blockquote">
+<p>Now, if only there were an interesting way to visualize our brand-new minimized solutions…</p>
+<p>Well, plot my prime implicants and call me Quine—if this isn’t a great opportunity to use <code>sol.chart()</code>!</p>
+</blockquote>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>vdem_panel_excluded_rows <span class="ot">&lt;-</span> <span class="fu">findRows</span>(vdem_panel_tt, <span class="at">type =</span> <span class="dv">2</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>vdem_panel_con <span class="ot">&lt;-</span> <span class="fu">minimize</span>(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  vdem_panel_tt,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">details =</span> <span class="cn">TRUE</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>vdem_panel_par <span class="ot">&lt;-</span> <span class="fu">minimize</span>(</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  vdem_panel_tt,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">include =</span> <span class="st">"?"</span>,</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">exclude =</span> vdem_panel_excluded_rows,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">details =</span> <span class="cn">TRUE</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>vdem_panel_int <span class="ot">&lt;-</span> <span class="fu">minimize</span>(</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  vdem_panel_tt,</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">include =</span> <span class="st">"?"</span>,</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">exclude =</span> vdem_panel_excluded_rows,</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir.exp =</span> vdem_dir_exp,</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">details =</span> <span class="cn">TRUE</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>vdem_panel_solutions <span class="ot">&lt;-</span> <span class="fu">sol.df</span>(</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">conservative =</span> vdem_panel_con,</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">parsimonious =</span> vdem_panel_par,</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">intermediate =</span> vdem_panel_int,</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">solution =</span> <span class="st">"all"</span>,</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">which_M =</span> <span class="dv">1</span>,</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">i_mode =</span> <span class="st">"C1P1"</span>,</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">include_cases =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">2</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="fu">sol.chart</span>(</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>  vdem_panel_solutions,</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>  <span class="at">conditions =</span> vdem_conds,</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_cases =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_pi_fit =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_solution_fit =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">2</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="cluster-heterogeneity_files/figure-html/cluster-panel-solutions-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The changes in the truth table carry directly into the minimization. In the 2024 reference analysis, the conservative and intermediate solutions coincide at <code>FREEXP*PARTY*GENCL + FREEXP*GENCL*JUCON</code>, while the parsimonious solution reduces these two prime implicants to <code>FREEXP*PARTY + FREEXP*JUCON</code>. In the panel, the assignment of <code>FREEXP*~PARTY*GENCL*~JUCON</code> to <code>OUT = 1</code> allows <code>FREEXP*GENCL</code> to emerge as a conservative prime implicant, because all four configurations covered by that expression are now sufficient for <code>CIVSOC</code>. Meanwhile, the newly observed sufficient configuration <code>FREEXP*PARTY*~GENCL*~JUCON</code> contributes to the second conservative prime implicant, <code>FREEXP*PARTY*~JUCON</code>. The panel conservative solution is consequently <code>FREEXP*GENCL + FREEXP*PARTY*~JUCON</code>, whereas parsimonious and intermediate minimization both return <code>FREEXP*GENCL + FREEXP*PARTY</code>.</p>
+</section>
+<section id="appraising-annual-clusters" class="level3" data-number="11.6.4">
+<h3 data-number="11.6.4" class="anchored" data-anchor-id="appraising-annual-clusters"><span class="header-section-number">11.6.4</span> Appraising Annual Clusters</h3>
+<p>After establishing the extended baseline panel, we can use years as clusters and request the optional country-specific period summaries through <code>unit_id</code>. Let’s keep it short and assess only the conservative solution.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>vdem_cluster_year_con <span class="ot">&lt;-</span> <span class="fu">cluster.test</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> vdem_panel,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">tt =</span> vdem_panel_tt,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster_id =</span> <span class="st">"year"</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">unit_id =</span> <span class="st">"country"</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">solution =</span> <span class="st">"conservative"</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Minimizing the panel truth table produces the already discussed conservative formula:</p>
+<p><span class="math display">\[
+\text{FREEXP} * \text{PARTY} * \sim\text{JUCON}
++
+\text{FREEXP} * \text{GENCL}
+\rightarrow \text{CIVSOC}.
+\]</span> The first prime implicant combines membership in freedom of expression and party institutionalization with nonmembership in judicial constraints, while the second combines membership in freedom of expression and gender equality. <code>cluster.test()</code> then evaluates their fuzzy union across all 320 country-years, thereby establishing the panel consistency and coverage, before recalculating the same parameters of fit among the 64 country-years in each annual cluster. Because <code>unit_id = "country"</code> is also supplied, the function additionally calculates one consistency and coverage value from the five observations belonging to each country.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>vdem_cluster_year_con<span class="sc">$</span>results<span class="sc">$</span>overview</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   solution_type                    configuration components status pooled_consistency pooled_coverage max_abs_cluster_delta_consistency max_abs_cluster_delta_coverage worst_cluster_consistency_id worst_cluster_coverage_id within_available n_units_repeated</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1           CON FREEXP*GENCL+FREEXP*PARTY*~JUCON          2     ok          0.9139045       0.8964822                       0.005500678                      0.0107292                         2023                      2020             TRUE               64</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Across all 320 country-years, the conservative formula has a consistency of sufficiency of <code>0.914</code> and solution coverage of <code>0.896</code>. The five annual calculations are assessed against these baseline fit parameters.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  vdem_cluster_year_con<span class="sc">$</span>results<span class="sc">$</span>clusters,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  component <span class="sc">==</span> <span class="st">"solution"</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   solution_type                    configuration component cluster_id cluster_size consistency  coverage delta_consistency delta_coverage</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1           CON FREEXP*GENCL+FREEXP*PARTY*~JUCON  solution       2020           64   0.9100537 0.9072114      -0.003850809    0.010729198</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2           CON FREEXP*GENCL+FREEXP*PARTY*~JUCON  solution       2021           64   0.9117386 0.8967873      -0.002165928    0.000305098</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3           CON FREEXP*GENCL+FREEXP*PARTY*~JUCON  solution       2022           64   0.9190076 0.8989968       0.005103053    0.002514556</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4           CON FREEXP*GENCL+FREEXP*PARTY*~JUCON  solution       2023           64   0.9194052 0.8914170       0.005500678   -0.005065207</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5           CON FREEXP*GENCL+FREEXP*PARTY*~JUCON  solution       2024           64   0.9092073 0.8875939      -0.004697272   -0.008888345</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Annual consistency ranges from <code>0.909</code> in 2024 to <code>0.919</code> in 2023, and the largest absolute difference from the baseline consistency is approximately <code>0.006</code>. Solution coverage ranges from <code>0.888</code> in 2024 to <code>0.907</code> in 2020, with a largest absolute difference from baseline coverage of approximately <code>0.011</code>. These small departures leave the annual clusters quite similar to the panel baseline.</p>
+</section>
+<section id="case-specific-summaries-and-where-to-find-them" class="level3" data-number="11.6.5">
+<h3 data-number="11.6.5" class="anchored" data-anchor-id="case-specific-summaries-and-where-to-find-them"><span class="header-section-number">11.6.5</span> Case-Specific Summaries and Where to Find Them</h3>
+<p><code>results$units</code> is useful if we want one consistency and coverage value from each country’s five observations, compare those values with the complete-panel parameters of fit, and perform the same calculation for all 64 countries. Sorting the solution-level records by the absolute consistency difference identifies the countries whose five-year summaries depart most strongly from the panel consistency:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>vdem_cluster_country_con_df <span class="ot">&lt;-</span> <span class="fu">subset</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  vdem_cluster_year_con<span class="sc">$</span>results<span class="sc">$</span>units,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  component <span class="sc">==</span> <span class="st">"solution"</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  vdem_cluster_country_con_df[</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">order</span>(</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">abs</span>(vdem_cluster_country_con_df<span class="sc">$</span>delta_consistency),</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">decreasing =</span> <span class="cn">TRUE</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  ],</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="dv">10</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    solution_type                    configuration component               unit_id n_clusters consistency  coverage delta_consistency delta_coverage</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 57           CON FREEXP*GENCL+FREEXP*PARTY*~JUCON  solution                Uganda          5   0.1288406 1.0000000        -0.7850639     0.10351780</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 8            CON FREEXP*GENCL+FREEXP*PARTY*~JUCON  solution              Cameroon          5   0.1710710 1.0000000        -0.7428335     0.10351780</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 42           CON FREEXP*GENCL+FREEXP*PARTY*~JUCON  solution Republic of the Congo          5   0.3477840 1.0000000        -0.5661206     0.10351780</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 11           CON FREEXP*GENCL+FREEXP*PARTY*~JUCON  solution                  Chad          5   0.4154653 1.0000000        -0.4984392     0.10351780</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 33           CON FREEXP*GENCL+FREEXP*PARTY*~JUCON  solution               Morocco          5   0.4924266 1.0000000        -0.4214779     0.10351780</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6            CON FREEXP*GENCL+FREEXP*PARTY*~JUCON  solution               Burundi          5   0.5151555 0.8272051        -0.3987490    -0.06927714</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 51           CON FREEXP*GENCL+FREEXP*PARTY*~JUCON  solution             Sri Lanka          5   0.7322004 1.0000000        -0.1817041     0.10351780</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 20           CON FREEXP*GENCL+FREEXP*PARTY*~JUCON  solution                 India          5   0.7463740 0.9990863        -0.1675306     0.10260412</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 24           CON FREEXP*GENCL+FREEXP*PARTY*~JUCON  solution            Kyrgyzstan          5   0.7672313 1.0000000        -0.1466733     0.10351780</span></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 49           CON FREEXP*GENCL+FREEXP*PARTY*~JUCON  solution            Somaliland          5   0.7810427 1.0000000        -0.1328618     0.10351780</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>All 64 countries appear in all five years, so the table contains 64 solution-level unit summaries with <code>n_clusters = 5</code>. For each country, the numerator and denominator of consistency and coverage are calculated from that country’s five pairs of solution and outcome memberships. With a consistency of <code>0.129</code>, Uganda has the largest negative difference from the panel consistency of <code>0.914</code>. Cameroon follows with consistency <code>0.171</code>, while the Republic of the Congo and Chad have consistencies of approximately <code>0.348</code> and <code>0.415</code>.</p>
+<p>Uganda’s country-specific coverage is <code>1</code>. When its five observations are combined, the formula therefore covers the entirety of Uganda’s membership in <code>CIVSOC</code>, while membership in the formula extends far beyond outcome membership, producing the low consistency of sufficiency.</p>
+<p>Neither value identifies which years produce the discrepancy. To inspect a country’s evolution, use the annual prime-implicant memberships in <code>vdem_panel_con$pims</code> together with the corresponding annual <code>CIVSOC</code> memberships.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>vdem_panel_memberships_con <span class="ot">&lt;-</span> vdem_panel_con<span class="sc">$</span>pims</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>vdem_panel_memberships_con<span class="sc">$</span>solution <span class="ot">&lt;-</span> <span class="fu">pmax</span>(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  vdem_panel_memberships_con[[<span class="st">"FREEXP*GENCL"</span>]],</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  vdem_panel_memberships_con[[<span class="st">"FREEXP*PARTY*~JUCON"</span>]]</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>vdem_panel_memberships_con<span class="sc">$</span>CIVSOC <span class="ot">&lt;-</span> vdem_panel<span class="sc">$</span>CIVSOC</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>vdem_panel_memberships_con<span class="sc">$</span>solution_excess <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  vdem_panel_memberships_con,</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pmax</span>(solution <span class="sc">-</span> CIVSOC, <span class="dv">0</span>)</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>vdem_panel_memberships_con<span class="sc">$</span>case <span class="ot">&lt;-</span> <span class="fu">rownames</span>(vdem_panel_memberships_con)</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a><span class="fu">subset</span>(</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>  vdem_panel_memberships_con,</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">startsWith</span>(case, <span class="st">"Uganda,"</span>)</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              FREEXP*GENCL FREEXP*PARTY*~JUCON  solution     CIVSOC solution_excess         case</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Uganda, 2020    0.8412113           0.1628166 0.8412113 0.07882182       0.7623895 Uganda, 2020</span></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Uganda, 2021    0.7619380           0.2419863 0.7619380 0.07717721       0.6847608 Uganda, 2021</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Uganda, 2022    0.6008895           0.1391876 0.6008895 0.07717721       0.5237123 Uganda, 2022</span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Uganda, 2023    0.6161779           0.1279475 0.6161779 0.05912253       0.5570554 Uganda, 2023</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Uganda, 2024    0.5539444           0.1765000 0.5539444 0.14243024       0.4115142 Uganda, 2024</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Use <code>results$units</code> only when the compact five-year summary and its difference from the complete-panel parameters of fit answer the research question.</p>
+</section>
+</section>
+<section id="analytical-choices-and-data-requirements" class="level2" data-number="11.7">
+<h2 data-number="11.7" class="anchored" data-anchor-id="analytical-choices-and-data-requirements"><span class="header-section-number">11.7</span> Analytical Choices and Data Requirements</h2>
+<p>The examples have now introduced the ordinary workflow: select a (substantively defensible) grouping, evaluate the baseline formula within each cluster, inspect the complete solution before its prime implicants, and request country-specific period summaries only when one aggregated pair of consistency and coverage values for each country is useful. Before leaving the function, we should make explicit how <code>cluster.test()</code> connects the supplied objects and determines which observations enter each calculation.</p>
+<section id="keeping-the-data-and-truth-table-aligned" class="level3" data-number="11.7.1">
+<h3 data-number="11.7.1" class="anchored" data-anchor-id="keeping-the-data-and-truth-table-aligned"><span class="header-section-number">11.7.1</span> Keeping the Data and Truth Table Aligned</h3>
+<p><code>cluster.test()</code> uses <code>tt</code> to obtain the calibrated condition and outcome memberships and to derive the baseline solution formula and its prime implicants, while <code>data</code> supplies the cluster identifier and, when requested, the unit identifier attached to each observation.</p>
+<p>The function must therefore be able to pair every membership record in <code>tt</code> with the correct identifiers in <code>data</code>, and both objects must contain the same observations in the same order.</p>
+<p><code>cluster.test()</code> checks informative row names for exact identity and order; when both objects have only the default row names <code>1, 2, 3, ...</code>, their alignment is necessarily positional. Independently sorting <code>data</code> after constructing the truth table would then attach cluster and unit identifiers to the wrong membership records. If the observations must be reordered, do so before constructing the truth table and keep that order unchanged when calling <code>cluster.test()</code>.</p>
+</section>
+<section id="knowing-which-observations-enter-each-calculation" class="level3" data-number="11.7.2">
+<h3 data-number="11.7.2" class="anchored" data-anchor-id="knowing-which-observations-enter-each-calculation"><span class="header-section-number">11.7.2</span> Knowing Which Observations Enter Each Calculation</h3>
+<p>After the calibrated condition and outcome memberships have been handled during truth-table construction, we must check whether the observations can be assigned to the clusters and repeated units used by the diagnostic. <code>cluster_id</code> must contain at least two distinct nonmissing clusters. An observation without a cluster identifier can contribute to the complete-panel parameters of fit, but not to a cluster-specific calculation.</p>
+<p>When unit_id is supplied, each unit must appear in more than one cluster, and each unit–cluster combination may identify only one observation. In the panel example, each country must therefore be observed in at least two years and may have only one record per year. cluster_size and n_clusters report how many observations and clusters support the corresponding parameters of fit.</p>
+</section>
+<section id="when-a-solution-type-cannot-be-evaluated" class="level3" data-number="11.7.3">
+<h3 data-number="11.7.3" class="anchored" data-anchor-id="when-a-solution-type-cannot-be-evaluated"><span class="header-section-number">11.7.3</span> When a Solution Type Cannot Be Evaluated</h3>
+<p>This final issue arises only when minimization fails for one of the selected solution types or when the function cannot calculate membership in its solution formula and prime implicants. The affected solution type then receives a non-<code>ok</code> <code>status</code> in the overview, while its record in <code>diagnostics</code> identifies the stage and reason through <code>error_source</code> and <code>error_message</code>.</p>
+<p>A failure for one solution type does not erase the cluster-specific evidence obtained for the others. It does, however, mean that no comparison is available for the failed conservative, parsimonious, or intermediate formula. The failure should therefore be reported separately rather than interpreted as either similar or different parameters of fit across clusters.</p>
+</section>
+</section>
+<section id="what-the-diagnostic-can-support" class="level2" data-number="11.8">
+<h2 data-number="11.8" class="anchored" data-anchor-id="what-the-diagnostic-can-support"><span class="header-section-number">11.8</span> What the Diagnostic Can Support</h2>
+<p><code>cluster.test()</code> provides descriptive evidence about whether a baseline solution formula and its prime implicants display similar consistency and coverage across groups. When repeated units are supplied, it can also summarize consistency and coverage over all observations belonging to each unit. These unit-specific parameters pool the repeated observations and do not show change from one cluster to another. The function does not estimate cluster-specific formulas, test whether differences in parameters of fit are statistically significant, adjust the QCA analysis for dependence among repeated observations, or establish that cluster membership causes the observed variation.</p>
+<p>Using the custom seven-cluster grouping, the regional analysis found the lowest consistency of sufficiency for all three baseline solution formulas in the Middle East and North Africa. For the conservative formula, regional consistency was <code>0.616</code>, compared with baseline consistency of <code>0.888</code>, while regional solution coverage remained close to its baseline counterpart. Prime-implicant-specific evidence then showed that <code>FREEXP*GENCL*JUCON</code> had a regional consistency of <code>0.616</code> and <code>FREEXP*PARTY*GENCL</code> had a regional consistency of <code>0.724</code>, both substantially below their baseline values. In the panel analysis, the conservative formula displayed almost identical consistency and coverage across the five annual clusters. The optional country-specific output then summarized the same parameters over each country’s five observations, without separating the annual evidence.</p>
+<p>A report should therefore identify the exact solution formula or prime implicant being evaluated, the grouping variable, the baseline consistency and coverage, the cluster- or unit-specific parameters of fit, the signed differences between them, and the number of observations underlying the comparison. Those details show where the sufficient relation varies, in which direction, by how much, and on what empirical basis.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-coppedgeEtAl2025vdemCodebook" class="csl-entry" role="listitem">
+Coppedge, Michael, John Gerring, Carl Henrik Knutsen, Staffan I. Lindberg, Jan Teorell, David Altman, Fabio Angiolillo, et al. 2025. <em>V-Dem Codebook V15</em>. Varieties of Democracy Project. <a href="https://www.v-dem.net/documents/55/codebook.pdf">https://www.v-dem.net/documents/55/codebook.pdf</a>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./subsample.html" class="pagination-link" aria-label="Subsample Diagnostics">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Subsample Diagnostics</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./theory-comparison.html" class="pagination-link" aria-label="Theory Comparison">
+        <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Theory Comparison</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

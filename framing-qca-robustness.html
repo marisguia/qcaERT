@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>1&nbsp; What is QCA Robustness – A Guide to qcaERT</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./qcaert-alongside-setmethods.html" rel="next">
+<link href="./index.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-707d8167ce6003fca903bfe2be84ab7f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-10058ab0c6d3387edda5ec9f53ada30a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-5fb265ea9e9be481d23acbcf801e35e9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-10058ab0c6d3387edda5ec9f53ada30a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">A Guide to qcaERT</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./framing-qca-robustness.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What is QCA Robustness</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./framing-qca-robustness.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What is QCA Robustness</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./qcaert-alongside-setmethods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Raison d’être</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./how-to-read-this-book.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to Read This Book</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part I: Reference Analysis</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./reference-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">The Reference Analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./presenting-the-solutions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Presenting the Solutions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part II: Boundary Diagnostics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./calibration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Calibration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./frequency-cutoff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Frequency Cutoff</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./inclusion-cutoff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inclusion Cutoff</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./alternative-set.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Alternative-Set Diagnostics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part III: Case-Composition Diagnostics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./leave-one-out-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Leave-One-Out Diagnostics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./subsample.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Subsample Diagnostics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part IV: Structured Comparison Diagnostics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cluster-heterogeneity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Cluster Heterogeneity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./theory-comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Theory Comparison</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./conclusion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Conclusion</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#establish-the-comparator" id="toc-establish-the-comparator" class="nav-link active" data-scroll-target="#establish-the-comparator"><span class="header-section-number">1.1</span> Establish the Comparator</a></li>
+  <li><a href="#name-the-part-of-the-analysis-that-changes" id="toc-name-the-part-of-the-analysis-that-changes" class="nav-link" data-scroll-target="#name-the-part-of-the-analysis-that-changes"><span class="header-section-number">1.2</span> Name the Part of the Analysis That Changes</a></li>
+  <li><a href="#name-what-must-be-preserved" id="toc-name-what-must-be-preserved" class="nav-link" data-scroll-target="#name-what-must-be-preserved"><span class="header-section-number">1.3</span> Name What Must Be Preserved</a>
+  <ul class="collapse">
+  <li><a href="#the-selected-solution-formula" id="toc-the-selected-solution-formula" class="nav-link" data-scroll-target="#the-selected-solution-formula"><span class="header-section-number">1.3.1</span> The selected solution formula</a></li>
+  <li><a href="#solution-consistency-pri-and-coverage" id="toc-solution-consistency-pri-and-coverage" class="nav-link" data-scroll-target="#solution-consistency-pri-and-coverage"><span class="header-section-number">1.3.2</span> Solution consistency, PRI, and coverage</a></li>
+  </ul></li>
+  <li><a href="#keep-research-design-attached-to-the-diagnostic" id="toc-keep-research-design-attached-to-the-diagnostic" class="nav-link" data-scroll-target="#keep-research-design-attached-to-the-diagnostic"><span class="header-section-number">1.4</span> Keep Research Design Attached to the Diagnostic</a></li>
+  <li><a href="#report-the-denominator-not-only-the-rate" id="toc-report-the-denominator-not-only-the-rate" class="nav-link" data-scroll-target="#report-the-denominator-not-only-the-rate"><span class="header-section-number">1.5</span> Report the Denominator, Not Only the Rate</a></li>
+  <li><a href="#follow-the-source-of-uncertainty-through-the-book" id="toc-follow-the-source-of-uncertainty-through-the-book" class="nav-link" data-scroll-target="#follow-the-source-of-uncertainty-through-the-book"><span class="header-section-number">1.6</span> Follow the Source of Uncertainty Through the Book</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What is QCA Robustness</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Before interpreting a perturbation-based robustness diagnostic, a researcher using QCA should be able to complete two sentences:</p>
+<blockquote class="blockquote">
+<p>The reference result was tested against changes in <strong>_____</strong>.</p>
+<p>It was considered preserved when <strong>_____</strong> remained unchanged or sufficiently similar.</p>
+</blockquote>
+<p>The first blank identifies the analytical decision being varied. The second sheds light on the QCA object or relation used to judge preservation. Unless both are stated, calling a result “robust” tells us neither what the analysis withstood nor what, exactly, survived.</p>
+<p>Exceptionally, the cluster and theory comparisons introduced later do not perturb one analytical decision along such a path. For those diagnostics, the corresponding questions are which sufficient relation is being evaluated within which groups, or which condition-set specifications are being compared.</p>
+<section id="establish-the-comparator" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="establish-the-comparator"><span class="header-section-number">1.1</span> Establish the Comparator</h2>
+<p>Most diagnostics in this book begin with a baseline reference analysis that establishes the population of cases, the calibrated outcome and condition sets, the inclusion and frequency cutoffs used to construct the truth table, the treatment of logical remainders, and the conservative, parsimonious, or intermediate solution formula selected for comparison. Although the examples do not produce multiple admissible models or intermediate branches, we always specify, for didactic purposes, which model position or branch will be followed when appraising robustness.</p>
+<p>Oana and Schneider refer to the carefully constructed solution selected for substantive interpretation as the <strong>Initial Solution</strong> <span class="citation" data-cites="oanaschneider2024">(<a href="references.html#ref-oanaschneider2024" role="doc-biblioref">Oana and Schneider 2024</a>)</span>. This book usually speaks more broadly of the <strong>reference</strong> or <strong>baseline</strong> analysis because <strong><em>qcaERT</em></strong> often reconstructs more than the solution formula itself. Depending on the diagnostic, the comparison may also require the original calibration anchors, calibrated memberships, truth table, exclusions, parameters of fit, and case set.</p>
+<p>Again, the theory-comparison diagnostic is the exception. <code>theory.test()</code> does not perturb one reference formula, but constructs a separate truth table and solution for each theoretically motivated condition set, then compares those analyses with one another. The common outcome, cases, truth-table cutoffs, solution-selection rules, and other shared settings make the comparison coherent, but none of the condition-set specifications is automatically entitled to serve as the reference.</p>
+<p>The comparison must also involve an alternative worth considering. A calibration anchor can be moved to a mathematically feasible but conceptually indefensible value, just as a case can be removed even though the research question clearly places it inside the reference population. Either operation may change the solution formula, but neither automatically supplies meaningful evidence against the reference analysis. Skaaning’s early robustness exercises consequently focused on <strong>reasonable</strong> alternative calibration thresholds <span class="citation" data-cites="skaaning2011">(<a href="references.html#ref-skaaning2011" role="doc-biblioref">Skaaning 2011</a>)</span>, while Oana and Schneider distinguish empirically observed sensitivity ranges from the substantively plausible alternatives that should compose a harder robustness test <span class="citation" data-cites="oanaschneider2024">(<a href="references.html#ref-oanaschneider2024" role="doc-biblioref">Oana and Schneider 2024</a>)</span>.</p>
+<blockquote class="blockquote">
+<p>Throwing every diagnostic at the wall and hoping the resulting heap looks reassuring is not a robustness strategy. The research design must tell us which decisions are genuinely uncertain, which alternatives remain defensible, and why the selected comparison bears on the claim being made.</p>
+</blockquote>
+</section>
+<section id="name-the-part-of-the-analysis-that-changes" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="name-the-part-of-the-analysis-that-changes"><span class="header-section-number">1.2</span> Name the Part of the Analysis That Changes</h2>
+<p>Calibration, truth-table construction, case composition, and condition selection all disturb a different QCA object. They enter the workflow at different stages and can reach the solution formula through different mechanisms:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Analytical decision varied</th>
+<th style="text-align: left;">What changes first</th>
+<th style="text-align: left;">What may change afterward</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Qualitative calibration anchor</td>
+<td style="text-align: left;">Cases’ memberships in one condition or in the outcome</td>
+<td style="text-align: left;">Membership in truth-table configurations, consistency of sufficiency, PRI, sufficiency (<code>OUT</code>) assignments, and the minimized solution formula</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Frequency cutoff</td>
+<td style="text-align: left;">The empirical frequency required for treating a truth-table configuration as observed</td>
+<td style="text-align: left;">The distinction between observed configurations and logical remainders, followed by the minimized solution formula</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Inclusion cutoff</td>
+<td style="text-align: left;">The consistency requirement for assigning qualifying truth-table configurations to the outcome</td>
+<td style="text-align: left;"><code>OUT</code> assignments and the configurations submitted to minimization as sufficient for the outcome</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Case composition</td>
+<td style="text-align: left;">The cases contributing to configuration frequencies, consistency of sufficiency, PRI, and outcome assignments</td>
+<td style="text-align: left;">The truth table, logical remainders, and solution formula; if calibration is recomputed, the qualitative anchors and calibrated memberships may change as well</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Condition set</td>
+<td style="text-align: left;">The number and meaning of the logically possible configurations</td>
+<td style="text-align: left;">The observed configurations, logical remainders, simplifying assumptions, prime implicants, and complete solution formula</td>
+</tr>
+</tbody>
+</table>
+<p>As you can see, a formula change should be interpreted in light of the analytical operation that produced it. If raising the frequency cutoff turns a previously observed configuration into a logical remainder, the resulting formula change does not mean the same thing as one produced by removing a case. The former changes the empirical-representation requirement imposed on the existing configurational space; the latter rearranges the empirical information within it.</p>
+<p>The distinction between one-at-a-time and joint changes is equally important. A calibration, frequency-cutoff, or inclusion-cutoff sensitivity path changes one analytical decision while holding the others fixed. An alternative-set appraisal can instead combine changes to several calibration anchors with different inclusion and frequency cutoffs. The sensitivity path identifies a local formula-preservation boundary for a single analytical decision, whereas the alternative-set appraisal examines what happens across multidimensional alternative specifications.</p>
+</section>
+<section id="name-what-must-be-preserved" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="name-what-must-be-preserved"><span class="header-section-number">1.3</span> Name What Must Be Preserved</h2>
+<p>Once the analytical change has been identified, the researcher must decide which evidence will be used to evaluate it. Exact preservation of the solution formula, differences in its parameters of fit, similarity between the complete-solution memberships produced by two formulas, and changes in the cases’ set-theoretic positions are related questions, but they are not substitutes for one another <span class="citation" data-cites="wagemannSchneider2015transparency oanaschneider2024">(<a href="references.html#ref-wagemannSchneider2015transparency" role="doc-biblioref">Wagemann and Schneider 2015</a>; <a href="references.html#ref-oanaschneider2024" role="doc-biblioref">Oana and Schneider 2024</a>)</span>.</p>
+<section id="the-selected-solution-formula" class="level3" data-number="1.3.1">
+<h3 data-number="1.3.1" class="anchored" data-anchor-id="the-selected-solution-formula"><span class="header-section-number">1.3.1</span> The selected solution formula</h3>
+<p>Formula preservation focuses on whether the selected Boolean expression remains identical after the analytical change. The comparison must refer to the same solution type and, when relevant, the same selected model position and intermediate branch. The boundary diagnostics use this criterion to identify the last tested value that reproduces the reference formula and the first tested value that changes it or otherwise prevents the selected result from being compared.</p>
+<blockquote class="blockquote">
+<p>“Formula preservation” is exact and easy to state, but it is actually rather tricky. Two different formulas can produce highly similar complete-solution memberships across the cases, while an identical formula can acquire different parameters of fit after the cases’ calibrated memberships or the composition of the case set changes.</p>
+</blockquote>
+</section>
+<section id="solution-consistency-pri-and-coverage" class="level3" data-number="1.3.2">
+<h3 data-number="1.3.2" class="anchored" data-anchor-id="solution-consistency-pri-and-coverage"><span class="header-section-number">1.3.2</span> Solution consistency, PRI, and coverage</h3>
+<p>When the same solution formula is reproduced, its relation with the calibrated outcome may nevertheless change because the cases or their calibrated memberships have as well. Solution consistency evaluates the degree to which membership in the complete solution is a subset of membership in the outcome. Solution PRI penalizes membership in the solution that is shared with both the outcome and its negation. And solution coverage evaluates how much membership in the outcome is covered by the union of the solution’s sufficient terms.</p>
+<p>The meaning of a parameter comparison depends on the diagnostic. For instance, <code>altset.test()</code> compares solution consistency, PRI, and coverage only when the reference analysis and an alternative specification contain the same selected formula key—its fit comparison is therefore like for like. <code>loo.test()</code> and <code>subsample.test()</code>, by contrast, compare the parameters attached to the selected solution type and model position in the complete-data and reduced-data analyses whenever both results are available. Those parameters can be compared even when the corresponding formulas differ. In that situation, the reported difference describes how the parameter of fit changes across two different sufficient sets; it does not isolate a change in the fit of the reference formula itself.</p>
+<p>Structured comparisons require a different interpretation. On the one hand, <code>cluster.test()</code> holds a selected solution formula or prime implicant fixed and recalculates its consistency and coverage within each cluster. On the other hand, <code>theory.test()</code> constructs a separate truth table and performs a separate minimization for each condition-set specification, so differences in solution consistency, PRI, or coverage refer to independently obtained solutions. The numerical columns may retain familiar names throughout the package, but the analytical comparison those numbers represent must still be made explicit.</p>
+</section>
+</section>
+<section id="keep-research-design-attached-to-the-diagnostic" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="keep-research-design-attached-to-the-diagnostic"><span class="header-section-number">1.4</span> Keep Research Design Attached to the Diagnostic</h2>
+<p>Thomann and Maggetti distinguish QCA as a formal data-analysis technique from QCA as a broader research approach <span class="citation" data-cites="thomannmaggetti2020">(<a href="references.html#ref-thomannmaggetti2020" role="doc-biblioref">Thomann and Maggetti 2020</a>)</span>. Calibration, truth-table construction, tests of necessity and sufficiency, and logical minimization belong to the technique; as concept formation, case and condition selection, scope conditions, the use of case knowledge, and the movement between theory and evidence belong to the broader research approach.</p>
+<p>This distinction does not prohibit robustness appraisals involving cases or conditions. It tells us that such appraisals reach further into the research design than moving an inclusion cutoff within an otherwise fixed analysis. Deleting a case may change configuration frequencies, the available logical remainders and the parameters of fit; replacing a condition changes the theoretical specification and reconstructs the entire configurational space. Neither operation should be interpreted as a generic stress test detached from the reasons for selecting the original cases or conditions.</p>
+<p>The evidentiary value of a diagnostic also depends on whether the study is case-oriented or condition-oriented, whether it emphasizes <strong>substantive theoretical interpretability</strong> or <strong>redundancy-free solutions</strong>, and whether its reasoning is primarily exploratory or deductive <span class="citation" data-cites="thomannmaggetti2020">(<a href="references.html#ref-thomannmaggetti2020" role="doc-biblioref">Thomann and Maggetti 2020</a>)</span>. For example, repeatedly changing case composition may be informative in a condition-oriented analysis whose larger case set contains genuine uncertainty about individual observations or delimitations. In a small-N, case-oriented study with carefully justified scope conditions, mechanically deleting every case does not acquire substantive meaning merely because the operation can be automated. The diagnostic must remain connected to the study’s case-selection rationale and intended inference.</p>
+</section>
+<section id="report-the-denominator-not-only-the-rate" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="report-the-denominator-not-only-the-rate"><span class="header-section-number">1.5</span> Report the Denominator, Not Only the Rate</h2>
+<p>Every rate has a numerator and a denominator. While the numerator counts the comparable analyses that meet the preservation criterion, the denominator enumerates all analyses in which that criterion could actually be evaluated. A formula-preservation rate of 75%, for example, may mean that 60 of 80 comparable analyses preserve the baseline formula—not that 75 of all 100 attempted analyses do so. Analyses that fail or do not produce a comparable solution must be reported separately, and not counted as formula changes.</p>
+<p>Transparency in QCA requires enough information for readers to reconstruct the analytical decisions that produced the truth table and solution, including calibration, case selection, truth-table cutoffs, the treatment of logical remainders, parameters of fit, and meaningful robustness tests <span class="citation" data-cites="wagemannSchneider2015transparency">(<a href="references.html#ref-wagemannSchneider2015transparency" role="doc-biblioref">Wagemann and Schneider 2015</a>)</span>. A robustness report must add the comparison design: which analytical decision changed, which choices remained fixed, which solution type, model position, or intermediate branch was monitored, and which criterion defined preservation.</p>
+<p>The denominator is part of that account. Comparison availability tells us whether the intended formula or parameter comparison could be made at all. An attempted analysis may fail during calibration, truth-table construction, or minimization. One solution type may also remain available while another does not. For the affected solution type, a noncomparable result is neither formula preservation nor formula change and must not be counted as either one.</p>
+<p>A formula-preservation rate should therefore report the number of comparable analyses as its denominator. A rate concerning solution consistency, solution PRI, or solution coverage must use the denominator established by the diagnostic’s fit-comparison rule. For example, <code>altset.test()</code> requires a common selected formula key, whereas <code>loo.test()</code> and <code>subsample.test()</code> require the relevant selected solutions and their parameters of fit to be available. These denominators need not be identical, and neither should be silently replaced by the total number of attempted analyses.</p>
+<p>Unsuccessful and unavailable comparisons should not disappear from the report. Their frequency and causes may reveal that the tested alternatives often produce no sufficient truth-table configuration, no requested solution type, or another analytical failure. They should, however, remain separate from the numerator and denominator used to describe preservation among completed comparisons.</p>
+</section>
+<section id="follow-the-source-of-uncertainty-through-the-book" class="level2" data-number="1.6">
+<h2 data-number="1.6" class="anchored" data-anchor-id="follow-the-source-of-uncertainty-through-the-book"><span class="header-section-number">1.6</span> Follow the Source of Uncertainty Through the Book</h2>
+<p>The implementation chapters organize the workflow around the analytical decision or comparison that motivates the diagnostic:</p>
+<ul>
+<li><p><strong>Boundary diagnostics</strong> move calibration anchors, the frequency cutoff, or the inclusion cutoff along ordered paths. The alternative-set diagnostic then samples combinations of those choices within a specified search space.</p></li>
+<li><p><strong>Case-composition diagnostics</strong> reconstruct the QCA after deleting one case or drawing repeated subsamples, with calibration either held fixed or re-estimated when the research design calls for it.</p></li>
+<li><p><strong>Structured comparison diagnostics</strong> answer related but different questions. <code>cluster.test()</code> retains a selected sufficient expression and recalculates its consistency and coverage within substantively meaningful groups, while <code>theory.test()</code> gives each theoretically motivated condition set its own truth table and minimization before comparing the resulting formulas, parameters of fit, and complete-solution memberships.</p></li>
+</ul>
+<blockquote class="blockquote">
+<p>None of these diagnostics can confer a universal seal of robustness. Together, they allow us to identify varied analytical decisions, preserved QCA objects or relations, points at which the reference result changed, and attempted comparisons that could not be completed.</p>
+</blockquote>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-oanaschneider2024" class="csl-entry" role="listitem">
+Oana, Ioana-Elena, and Carsten Q. Schneider. 2024. <span>“A Robustness Test Protocol for Applied <span>QCA</span>: Theory and <span>R</span> Software Application.”</span> <em>Sociological Methods &amp; Research</em> 53 (1): 57–88. <a href="https://doi.org/10.1177/00491241211036158">https://doi.org/10.1177/00491241211036158</a>.
+</div>
+<div id="ref-skaaning2011" class="csl-entry" role="listitem">
+Skaaning, Svend-Erik. 2011. <span>“Assessing the Robustness of Crisp-Set and Fuzzy-Set <span>QCA</span> Results.”</span> <em>Sociological Methods &amp; Research</em> 40 (2): 391–408. <a href="https://doi.org/10.1177/0049124111404818">https://doi.org/10.1177/0049124111404818</a>.
+</div>
+<div id="ref-thomannmaggetti2020" class="csl-entry" role="listitem">
+Thomann, Eva, and Martino Maggetti. 2020. <span>“Designing Research with Qualitative Comparative Analysis (<span>QCA</span>): Approaches, Challenges, and Tools.”</span> <em>Sociological Methods &amp; Research</em> 49 (2): 356–86. <a href="https://doi.org/10.1177/0049124117729700">https://doi.org/10.1177/0049124117729700</a>.
+</div>
+<div id="ref-wagemannSchneider2015transparency" class="csl-entry" role="listitem">
+Wagemann, Claudius, and Carsten Q. Schneider. 2015. <span>“Transparency Standards in Qualitative Comparative Analysis.”</span> <em>Qualitative &amp; Multi-Method Research</em> 13 (1): 38–42. <a href="https://doi.org/10.5281/zenodo.893091">https://doi.org/10.5281/zenodo.893091</a>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./index.html" class="pagination-link" aria-label="Preface">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Preface</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./qcaert-alongside-setmethods.html" class="pagination-link" aria-label="Raison d'être">
+        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Raison d’être</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

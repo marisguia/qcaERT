@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>2&nbsp; Raison d’être – A Guide to qcaERT</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./how-to-read-this-book.html" rel="next">
+<link href="./framing-qca-robustness.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-707d8167ce6003fca903bfe2be84ab7f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-10058ab0c6d3387edda5ec9f53ada30a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-5fb265ea9e9be481d23acbcf801e35e9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-10058ab0c6d3387edda5ec9f53ada30a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">A Guide to qcaERT</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./qcaert-alongside-setmethods.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Raison d’être</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./framing-qca-robustness.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What is QCA Robustness</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./qcaert-alongside-setmethods.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Raison d’être</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./how-to-read-this-book.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">How to Read This Book</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part I: Reference Analysis</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./reference-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">The Reference Analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./presenting-the-solutions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Presenting the Solutions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part II: Boundary Diagnostics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./calibration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Calibration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./frequency-cutoff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Frequency Cutoff</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./inclusion-cutoff.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Inclusion Cutoff</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./alternative-set.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Alternative-Set Diagnostics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part III: Case-Composition Diagnostics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./leave-one-out-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Leave-One-Out Diagnostics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./subsample.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Subsample Diagnostics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Part IV: Structured Comparison Diagnostics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cluster-heterogeneity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Cluster Heterogeneity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./theory-comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Theory Comparison</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./conclusion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Conclusion</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#two-starting-points-for-a-robustness-appraisal" id="toc-two-starting-points-for-a-robustness-appraisal" class="nav-link active" data-scroll-target="#two-starting-points-for-a-robustness-appraisal"><span class="header-section-number">2.1</span> Two Starting Points for a Robustness Appraisal</a></li>
+  <li><a href="#where-the-contribution-actually-lies" id="toc-where-the-contribution-actually-lies" class="nav-link" data-scroll-target="#where-the-contribution-actually-lies"><span class="header-section-number">2.2</span> Where the Contribution Actually Lies</a>
+  <ul class="collapse">
+  <li><a href="#constructing-boundary-diagnostics" id="toc-constructing-boundary-diagnostics" class="nav-link" data-scroll-target="#constructing-boundary-diagnostics"><span class="header-section-number">2.2.1</span> Constructing Boundary Diagnostics</a></li>
+  <li><a href="#generating-and-interpreting-alternative-analyses" id="toc-generating-and-interpreting-alternative-analyses" class="nav-link" data-scroll-target="#generating-and-interpreting-alternative-analyses"><span class="header-section-number">2.2.2</span> Generating and Interpreting Alternative Analyses</a></li>
+  <li><a href="#changing-the-composition-of-the-cases" id="toc-changing-the-composition-of-the-cases" class="nav-link" data-scroll-target="#changing-the-composition-of-the-cases"><span class="header-section-number">2.2.3</span> Changing the Composition of the Cases</a></li>
+  <li><a href="#comparing-groups-and-theoretical-specifications" id="toc-comparing-groups-and-theoretical-specifications" class="nav-link" data-scroll-target="#comparing-groups-and-theoretical-specifications"><span class="header-section-number">2.2.4</span> Comparing Groups and Theoretical Specifications</a></li>
+  <li><a href="#keeping-the-analytical-record-together" id="toc-keeping-the-analytical-record-together" class="nav-link" data-scroll-target="#keeping-the-analytical-record-together"><span class="header-section-number">2.2.5</span> Keeping the Analytical Record Together</a></li>
+  </ul></li>
+  <li><a href="#choosing-the-package-by-the-research-question" id="toc-choosing-the-package-by-the-research-question" class="nav-link" data-scroll-target="#choosing-the-package-by-the-research-question"><span class="header-section-number">2.3</span> Choosing the Package by the Research Question</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Raison d’être</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Any account of <strong><em>qcaERT</em></strong>’s contribution must begin with <strong>SetMethods</strong> <span class="citation" data-cites="oanaschneider2018 oanaschneider2024">(<a href="references.html#ref-oanaschneider2018" role="doc-biblioref">Oana and Schneider 2018</a>, <a href="references.html#ref-oanaschneider2024" role="doc-biblioref">2024</a>)</span>. The latter package had already brought advanced QCA diagnostics and a distinctly set-theoretic robustness protocol into R long before <strong><em>qcaERT</em></strong> existed. It would therefore be inaccurate to claim that <strong><em>qcaERT</em></strong> introduced computational robustness appraisal to QCA, just as it would be unhelpful to portray the two packages as interchangeable collections of similar functions.</p>
+<p>Their most important difference concerns the part of the robustness workflow that each package develops in greatest depth. <strong>SetMethods</strong> offers the richer set-theoretic interpretation of how an <strong>Initial Solution</strong> relates to a researcher-constructed <strong>Test Set</strong> of plausible <strong>alternative solutions</strong>. Its robustness functions examine how those solutions overlap, what remains in their <strong>Robust Core</strong>, how their parameters of fit relate, and where the cases are located within the resulting set relations.</p>
+<p><strong><em>qcaERT</em></strong> concentrates instead on constructing and reconstructing the analyses that produce the alternatives: varying specified analytical choices, rebuilding the affected QCA objects, following selected solution types, retaining the parameters and case sets needed for comparison, and recording the specifications that fail to yield comparable results.</p>
+<p>The packages intervene at different analytical moments and often answer different research questions. A researcher may need the set-theoretic and case-oriented interpretation supplied by <strong>SetMethods</strong>, the controlled perturbation workflow supplied by <strong><em>qcaERT</em></strong>, or both.</p>
+<section id="two-starting-points-for-a-robustness-appraisal" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="two-starting-points-for-a-robustness-appraisal"><span class="header-section-number">2.1</span> Two Starting Points for a Robustness Appraisal</h2>
+<p>Oana and Schneider’s protocol begins with a carefully justified <strong>Initial Solution</strong> and a <strong>Test Set</strong> composed of substantively plausible <strong>alternative solutions</strong> <span class="citation" data-cites="oanaschneider2024">(<a href="references.html#ref-oanaschneider2024" role="doc-biblioref">Oana and Schneider 2024</a>)</span>. The researcher constructs those alternative solutions by changing defensible analytical choices, stores the resulting minimization objects, and then uses the <strong>SetMethods</strong> robustness functions to examine the relations among them. The package can identify the <strong>Robust Core</strong> shared by the <strong>Initial Solution</strong> and the <strong>Test Set</strong>, compare parameters of fit, and distinguish cases whose positions remain stable from cases whose positions depend on the alternative specifications.</p>
+<p>The protocol supplies something that a list of changed Boolean formulas cannot: a set-theoretic account of <strong>how</strong> the <strong>Initial Solution</strong> and the <strong>Test Set</strong> relate. Two alternative formulas may differ textually while retaining extensive overlap in their complete-solution memberships and in the cases covered by them. Conversely, a formula-preservation rate cannot identify whether particular cases become shaky, possible, or otherwise change their relation to the solution. These are central contributions of <strong>SetMethods</strong>, and <strong><em>qcaERT</em></strong> does not reproduce them.</p>
+<p>Most <strong><em>qcaERT</em></strong> diagnostics begin earlier. Rather than requiring the researcher to arrive with a bag full of alternative minimization objects already constructed, they begin with a reference analysis and an explicit description of the analytical choices to be varied. The relevant function then recalibrates sets when required, reconstructs the truth table, applies the solution-type-specific treatment of logical remainders and any supplied or recomputed exclusions, repeats the selected minimizations, and compares the requested results with their reference counterparts. The returned object preserves the tested specifications, the comparison records, and the supporting evidence required by that diagnostic.</p>
+<p>In an epistemological nutshell:</p>
+<ul>
+<li><p><strong>SetMethods</strong> examines what the Initial Solution, Test Set, Robust Core, and cases reveal after the alternative solutions have been assembled.</p></li>
+<li><p><strong><em>qcaERT</em></strong> traces defined changes to calibration, truth-table cutoffs, case composition, or condition-set specifications through the QCA workflow.</p></li>
+</ul>
+<p>The first approach is primarily relational and interpretive. The second, mainly operational and diagnostic. Neither relieves the researcher of deciding which alternatives are theoretically and empirically defensible.</p>
+</section>
+<section id="where-the-contribution-actually-lies" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="where-the-contribution-actually-lies"><span class="header-section-number">2.2</span> Where the Contribution Actually Lies</h2>
+<blockquote class="blockquote">
+<p>One might (correctly) state that the above distinction “does not clarify the package’s substantive novelty.”</p>
+</blockquote>
+<p>Differentiating a “relational and interpretive” approach from a “operational and diagnostic” one is useful, but indeed insufficient. At this level of generality, the contrast does not yet establish which robustness appraisals <strong><em>qcaERT</em></strong> makes possible, how it reorganizes analytical work that could already be performed with <strong>SetMethods</strong>, or which diagnostics have no direct counterpart in the latter package.</p>
+<p>The comparison must therefore move from general orientations to specific analytical operations. The following subsections examine what each package requires from the researcher, which QCA objects it constructs or reconstructs, which analytical choices and solution types can be examined together, and what evidence it retains for interpretation and reporting.</p>
+<p>The point is not to count functions or arguments, but to identify how the available tools alter the robustness workflow and the range of questions that can be examined through it.</p>
+<p>This requires a more technical comparison than the preceding discussion. Since much of <strong><em>qcaERT</em></strong>’s proposed contribution concerns operational scope and analytical control, its substantive novelty cannot be established through broad descriptions alone. It must instead be demonstrated across calibration and truth-table boundaries, alternative specifications, changes in case composition, cluster and theory comparisons, and the diagnostic records they produce. Only then can we determine where <strong><em>qcaERT</em></strong> (version 0.1.2 at the time of this book’s release) extends the existing software environment and where <strong>SetMethods</strong> (version 4.1 released on 2025-03-21) remains the stronger option.</p>
+<section id="constructing-boundary-diagnostics" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="constructing-boundary-diagnostics"><span class="header-section-number">2.2.1</span> Constructing Boundary Diagnostics</h3>
+<p>The packages overlap most visibly in their calibration, inclusion-cutoff, and frequency-cutoff diagnostics. <code>SetMethods::rob.calibrange()</code>, <code>SetMethods::rob.inclrange()</code>, and <code>SetMethods::rob.ncutrange()</code> move an analytical boundary and identify the range over which a selected solution formula remains unchanged. Their <strong><em>qcaERT</em></strong> counterparts—<code>calib.test()</code>, <code>incl.test()</code>, and <code>ncut.test()</code>—investigate the corresponding sensitivity questions.</p>
+<p>The operational scope differs, however. <code>SetMethods::rob.calibrange()</code> evaluates <strong>one</strong> calibrated set in each call. Beyond crisp-set, its direct fuzzy-set procedure works <strong>only</strong> with the usual three qualitative anchors and moves them by a common fixed step. <code>calib.test()</code> can organize independent diagnostic paths for <strong>several conditions</strong> and, when requested, the outcome in one returned object. It also accommodates, beyond crisp calibration, <strong>direct fuzzy calibration with three or six qualitative anchors</strong>, and <strong>indirect calibration</strong>; selected anchors or cutpoints can be tested without requiring every threshold in the calibration specification to move.</p>
+<p>One call to <code>calib.test()</code> may therefore produce many one-anchor diagnostic paths, but each path still moves one anchor at a time. The broader interface does not turn a local sensitivity diagnostic into an almost infinitely exhaustive search over every possible joint calibration specification. Instead, it allows the researcher to define and retain a coordinated set of local questions without making a separate call for every condition, outcome, anchor, direction, and solution type. Moreover, it offers different plot options for visualizing the results.</p>
+<p>The inclusion- and frequency-cutoff comparisons extend the same principle. The <strong>SetMethods</strong> range functions follow <strong>one</strong> minimization specification. <code>incl.test()</code> and <code>ncut.test()</code> can monitor the <strong>conservative and parsimonious</strong> solutions separately or together, alongside the <strong>intermediate</strong> solution when the required directional expectations are supplied; with <code>incl.test()</code> also offering visualization options. For the parsimonious and intermediate solutions, they can <strong>recompute the logical remainders</strong> excluded as contradictory simplifying assumptions at each reconstructed truth table, or simply hold a supplied exclusion set fixed—<strong>SetMethods’</strong> only option.</p>
+<p>This is vital because moving a cutoff does not necessarily affect every solution type at the same value or through the same mechanism. A conservative formula may change when the outcome assignment of an empirical truth-table configuration changes, whereas a parsimonious formula may change earlier because the reconstructed analysis alters which logical remainders are available as simplifying assumptions. Keeping solution types and exclusion choices in the same diagnostic record makes these boundaries easier to compare.</p>
+</section>
+<section id="generating-and-interpreting-alternative-analyses" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="generating-and-interpreting-alternative-analyses"><span class="header-section-number">2.2.2</span> Generating and Interpreting Alternative Analyses</h3>
+<p>The contrast becomes clearest when several analytical choices are allowed to vary together. In the <strong>SetMethods</strong> protocol, the researcher first produces the alternative minimization results that constitute the <strong>Test Set</strong>. The package then evaluates their set relations with the <strong>Initial Solution</strong> and provides fit-oriented and case-oriented evidence. The analytical work performed by <strong>SetMethods</strong> begins from the solutions the researcher has chosen to compare.</p>
+<p>Conversely, <code>altset.test()</code> begins with a specified search space. The researcher supplies the allowable calibration movements and the grids of inclusion and frequency cutoffs; the function draws combinations from these choices, reconstructs the corresponding analyses, and records the outcome of every attempted specification. For each monitored solution type, the researcher can inspect the availability of a comparable formula and its agreement with the reference formula. When the same formula key is reproduced, the function can also assess whether solution consistency, PRI, and coverage remain within the stated tolerance. Specifications that fail during calibration, truth-table construction, exclusion recomputation, or minimization remain part of the analytical record rather than quietly disappearing from the denominator.</p>
+<p>Therefore, the two approaches illuminate different parts of the same broader exercise, with rather distinct spotlights. <strong>SetMethods</strong> is especially useful when a plausible <strong>Test Set</strong> already exists and the researcher wants to understand its set-theoretic relation to the <strong>Initial Solution</strong> and the cases. <strong><em>qcaERT</em></strong> is better suited to generating a reproducible collection of alternative specifications and retaining a record of how each specification traveled through the QCA workflow. An <code>altset.test()</code> formula-match rate is not a <strong>Robust Core</strong>, and the <strong>SetMethods</strong> case classifications are not a record of how every alternative truth table and minimization was constructed.</p>
+</section>
+<section id="changing-the-composition-of-the-cases" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3" class="anchored" data-anchor-id="changing-the-composition-of-the-cases"><span class="header-section-number">2.2.3</span> Changing the Composition of the Cases</h3>
+<p>Both packages concern themselves with “cases,” but in the context of different analytical operations. The case-oriented robustness tools in <strong>SetMethods</strong> locate observations within the intersections formed by the <strong>Initial Solution</strong> and the <strong>Test Set</strong>. They determine whether cases remain typical, become shaky or possible, occupy deviant positions, or otherwise alter their set-theoretic relation to the solutions being compared.</p>
+<p>Comparatively, <code>loo.test()</code> and <code>subsample.test()</code> change the collection of cases from which the QCA is constructed. <code>loo.test()</code> deletes one observation at a time, whereas <code>subsample.test()</code> repeatedly retains a specified proportion of the cases, optionally preserving the composition of supplied strata. Each reduced case set can lead to different truth-table frequencies, outcome assignments, logical remainders, solution formulas and parameters of fit. When calibration is recomputed, deleting or retaining observations may also change the anchors and the calibrated memberships that enter truth-table construction.</p>
+<p>These diagnostics answer questions for which <strong>SetMethods</strong> currently has no direct counterpart:</p>
+<ul>
+<li><p>Does deleting a particular case change the conservative, parsimonious, or intermediate solution?</p></li>
+<li><p>Do the reference formulas recur when several observations are removed together?</p></li>
+<li><p>Do solution consistency, PRI, or coverage change beyond a stated tolerance across those reconstructed analyses?</p></li>
+</ul>
+<p>Granted, a leave-one-out result is informative only when the dependence of a formula on a particular case bears on the research design, and a punishing subsample diagnostic is not a substitute for a justified population of cases. What <strong><em>qcaERT</em></strong> adds is the capacity to perform and document these case-composition perturbations within the same truth-table and minimization workflow used by its boundary diagnostics.</p>
+</section>
+<section id="comparing-groups-and-theoretical-specifications" class="level3" data-number="2.2.4">
+<h3 data-number="2.2.4" class="anchored" data-anchor-id="comparing-groups-and-theoretical-specifications"><span class="header-section-number">2.2.4</span> Comparing Groups and Theoretical Specifications</h3>
+<p><code>SetMethods::cluster()</code> is the more flexible general cluster diagnostic. It can evaluate a QCA minimization result, a Boolean expression, or a supplied membership vector; it can examine sufficiency or necessity; and <code>SetMethods::cluster.plot()</code> visualizes the resulting complete-data, between-cluster, and within-unit consistencies. These capabilities allow the researcher to investigate a wider range of set relations without first placing every target inside a newly minimized truth table.</p>
+<p><code>cluster.test()</code> is narrower by design. It begins with a truth table, obtains the requested conservative, parsimonious, or intermediate solution through minimization, and evaluates the selected sufficient solution formula and its prime implicants within the supplied clusters. When repeated units are identified across groups, it can also calculate one period-wide consistency and coverage value for each repeated unit. If <code>SetMethods::cluster()</code> offers greater flexibility in the target relation, by contrast, <code>cluster.test()</code> brings cluster-specific fit parameters into the same solution-selection, minimization, failure-recording, and tabular-inspection framework used elsewhere in <strong><em>qcaERT</em></strong>.</p>
+<p>The theory functions are even less interchangeable. <code>SetMethods::theory.evaluation()</code> begins with one Boolean theoretical expression and one empirical QCA solution. It examines their intersections, identifies the cases occupying them, and calculates the corresponding parameters of fit. The function is, thus, suited to evaluating how a stated theoretical claim relates to an empirical solution and the observed cases.</p>
+<p>Differently, <code>theory.test()</code> treats each theory as a condition-set specification. It constructs a separate truth table and minimization for every supplied condition set, then compares the resulting solution formulas, prime implicants, solution-level parameters of fit, and complete-solution memberships. It is designed for a researcher asking “how alternative selections of causal conditions reshape the empirical QCA results,” and thus do not evaluates the set-theoretic intersection between one Boolean theory and one already obtained solution.</p>
+</section>
+<section id="keeping-the-analytical-record-together" class="level3" data-number="2.2.5">
+<h3 data-number="2.2.5" class="anchored" data-anchor-id="keeping-the-analytical-record-together"><span class="header-section-number">2.2.5</span> Keeping the Analytical Record Together</h3>
+<p>Across these diagnostics, <strong><em>qcaERT</em></strong> uses a common family grammar for recurring analytical choices and returned evidence. Solution types, model positions, intermediate branches, logical remainders, excluded simplifying assumptions, parameters of fit, and comparison failures recur under familiar controls. The main result can be converted into a nice table or even a plot when available, while supporting components retain the path-, draw-, case-, cluster-, or theory-specific evidence needed to explain that result.</p>
+<blockquote class="blockquote">
+<p>This common structure is more than my obsessive-compulsive disorder manifest. When an alternative-set diagnostic attempts many specifications, the researcher should be able to distinguish the total number of draws from the number that produced all requested solution types, the number that produced only some of them, and the number that produced none. A formula-preservation rate must then use the number of comparable formulas for that particular solution type as its denominator, while a fit-preservation rate must use the analyses in which the required parameter comparison was actually available.</p>
+<p>The same principle carries into the other diagnostics: unavailable comparisons remain analytically distinct from formula changes, and a collapsed status does not replace the solution-specific evidence beneath it.</p>
+</blockquote>
+<p>Wrapping up with a nice ribbon, the solution-display functions support that workflow from another angle. <code>sol.df()</code> and <code>sol.chart()</code> align conservative, parsimonious, and intermediate results so that their prime implicants and parameters of fit can be presented together. <strong>SetMethods</strong> provides great tools for exporting selected solutions and examining case memberships in a chosen solution or prime implicant. But, again, the distinction concerns purpose: <strong><em>qcaERT</em></strong> emphasizes comparison across solution types, whereas <strong>SetMethods</strong> offers richer inspection and presentation of selected set-theoretic relations.</p>
+</section>
+</section>
+<section id="choosing-the-package-by-the-research-question" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="choosing-the-package-by-the-research-question"><span class="header-section-number">2.3</span> Choosing the Package by the Research Question</h2>
+<p>If I may be so bold, the practical division of labor can be summarized as follows:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Research task</th>
+<th style="text-align: left;"><strong>SetMethods</strong></th>
+<th style="text-align: left;"><strong><em>qcaERT</em></strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Interpret an Initial Solution against a Test Set</td>
+<td style="text-align: left;">Evaluates the Robust Core, parameters of fit, set relations, and case positions</td>
+<td style="text-align: left;">Does not reproduce this protocol</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Generate a multidimensional collection of alternative calibration and cutoff specifications</td>
+<td style="text-align: left;">The researcher constructs the alternative minimization objects before applying the Test Set functions</td>
+<td style="text-align: left;">Generates the specifications, reconstructs the QCA, and retains formula, fit, setting, and failure evidence</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Find formula-preservation boundaries</td>
+<td style="text-align: left;">Provides limited calibration-, inclusion-, and frequency-range functions for one selected minimization specification</td>
+<td style="text-align: left;">Coordinates multiple calibration paths and, where requested, several solution types and exclusion treatments</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Reconstruct the QCA after changing case composition</td>
+<td style="text-align: left;">No direct leave-one-out or repeated-subsample counterpart</td>
+<td style="text-align: left;">Deletes cases or draws subsamples, then rebuilds and compares the requested analyses</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Examine cluster heterogeneity</td>
+<td style="text-align: left;">Accepts broader target inputs, evaluates sufficiency or necessity, and provides a dedicated plot</td>
+<td style="text-align: left;">Integrates sufficient solution formulas and prime implicants with internal minimization and structured diagnostic records</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Evaluate a Boolean theory against an empirical solution</td>
+<td style="text-align: left;">Examines their intersections, parameters of fit, and cases</td>
+<td style="text-align: left;">Does not reproduce this theory–solution intersection analysis</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Compare alternative condition-set specifications</td>
+<td style="text-align: left;">Does not construct and compare a family of theory-specific truth tables and solutions</td>
+<td style="text-align: left;">Builds each QCA separately and compares formulas, parameters of fit, and complete-solution memberships</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Present solution results</td>
+<td style="text-align: left;">Exports selected solutions and examines prime-implicant and case memberships</td>
+<td style="text-align: left;">Aligns conservative, parsimonious, and intermediate solutions in common tables and charts</td>
+</tr>
+</tbody>
+</table>
+<p>The contribution of <strong><em>qcaERT</em></strong> lies neither in proposing a “new definition” of QCA robustness nor in replacing the set-theoretic protocol implemented by <strong>SetMethods</strong>. Rather, it provides an integrated environment for conducting robustness diagnostics across broader calibration specifications, coordinated monitoring of solution types and exclusions, generated multidimensional alternatives, reconstructed analyses under changing case compositions, comparisons among condition-set specifications, and explicit records of failed or unavailable comparisons.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-oanaschneider2018" class="csl-entry" role="listitem">
+Oana, Ioana-Elena, and Carsten Q. Schneider. 2018. <span>“<span>SetMethods</span>: An Add-on <span>R</span> Package for Advanced <span>QCA</span>.”</span> <em>The R Journal</em> 10 (1): 507–33. <a href="https://journal.r-project.org/archive/2018/RJ-2018-031/index.html">https://journal.r-project.org/archive/2018/RJ-2018-031/index.html</a>.
+</div>
+<div id="ref-oanaschneider2024" class="csl-entry" role="listitem">
+———. 2024. <span>“A Robustness Test Protocol for Applied <span>QCA</span>: Theory and <span>R</span> Software Application.”</span> <em>Sociological Methods &amp; Research</em> 53 (1): 57–88. <a href="https://doi.org/10.1177/00491241211036158">https://doi.org/10.1177/00491241211036158</a>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./framing-qca-robustness.html" class="pagination-link" aria-label="What is QCA Robustness">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">What is QCA Robustness</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./how-to-read-this-book.html" class="pagination-link" aria-label="How to Read This Book">
+        <span class="nav-page-text">How to Read This Book</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
