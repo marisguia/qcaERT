@@ -93,7 +93,7 @@
 #'   qcaERT diagnostics, see Marisguia (2026), *A Guide to qcaERT:
 #'   Robustness Diagnostics in QCA*. Read the browser-based edition at
 #'   <https://marisguia.github.io/qcaERT/> and cite the archived Version 1.0
-#'   at <https://doi.org/10.5281/zenodo.21685193>.
+#'   at \doi{10.5281/zenodo.21685193}.
 #'   \item `news(package = "qcaERT")` for development changes.
 #'   \item `citation(package = "qcaERT")` for citation information.
 #' }
@@ -110,7 +110,7 @@
 #' @references
 #' Marisguia, B. A. H. 2026. *A Guide to qcaERT: Robustness Diagnostics in
 #' QCA*. Version 1.0. Zenodo.
-#' <https://doi.org/10.5281/zenodo.21685193>.
+#' \doi{10.5281/zenodo.21685193}.
 #'
 #' Dusa, Adrian. 2019. *QCA with R. A Comprehensive Resource*. Cham:
 #' Springer. <https://adriandusa.com/research/books/2019-QCA/>.
