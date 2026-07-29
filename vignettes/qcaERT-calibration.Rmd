@@ -308,6 +308,12 @@ The same calibration specification is used in both functions. This is intentiona
 the meaning of `conditions`, `test.conditions`, and `test.outcome` should not
 change from one sibling function to another.
 
+Before sampling, `altset.test()` reconstructs every tested condition or outcome
+from `raw.data` and `calib_spec` and checks that those memberships match
+`calib.data`. A mismatch stops the test rather than comparing alternatives
+centered on one calibration with a baseline built from another. Conditions
+that are not selected for perturbation retain their stored memberships.
+
 ```{r altset-outcome}
 altset_outcome <- altset.test(
   raw.data = LR,

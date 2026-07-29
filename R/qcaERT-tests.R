@@ -15,7 +15,8 @@
 #' @section Inclusion or n.cut:
 #' Use [incl.test()] to check the inclusion (consistency) cutoff for
 #' sufficiency. It searches below and above the baseline `incl.cut` and records
-#' the last safe cutoff and first failing cutoff in each direction.
+#' the last safe cutoff and, when an admissible cutoff is tested and fails, the
+#' first failing cutoff in each direction.
 #'
 #' Use [ncut.test()] when the concern is the minimum number of cases under which
 #' a truth table row is declared as a remainder. It searches lower and upper
@@ -35,8 +36,9 @@
 #'
 #' @section Groups or clusters:
 #' Use [cluster.test()] when you expect heterogeneity across clusters, groups,
-#' or repeated units. It compares cluster-specific consistency, coverage, and
-#' related fit patterns against the overall truth table.
+#' or repeated units. It compares the consistency and coverage of selected
+#' sufficient solution formulas and prime implicants across clusters and,
+#' when requested, repeated units.
 #'
 #' @section Theory Specifications:
 #' Use [theory.test()] when you want to compare several theoretically motivated

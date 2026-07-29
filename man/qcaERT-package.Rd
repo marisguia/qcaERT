@@ -106,6 +106,11 @@ common returned-object structure.
 \item \code{vignette("qcaERT-calibration", package = "qcaERT")} for
 calibration specifications, scale-aware perturbations, and alternative
 sets.
+\item For comprehensive guidance, worked examples, and interpretation of
+qcaERT diagnostics, see Marisguia (2026), \emph{A Guide to qcaERT:
+Robustness Diagnostics in QCA}. Read the browser-based edition at
+\url{https://marisguia.github.io/qcaERT/} and cite the archived Version 1.0
+at \url{https://doi.org/10.5281/zenodo.21685193}.
 \item \code{news(package = "qcaERT")} for development changes.
 \item \code{citation(package = "qcaERT")} for citation information.
 }
@@ -114,7 +119,7 @@ sets.
 \section{Recommended citation}{
 
 Marisguia, B. A. H. (2026). qcaERT: Enhanced Robustness Tests for
-Qualitative Comparative Analysis. R package version 0.1.1.
+Qualitative Comparative Analysis. R package version 0.1.2.
 \url{https://CRAN.R-project.org/package=qcaERT}.
 doi:10.32614/CRAN.package.qcaERT.
 
@@ -123,6 +128,10 @@ to the analysis.
 }
 
 \references{
+Marisguia, B. A. H. 2026. \emph{A Guide to qcaERT: Robustness Diagnostics in
+QCA}. Version 1.0. Zenodo.
+\url{https://doi.org/10.5281/zenodo.21685193}.
+
 Dusa, Adrian. 2019. \emph{QCA with R. A Comprehensive Resource}. Cham:
 Springer. \url{https://adriandusa.com/research/books/2019-QCA/}.
 
@@ -135,6 +144,7 @@ Useful links:
 \itemize{
   \item \url{https://CRAN.R-project.org/package=qcaERT}
   \item \url{https://github.com/marisguia/qcaERT}
+  \item \url{https://marisguia.github.io/qcaERT/}
   \item Report bugs at \url{https://github.com/marisguia/qcaERT/issues}
 }
 

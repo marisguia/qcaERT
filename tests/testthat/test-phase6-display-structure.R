@@ -149,33 +149,61 @@ test_that("subsample print labels aggregate rows and solution-type-specific exac
   expect_true(any(grepl("Exact baseline matches by solution type", out, fixed = TRUE)))
 })
 
-test_that("altset print foregrounds solution-type-specific match rates", {
+test_that("altset print exposes the denominators of solution and fit match rates", {
   x <- structure(
     list(
       results = data.frame(
-        draw = 1:2,
-        incl.cut = c(0.75, 0.8),
-        n.cut = c(1L, 1L),
-        status = c("ok", "ok"),
-        n_changed_sets = c(1L, 1L),
-        changed_sets = c("A", "A"),
-        changed_roles = c("condition", "condition"),
-        solution_change = c(NA_character_, "CON: formula_changed"),
-        fit_changed_types = c(NA_character_, "CON"),
-        n_fit_deltas = c(0L, 1L),
-        max_abs_fit_delta = c(0, 0.1),
+        draw = 1:4,
+        incl.cut = c(0.75, 0.8, 0.7, 0.85),
+        n.cut = c(1L, 1L, 2L, 2L),
+        status = c("ok", "ok", "ok", "no_comparable_solution"),
+        n_changed_sets = rep(1L, 4),
+        changed_sets = rep("A", 4),
+        changed_roles = rep("condition", 4),
+        solution_change = c(
+          NA_character_,
+          "CON: formula_changed",
+          "PAR: formula_changed",
+          NA_character_
+        ),
+        fit_changed_types = c(NA_character_, "CON", "PAR", NA_character_),
+        n_fit_deltas = c(0L, 1L, 1L, NA_integer_),
+        max_abs_fit_delta = c(0, 0.1, 0.1, NA_real_),
         stringsAsFactors = FALSE
       ),
+      diagnostics = data.frame(
+        solution_changed_conservative = c(FALSE, TRUE, FALSE, NA),
+        fit_compared_conservative = c(TRUE, FALSE, TRUE, FALSE),
+        fit_changed_conservative = c(FALSE, NA, TRUE, NA),
+        solution_changed_parsimonious = c(FALSE, FALSE, TRUE, NA),
+        fit_compared_parsimonious = c(TRUE, TRUE, FALSE, FALSE),
+        fit_changed_parsimonious = c(FALSE, TRUE, NA, NA),
+        solution_changed_intermediate = c(FALSE, TRUE, NA, NA),
+        fit_compared_intermediate = c(TRUE, FALSE, FALSE, FALSE),
+        fit_changed_intermediate = c(FALSE, NA, NA, NA)
+      ),
       summary = list(
-        n_draws = 2L,
-        n_fit_compared = 2L,
-        score_solution_by_solution_type = c(conservative = 0.5),
-        score_fit_by_solution_type = c(conservative = 0.5)
+        n_draws = 4L,
+        n_fit_compared = 3L,
+        score_solution_by_solution_type = c(
+          conservative = 2 / 3,
+          parsimonious = 2 / 3,
+          intermediate = 1 / 2
+        ),
+        score_fit_by_solution_type = c(
+          conservative = 1 / 2,
+          parsimonious = 1 / 2,
+          intermediate = 1
+        )
       ),
       settings = list(
-        solution = "conservative",
-        monitored_solutions = "conservative",
-        n_draws = 2L,
+        solution = "all",
+        monitored_solutions = c(
+          "conservative",
+          "parsimonious",
+          "intermediate"
+        ),
+        n_draws = 4L,
         incl.cut = 0.75,
         n.cut = 1,
         fit_tol = 1e-6,
@@ -188,10 +216,16 @@ test_that("altset print foregrounds solution-type-specific match rates", {
 
   out <- capture.output(print(x))
 
-  expect_true(any(grepl("Draws with any solution change: 1", out, fixed = TRUE)))
-  expect_true(any(grepl("Solution match rate by solution type", out, fixed = TRUE)))
-  expect_false(any(grepl("Solution stability score", out, fixed = TRUE)))
-  expect_false(any(grepl("Total stability score", out, fixed = TRUE)))
+  expect_true(any(grepl("Draws requested: 4", out, fixed = TRUE)))
+  expect_true(any(grepl("Complete for all solution types", out, fixed = TRUE)))
+  expect_true(any(grepl("Partial", out, fixed = TRUE)))
+  expect_true(any(grepl("No comparable solution", out, fixed = TRUE)))
+  expect_true(any(grepl("Solution-formula preservation", out, fixed = TRUE)))
+  expect_true(any(grepl("Parameters-of-fit preservation", out, fixed = TRUE)))
+  expect_true(any(grepl("2/3", out, fixed = TRUE)))
+  expect_true(any(grepl("66.7%", out, fixed = TRUE)))
+  expect_true(any(grepl("conditional on fit being compared", out, fixed = TRUE)))
+  expect_false(any(grepl("Solution match rate by solution type", out, fixed = TRUE)))
 })
 
 test_that("as.data.frame returns the standardized user-facing table", {
@@ -306,8 +340,7 @@ test_that("cluster print uses compact overview and single-configuration details"
         which_M = 1L,
         i_mode = "all",
         cluster_id = "DEV_group",
-        unit_id = "case_id",
-        necessity = FALSE
+        unit_id = "case_id"
       )
     ),
     class = "cluster_test"

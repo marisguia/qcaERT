@@ -70,3 +70,36 @@ test_that("hybrid fit comparison returns not compared when no solution names mat
   expect_identical(cmp$matched_keys, character(0))
   expect_null(cmp$details)
 })
+
+test_that("altset.test distinguishes zero fit deltas from an unavailable comparison", {
+  skip_if_not_installed("QCA")
+
+  fixture <- qcaert_fixture_direct6()
+  out <- qcaert_expect_no_warning(altset.test(
+    raw.data = fixture$raw,
+    calib.data = fixture$calib,
+    outcome = fixture$outcome,
+    conditions = fixture$conditions,
+    calib_spec = fixture$calib_spec,
+    test.conditions = fixture$test.conditions,
+    anchors_to_test = c("E1", "C1", "I1"),
+    unit_step = 10,
+    calib_max_steps = 5,
+    incl.cut = 0.75,
+    incl_step = 0.1,
+    incl_max_steps = 5,
+    n.cut = 1,
+    ncut_step = 1,
+    ncut_max_steps = 5,
+    n_draws = 2,
+    fit_tol = 1,
+    seed = 101,
+    solution = "conservative",
+    exclude_mode = "none",
+    progress = FALSE
+  ))
+
+  expect_identical(out$diagnostics$fit_compared, c(TRUE, FALSE))
+  expect_identical(out$results$n_fit_deltas, c(0L, NA_integer_))
+  expect_false("fit_compared" %in% names(out$results))
+})

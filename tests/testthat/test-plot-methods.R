@@ -40,7 +40,7 @@ test_that("incl_test plot methods return ggplot objects", {
   )
 })
 
-test_that("incl_test trace plots do not duplicate an evaluated failing cutoff", {
+test_that("incl_test trace plots distinguish evaluated failures from search boundaries", {
   skip_if_not_installed("ggplot2")
 
   trace <- data.frame(
@@ -74,11 +74,12 @@ test_that("incl_test trace plots do not duplicate an evaluated failing cutoff", 
   expect_equal(changed_plot$layers[[1L]]$data$step, 1:4)
   expect_length(changed_plot$layers, 4L)
 
-  out$diagnostics$stop_reason <- "feasibility_boundary"
+  out$diagnostics$incl.cut_first_failing <- NA_real_
+  out$diagnostics$stop_reason <- "search_boundary_lower"
   out$by_direction$lower$trace <- trace[1:3, , drop = FALSE]
   boundary_plot <- plot(out, type = "trace", direction = "lower")
-  expect_equal(boundary_plot$layers[[1L]]$data$step, 1:4)
-  expect_equal(boundary_plot$layers[[3L]]$data$step, 4L)
+  expect_equal(boundary_plot$layers[[1L]]$data$step, 1:3)
+  expect_length(boundary_plot$layers, 3L)
 })
 
 test_that("calib_test plot methods return ggplot objects for direct-six anchors", {

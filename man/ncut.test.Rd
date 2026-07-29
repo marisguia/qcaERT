@@ -42,7 +42,8 @@ non-empty character string.}
 the condition set is left to \code{\link[QCA:truthTable]{QCA::truthTable()}}.}
 
 \item{n.cut}{Baseline truth table frequency cutoff passed to
-\code{\link[QCA:truthTable]{QCA::truthTable()}}. This must be an integer-like value of at least \code{1}.}
+\code{\link[QCA:truthTable]{QCA::truthTable()}}. This must be an integer-like value from \code{1} through
+the number of rows in \code{data}.}
 
 \item{step}{Positive integer step size used to move \code{n.cut} downward and
 upward from the baseline value.}
@@ -144,8 +145,9 @@ Perturbs the truth table frequency cutoff used in the analysis and checks
 when the monitored QCA solution changes. Starting from a baseline \code{n.cut},
 the function searches downward and upward in fixed integer steps and records
 the last value that preserved the baseline solution, the first value that
-changed the solution or triggered an error, and the reason the search
-stopped in each direction.
+was tested and changed the solution or triggered an error, and the reason
+the search stopped in each direction. An out-of-range proposal is not
+reported as a failing value because it is not analyzed.
 }
 \details{
 The baseline analysis is built with \code{\link[QCA:truthTable]{QCA::truthTable()}} using the supplied
@@ -159,7 +161,8 @@ The search range is bounded below by \code{1} and above by the number of rows in
 
 A directional search stops when one of the following occurs:
 \itemize{
-\item the next tested value falls outside the allowed range,
+\item the next proposed value falls outside the allowed range, in which
+case it is not tested and \code{first_failing} remains missing,
 \item truth table construction fails,
 \item exclusion recomputation fails,
 \item minimization fails, or

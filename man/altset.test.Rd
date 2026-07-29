@@ -49,7 +49,9 @@ altset.test(
 condition columns, and the raw outcome column when \code{test.outcome = TRUE}.}
 
 \item{calib.data}{A data frame object containing the calibrated outcome
-and calibrated condition columns used for the baseline analysis.}
+and calibrated condition columns used for the baseline analysis. For every
+tested condition or outcome, the stored memberships must match those
+reconstructed from \code{raw.data} and \code{calib_spec}.}
 
 \item{outcome}{Name of the outcome column in \code{calib.data}. This must be a
 single non-empty character string.}
@@ -61,7 +63,8 @@ single non-empty character string.}
 condition, plus one for the outcome when \code{test.outcome = TRUE}. Each entry
 must contain \code{raw}, \code{type}, and \code{thresholds}, may contain \code{method}, and may
 contain \code{calibrate}, a named list of additional \code{\link[QCA:calibrate]{QCA::calibrate()}}
-arguments for that set.}
+arguments for that set. The entries for tested sets define the reference
+calibrations checked against \code{calib.data}.}
 
 \item{test.conditions}{Subset of \code{conditions} to perturb when generating
 random alternative calibration draws. May be \code{NULL} only when
@@ -184,7 +187,9 @@ information, and error information when a draw fails.}
 \item{\code{results}}{A compact data frame with the columns
 \code{draw}, \code{incl.cut}, \code{n.cut}, \code{status}, \code{n_changed_sets},
 \code{changed_sets}, \code{changed_roles}, \code{solution_change}, \code{fit_changed_types},
-\code{n_fit_deltas}, and \code{max_abs_fit_delta}.}
+\code{n_fit_deltas}, and \code{max_abs_fit_delta}. \code{n_fit_deltas} is \code{NA} when no
+fit comparison was available and is zero when fit was compared but no
+difference exceeded \code{fit_tol}.}
 \item{\code{by_draw}}{A named list with one entry per draw. Each entry stores
 the full run result, solution-comparison information, fit-comparison
 information, and draw-level fit details.}
@@ -192,9 +197,10 @@ information, and draw-level fit details.}
 the result object.}
 }
 
-\code{print.altset_test()} prints a concise summary, the \code{results} table, and
-solution-type-specific match-rate tables. \code{as.data.frame.altset_test()} returns
-the \code{results} table.
+\code{print.altset_test()} prints a concise summary, the \code{results} table, draw
+availability counts, and solution-type-specific formula- and fit-preservation
+tables with their comparison denominators. \code{as.data.frame.altset_test()}
+returns the \code{results} table.
 }
 \description{
 Repeatedly generates alternative analyses by jointly varying calibration
@@ -214,6 +220,14 @@ Rows in \code{raw.data} and \code{calib.data} are paired before recalibration.
 Informative row names must be unique and identical in the same order on both
 inputs. If both inputs use only default row names (\code{1}, ..., \code{n}), pairing
 is positional and the inputs must not be independently reordered.
+
+Before the baseline analysis is run, the function reconstructs each tested
+condition or outcome from \code{raw.data} and \code{calib_spec} and verifies that the
+resulting memberships match the corresponding column in \code{calib.data}.
+A mismatch stops the test because the alternative calibrations would
+otherwise be centered on a different reference calibration. Conditions not
+selected for perturbation retain their stored memberships in \code{calib.data}
+and are not included in this equality check.
 
 Each draw samples:
 \itemize{

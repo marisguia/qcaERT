@@ -325,19 +325,17 @@ selected solution memberships across theories.
 
 ## Test clusters
 
-`cluster.test()` starts from an existing truth table and compares selected
-configurations across groups.
+`cluster.test()` starts from an existing truth table and evaluates selected
+solution formulas and their prime implicants across groups.
 
 ```{r clusters}
 cluster_data <- dat
 cluster_data$region <- ifelse(seq_len(nrow(cluster_data)) %% 2 == 0, "A", "B")
-cluster_data$unit <- rownames(cluster_data)
 
 cluster_out <- cluster.test(
   data = cluster_data,
   tt = tt,
   cluster_id = "region",
-  unit_id = "unit",
   solution = "all",
   dir.exp = dir_exp,
   progress = TRUE
@@ -346,11 +344,12 @@ cluster_out <- cluster.test(
 cluster_out
 as.data.frame(cluster_out)
 cluster_out$results$clusters
-cluster_out$results$units
 ```
 
 `cluster.test()` is one of the structured-result exceptions in the package:
-`results` is a list with `overview`, `clusters`, and `units`.
+`results` is a list with `overview`, `clusters`, and `units`. The `units` table
+is used only when `unit_id` identifies units observed in more than one cluster;
+this cross-sectional example requests only the cluster comparison.
 The other structured-result exception is `theory.test()`, whose `results`
 component contains `models`, `solutions`, and `pairwise`.
 

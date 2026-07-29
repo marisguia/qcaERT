@@ -1,11 +1,11 @@
-#' Cluster heterogeneity diagnostics for QCA configurations
+#' Cluster heterogeneity diagnostics for QCA solutions
 #'
-#' Evaluates how the consistency and coverage of selected QCA configurations
-#' vary across clusters and, when repeated units are available, across units
-#' observed in more than one cluster. The function starts from an existing
-#' truth table, minimizes it under the requested solution type, extracts the
-#' selected baseline configurations, and then compares pooled fit values with
-#' cluster-specific and within-unit fit values.
+#' Evaluates how the consistency and coverage of selected QCA solution formulas
+#' and their prime implicants vary across clusters and, when repeated units are
+#' available, across units observed in more than one cluster. The function
+#' starts from an existing truth table, minimizes it under the requested
+#' solution type, extracts the selected baseline expressions, and then compares
+#' pooled fit values with cluster-specific and within-unit fit values.
 #'
 #' @param data A data frame object containing the columns used to build
 #'   `tt` plus the cluster and, optionally, unit identifiers. `data`
@@ -35,9 +35,6 @@
 #'   when minimization returns multiple models.
 #' @param i_mode Character string controlling intermediate-solution selection.
 #'   Accepted values are `"all"` and `"C1P1"`.
-#' @param necessity Logical; if `TRUE`, compute fit as necessity consistency
-#'   and coverage. If `FALSE`, compute fit as sufficiency consistency and
-#'   coverage.
 #' @param progress Logical; if `TRUE` and the session is interactive, show a
 #'   text progress bar while minimizing the monitored solution types.
 #' @param x A `cluster_test` object returned by [cluster.test()].
@@ -53,7 +50,8 @@
 #' @returns An object of class `cluster_test` with the following components:
 #'   \describe{
 #'     \item{`diagnostics`}{A detailed data frame with one row per selected
-#'     configuration. It records the solution type, configuration key, component count,
+#'     solution formula. It records the solution type, internal configuration
+#'     key, component count,
 #'     status, pooled consistency and coverage, maximum and mean absolute
 #'     cluster-level deltas, the clusters with the worst consistency and
 #'     coverage values, whether within-unit diagnostics were available, the
@@ -61,41 +59,41 @@
 #'     be evaluated.}
 #'     \item{`results`}{A named list with three tables:
 #'       \describe{
-#'         \item{`overview`}{One row per selected configuration, summarizing pooled fit,
+#'         \item{`overview`}{One row per selected solution formula, summarizing pooled fit,
 #'         maximum cluster deltas, worst clusters, and within-unit
 #'         availability.}
-#'         \item{`clusters`}{One row per configuration-component-cluster combination,
+#'         \item{`clusters`}{One row per expression-component-cluster combination,
 #'         giving cluster-specific consistency, coverage, and deltas from the
-#'         pooled configuration values. The whole configuration is stored as
+#'         pooled expression values. The complete solution formula is stored as
 #'         `component = "solution"`; separate term-level rows are included only
 #'         for multi-term solutions.}
-#'         \item{`units`}{One row per configuration-component-unit combination for
+#'         \item{`units`}{One row per expression-component-unit combination for
 #'         units observed in more than one cluster, giving within-unit
-#'         consistency, coverage, and deltas from the pooled configuration values.
+#'         consistency, coverage, and deltas from the pooled expression values.
 #'         Separate term-level rows are included only for multi-term solutions.}
 #'       }}
 #'     \item{`baseline`}{A list containing the input truth table, minimization
 #'     results by solution type, selected solution terms used for comparison,
-#'     metadata, and the extracted configuration definitions used for the
+#'     metadata, and the extracted expression definitions used for the
 #'     heterogeneity diagnostics.}
 #'     \item{`by_cluster`}{A named list of detailed cluster-level diagnostics
-#'     for each selected configuration.}
+#'     for each selected solution formula.}
 #'     \item{`by_unit`}{A named list of detailed unit-level diagnostics for
-#'     each selected configuration when repeated units are available, or `NULL`
+#'     each selected solution formula when repeated units are available, or `NULL`
 #'     otherwise.}
 #'     \item{`settings`}{A list containing the analysis settings used to build
 #'     the result object.}
 #'   }
 #'
 #'   `print.cluster_test()` prints a compact overview and, when the object has
-#'   one displayed configuration, cluster and within-unit details.
+#'   one displayed solution formula, cluster and within-unit details.
 #'   `as.data.frame.cluster_test()` returns `results$overview`.
 #'
 #' @details
 #' The function recovers the outcome membership from `tt$recoded.data`, runs
 #' minimization for the requested solution type or solution types, extracts the
-#' selected baseline configurations, and computes pooled fit values for each
-#' configuration and configuration component.
+#' selected baseline solution formulas, and computes pooled fit values for each
+#' complete formula and prime implicant.
 #'
 #' Rows in `data` and `tt$recoded.data` are paired before cluster diagnostics.
 #' Informative row names must be unique and identical in the same order on both
@@ -113,8 +111,8 @@
 #'
 #' Within-unit diagnostics use a separate occurrence table formed from rows
 #' with non-missing `unit_id` and `cluster_id`. A unit is repeated when it is
-#' observed in more than one distinct cluster, regardless of its configuration
-#' or outcome membership values. Each non-missing unit-cluster combination
+#' observed in more than one distinct cluster, regardless of its selected
+#' expression or outcome membership values. Each non-missing unit-cluster combination
 #' must occur at most once; duplicate combinations are rejected rather than
 #' having their fuzzy memberships summed. Within-unit fit uses the eligible
 #' membership pairs among each repeated unit's observed cluster occurrences.
@@ -175,7 +173,6 @@
 #'   dir.exp = dir_exp,
 #'   exclude = enhanced,
 #'   which_M = 1,
-#'   necessity = FALSE,
 #'   progress = TRUE
 #' )
 #'
@@ -199,7 +196,6 @@ cluster.test <- function(
     exclude = NULL,
     which_M = 1,
     i_mode = c("all", "C1P1"),
-    necessity = FALSE,
     progress = TRUE,
     ...
 ) {
@@ -208,6 +204,12 @@ cluster.test <- function(
   selection_controls <- .normalize_i_mode(i_mode)
   i_mode <- selection_controls$i_mode
   dots_raw <- list(...)
+  if ("necessity" %in% names(dots_raw)) {
+    stop(
+      "`necessity` has been removed from `cluster.test()`. ",
+      "The function evaluates selected solution expressions as sufficient for the outcome."
+    )
+  }
 
   if (is.null(dim(data)) || is.null(nrow(data)) || nrow(data) < 1L) {
     stop("`data` must be a non-empty data frame object with at least one row.")
@@ -233,10 +235,6 @@ cluster.test <- function(
     }
   }
 
-  if (!is.logical(necessity) || length(necessity) != 1L || is.na(necessity)) {
-    stop("`necessity` must be a single TRUE/FALSE value.")
-  }
-
   if (is.null(tt$recoded.data) || is.null(nrow(tt$recoded.data))) {
     stop("`data` must have the same number of rows as `tt$recoded.data`.")
   }
@@ -253,7 +251,7 @@ cluster.test <- function(
     tryCatch(conditionMessage(e), error = function(...) as.character(e))
   }
 
-  .fit_pair <- function(x, y, necessity = FALSE) {
+  .fit_pair <- function(x, y) {
     if (length(x) != length(y)) stop("Internal error: x and y must have equal length.")
 
     ok <- !(is.na(x) | is.na(y))
@@ -265,8 +263,8 @@ cluster.test <- function(
     }
 
     num <- sum(pmin(x, y))
-    den_cons <- if (necessity) sum(y) else sum(x)
-    den_cov  <- if (necessity) sum(x) else sum(y)
+    den_cons <- sum(x)
+    den_cov  <- sum(y)
 
     cons <- if (den_cons > 0) num / den_cons else NA_real_
     cov  <- if (den_cov  > 0) num / den_cov  else NA_real_
@@ -288,14 +286,12 @@ cluster.test <- function(
       y,
       cluster_vec,
       observed_clusters,
-      unit_cluster_occurrences,
-      necessity
+      unit_cluster_occurrences
   ) {
     membership_ok <- !(is.na(x) | is.na(y))
     pooled <- .fit_pair(
       x[membership_ok],
-      y[membership_ok],
-      necessity = necessity
+      y[membership_ok]
     )
 
     by_cluster <- lapply(observed_clusters, function(cluster_value) {
@@ -303,8 +299,7 @@ cluster.test <- function(
       cluster_fit_rows <- cluster_rows & membership_ok
       fitj <- .fit_pair(
         x[cluster_fit_rows],
-        y[cluster_fit_rows],
-        necessity = necessity
+        y[cluster_fit_rows]
       )
 
       data.frame(
@@ -332,8 +327,7 @@ cluster.test <- function(
           ]
           fiti <- .fit_pair(
             x[occurrence_rows],
-            y[occurrence_rows],
-            necessity = necessity
+            y[occurrence_rows]
           )
 
           data.frame(
@@ -545,7 +539,6 @@ cluster.test <- function(
         solution_type = rg,
         i_mode = if (identical(rg, "intermediate")) i_mode else NA_character_,
         which_M = which_M,
-        necessity = necessity,
         configuration_key = target_key,
         component_count = NA_integer_,
         status = "minimize_error",
@@ -592,7 +585,6 @@ cluster.test <- function(
           solution_type = rg,
           i_mode = if (identical(rg, "intermediate")) i_mode else NA_character_,
           which_M = which_M,
-          necessity = necessity,
           configuration_key = target_key,
           component_count = component_count,
           status = ttg$status,
@@ -658,8 +650,7 @@ cluster.test <- function(
           y = recoded_outcome,
           cluster_vec = cluster_vec,
           observed_clusters = observed_clusters,
-          unit_cluster_occurrences = unit_cluster_occurrences,
-          necessity = necessity
+          unit_cluster_occurrences = unit_cluster_occurrences
         )
 
         pooled_terms[[nm]] <- dd$pooled
@@ -844,7 +835,6 @@ cluster.test <- function(
         solution_type = rg,
         i_mode = if (identical(rg, "intermediate")) i_mode else NA_character_,
         which_M = which_M,
-        necessity = necessity,
         configuration_key = target_key,
         component_count = component_count,
         status = "ok",
@@ -923,7 +913,6 @@ cluster.test <- function(
       exclude = exclude,
       which_M = which_M,
       i_mode = i_mode,
-      necessity = necessity,
       progress = progress
     )
   )
@@ -1095,10 +1084,6 @@ print.cluster_test <- function(x, row.names = FALSE, ...) {
   if (!is.null(settings$unit_id) && !is.na(settings$unit_id)) {
     cat("Unit id: ", settings$unit_id, "\n", sep = "")
   }
-  if (!is.null(settings$necessity)) {
-    cat("Necessity mode: ", settings$necessity, "\n", sep = "")
-  }
-
   .print_qcaert_table(.cluster_overview_for_print(overview), "Overview", row.names = row.names, ...)
 
   if (is.data.frame(overview) && nrow(overview) == 1L) {

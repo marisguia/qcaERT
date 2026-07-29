@@ -510,6 +510,15 @@ test_that("case-deletion and subsample result schemas are frozen", {
     names(subsample$summary),
     c("exact_solution", "term_stability", "fit_stability", "similarity", "calibration")
   )
+  term_stability <- subsample$summary$term_stability$conservative
+  expect_identical(
+    names(term_stability),
+    c("term", "baseline", "appearance_rate")
+  )
+  expect_identical(
+    rownames(term_stability),
+    as.character(seq_len(nrow(term_stability)))
+  )
 })
 
 test_that("cluster and sol.df result schemas are frozen", {
@@ -542,7 +551,6 @@ test_that("cluster and sol.df result schemas are frozen", {
       "solution_type",
       "i_mode",
       "which_M",
-      "necessity",
       "configuration_key",
       "component_count",
       "status",
@@ -579,12 +587,26 @@ test_that("cluster and sol.df result schemas are frozen", {
       "exclude",
       "which_M",
       "i_mode",
-      "necessity",
       "progress"
     )
   )
   expect_identical(names(as.data.frame(cluster)), names(cluster$results$overview))
   expect_identical(names(cluster$results), c("overview", "clusters", "units"))
+  expect_identical(
+    names(cluster$results$clusters),
+    c(
+      "solution_type",
+      "configuration",
+      "component",
+      "cluster_id",
+      "cluster_size",
+      "consistency",
+      "coverage",
+      "delta_consistency",
+      "delta_coverage"
+    )
+  )
+  expect_null(cluster$results$units)
 
   sol <- qcaert_expect_no_warning(QCA::minimize(tt, include = ""))
   sol_table <- sol.df(conservative = sol, solution = "conservative")

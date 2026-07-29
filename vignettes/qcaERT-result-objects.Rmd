@@ -100,10 +100,14 @@ altset_out$by_draw
 altset_out$summary
 ```
 
-The clean table is for scanning. The summary component is for stability scores
-across all draws. When calibration is part of the sampled draw, `changed_sets`
-names the perturbed calibrated sets and `changed_roles` records whether those
-sets were conditions, the outcome, or both.
+The clean table is for scanning. In it, `n_fit_deltas = 0` means that fit was
+compared and no difference exceeded `fit_tol`; `n_fit_deltas = NA` means that
+no like-for-like fit comparison was available. The printed summary separates
+attempted draws, formula-comparable draws, and fit-comparable draws so each
+preservation rate retains its denominator. When calibration is part of the
+sampled draw, `changed_sets` names the perturbed calibrated sets and
+`changed_roles` records whether those sets were conditions, the outcome, or
+both.
 
 ## Cluster tests
 

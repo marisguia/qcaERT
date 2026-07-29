@@ -427,6 +427,41 @@
   data_out
 }
 
+.validate_calib_data_matches_specs <- function(
+    calib.data,
+    raw.data,
+    calib_specs,
+    targets,
+    tolerance = sqrt(.Machine$double.eps)
+) {
+  for (set_name in unique(targets)) {
+    spec <- calib_specs[[set_name]]
+    expected <- .calibrate_from_spec(raw.data[[spec$raw]], spec)
+    observed <- calib.data[[set_name]]
+
+    comparable_type <- is.numeric(observed) || is.logical(observed)
+    matches <- comparable_type &&
+      isTRUE(all.equal(
+        as.numeric(observed),
+        as.numeric(expected),
+        tolerance = tolerance,
+        check.attributes = FALSE
+      ))
+
+    if (!matches) {
+      stop(
+        "`calib.data[['", set_name, "']]` does not match the memberships ",
+        "reconstructed from `raw.data[['", spec$raw, "']]` and ",
+        "`calib_spec[['", set_name, "']]`. Rebuild `calib.data` using this ",
+        "calibration specification or update `calib_spec` to describe the ",
+        "reference calibration."
+      )
+    }
+  }
+
+  invisible(TRUE)
+}
+
 .calib_thresholds_in_range <- function(spec, xmin, xmax) {
   vals <- as.numeric(spec$thresholds)
   all(is.finite(vals)) && all(vals >= xmin) && all(vals <= xmax)

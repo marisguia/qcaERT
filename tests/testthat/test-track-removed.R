@@ -8,6 +8,10 @@ test_that("track has been removed from public function arguments", {
   expect_false("track" %in% names(formals(subsample.test)))
 })
 
+test_that("necessity has been removed from cluster.test arguments", {
+  expect_false("necessity" %in% names(formals(cluster.test)))
+})
+
 test_that("old track helpers are gone", {
   ns <- asNamespace("qcaERT")
 

@@ -893,6 +893,7 @@ subsample.test <- function(
           stringsAsFactors = FALSE
         )
       }
+      rownames(out[[solution_type]]) <- NULL
     }
 
     out

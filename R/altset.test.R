@@ -11,7 +11,9 @@
 #' @param raw.data A data frame object containing the raw, uncalibrated
 #'   condition columns, and the raw outcome column when `test.outcome = TRUE`.
 #' @param calib.data A data frame object containing the calibrated outcome
-#'   and calibrated condition columns used for the baseline analysis.
+#'   and calibrated condition columns used for the baseline analysis. For every
+#'   tested condition or outcome, the stored memberships must match those
+#'   reconstructed from `raw.data` and `calib_spec`.
 #' @param outcome Name of the outcome column in `calib.data`. This must be a
 #'   single non-empty character string.
 #' @param conditions Character vector of calibrated condition names in
@@ -20,7 +22,8 @@
 #'   condition, plus one for the outcome when `test.outcome = TRUE`. Each entry
 #'   must contain `raw`, `type`, and `thresholds`, may contain `method`, and may
 #'   contain `calibrate`, a named list of additional [QCA::calibrate()]
-#'   arguments for that set.
+#'   arguments for that set. The entries for tested sets define the reference
+#'   calibrations checked against `calib.data`.
 #' @param test.conditions Subset of `conditions` to perturb when generating
 #'   random alternative calibration draws. May be `NULL` only when
 #'   `test.outcome = TRUE`, in which case only the outcome calibration is
@@ -114,7 +117,9 @@
 #'     \item{`results`}{A compact data frame with the columns
 #'     `draw`, `incl.cut`, `n.cut`, `status`, `n_changed_sets`,
 #'     `changed_sets`, `changed_roles`, `solution_change`, `fit_changed_types`,
-#'     `n_fit_deltas`, and `max_abs_fit_delta`.}
+#'     `n_fit_deltas`, and `max_abs_fit_delta`. `n_fit_deltas` is `NA` when no
+#'     fit comparison was available and is zero when fit was compared but no
+#'     difference exceeded `fit_tol`.}
 #'     \item{`by_draw`}{A named list with one entry per draw. Each entry stores
 #'     the full run result, solution-comparison information, fit-comparison
 #'     information, and draw-level fit details.}
@@ -122,9 +127,10 @@
 #'     the result object.}
 #'   }
 #'
-#'   `print.altset_test()` prints a concise summary, the `results` table, and
-#'   solution-type-specific match-rate tables. `as.data.frame.altset_test()` returns
-#'   the `results` table.
+#'   `print.altset_test()` prints a concise summary, the `results` table, draw
+#'   availability counts, and solution-type-specific formula- and fit-preservation
+#'   tables with their comparison denominators. `as.data.frame.altset_test()`
+#'   returns the `results` table.
 #'
 #' @details
 #' The function first runs a baseline analysis using `calib.data`,
@@ -135,6 +141,14 @@
 #' Informative row names must be unique and identical in the same order on both
 #' inputs. If both inputs use only default row names (`1`, ..., `n`), pairing
 #' is positional and the inputs must not be independently reordered.
+#'
+#' Before the baseline analysis is run, the function reconstructs each tested
+#' condition or outcome from `raw.data` and `calib_spec` and verifies that the
+#' resulting memberships match the corresponding column in `calib.data`.
+#' A mismatch stops the test because the alternative calibrations would
+#' otherwise be centered on a different reference calibration. Conditions not
+#' selected for perturbation retain their stored memberships in `calib.data`
+#' and are not included in this equality check.
 #'
 #' Each draw samples:
 #' \itemize{
@@ -873,6 +887,13 @@ altset.test <- function(
   tested_roles <- c(rep("condition", length(test.conditions)), if (test.outcome) "outcome" else character(0))
   names(tested_roles) <- tested_sets
 
+  .validate_calib_data_matches_specs(
+    calib.data = calib.data,
+    raw.data = raw.data,
+    calib_specs = calib_specs,
+    targets = tested_sets
+  )
+
   incl_grid <- incl.cut + seq.int(-incl_max_steps, incl_max_steps) * incl_step
   incl_grid <- sort(unique(incl_grid[incl_grid >= 0 & incl_grid <= 1]))
   if (length(incl_grid) == 0L) {
@@ -1070,7 +1091,11 @@ altset.test <- function(
     fit_changed <- if (status_ok && length(compared_solution_types) > 0L) length(fit_changed_measures) > 0L else NA
     changed_any <- if (status_ok) isTRUE(solution_changed) || isTRUE(fit_changed) else NA
     fit_changed_types <- if (status_ok && length(fit_changed_solution_types) > 0L) paste(fit_changed_solution_types, collapse = ",") else NA_character_
-    n_fit_deltas <- if (status_ok) as.integer(length(fit_changed_measures)) else NA_integer_
+    n_fit_deltas <- if (status_ok && length(compared_solution_types) > 0L) {
+      as.integer(length(fit_changed_measures))
+    } else {
+      NA_integer_
+    }
     max_abs_fit_delta <- if (status_ok) .fit_abs_max(fit_delta) else NA_real_
 
     calib_changed <- Filter(function(x) isTRUE(x$changed), draw_meta$calibration)
@@ -1264,6 +1289,7 @@ altset.test <- function(
 #' @export
 print.altset_test <- function(x, row.names = FALSE, ...) {
   results <- x$results
+  diagnostics <- x$diagnostics
   settings <- x$settings
   summary <- x$summary
 
@@ -1290,37 +1316,182 @@ print.altset_test <- function(x, row.names = FALSE, ...) {
   .print_qcaert_table(results, "Result", row.names = row.names, ...)
 
   cat("\nSummary\n")
-  if (!is.null(summary$n_draws)) {
-    cat(" Draws: ", summary$n_draws, "\n", sep = "")
-  }
-  if (is.data.frame(results) && nrow(results) > 0L) {
-    n_solution_changed <- .count_present(results$solution_change)
-    n_fit_changed <- .count_present(results$fit_changed_types)
+  n_draws <- if (!is.null(summary$n_draws)) summary$n_draws else nrow(results)
+  cat("\nDraws requested: ", n_draws, "\n", sep = "")
 
-    cat(" Draws with any solution change: ", n_solution_changed, "\n", sep = "")
-    cat(" Draws with any fit change: ", n_fit_changed, "\n", sep = "")
-  }
-  if (!is.null(summary$n_fit_compared)) {
-    cat(" Draws with fit comparison: ", summary$n_fit_compared, "\n", sep = "")
-  }
+  monitored_solutions <- settings$monitored_solutions
+  required_columns <- unlist(
+    lapply(
+      monitored_solutions,
+      function(solution_type) {
+        c(
+          paste0("solution_changed_", solution_type),
+          paste0("fit_compared_", solution_type),
+          paste0("fit_changed_", solution_type)
+        )
+      }
+    ),
+    use.names = FALSE
+  )
 
-  if (!is.null(summary$score_solution_by_solution_type) && length(summary$score_solution_by_solution_type) > 0L) {
-    solution_table <- data.frame(
-      solution_type = vapply(names(summary$score_solution_by_solution_type), .compact_solution_type_names, character(1)),
-      match_rate = as.numeric(summary$score_solution_by_solution_type),
-      stringsAsFactors = FALSE
+  has_comparison_details <- is.data.frame(diagnostics) &&
+    length(monitored_solutions) > 0L &&
+    all(required_columns %in% names(diagnostics))
+
+  if (has_comparison_details) {
+    type_counts <- setNames(
+      lapply(
+        monitored_solutions,
+        function(solution_type) {
+          solution_changed <- diagnostics[[paste0("solution_changed_", solution_type)]]
+          solution_compared <- !is.na(solution_changed)
+          fit_compared <- diagnostics[[paste0("fit_compared_", solution_type)]] %in% TRUE
+          fit_changed <- diagnostics[[paste0("fit_changed_", solution_type)]]
+
+          list(
+            solution_compared = solution_compared,
+            n_solution_compared = sum(solution_compared),
+            n_solution_preserved = sum(solution_compared & !solution_changed),
+            n_fit_compared = sum(fit_compared),
+            n_fit_preserved = sum(fit_compared & !is.na(fit_changed) & !fit_changed)
+          )
+        }
+      ),
+      monitored_solutions
     )
-    .print_qcaert_table(solution_table, "Solution match rate by solution type", row.names = FALSE)
-  }
 
-  if (!is.null(summary$score_fit_by_solution_type) && length(summary$score_fit_by_solution_type) > 0L) {
-    fit_table <- data.frame(
-      solution_type = vapply(names(summary$score_fit_by_solution_type), .compact_solution_type_names, character(1)),
-      match_rate = as.numeric(summary$score_fit_by_solution_type),
-      stringsAsFactors = FALSE
+    comparison_matrix <- do.call(
+      cbind,
+      lapply(type_counts, function(counts) counts$solution_compared)
     )
-    if (any(!is.na(fit_table$match_rate))) {
-      .print_qcaert_table(fit_table, "Fit match rate by solution type", row.names = FALSE)
+    n_comparable_by_draw <- rowSums(comparison_matrix)
+    n_complete <- sum(n_comparable_by_draw == length(monitored_solutions))
+    n_partial <- sum(
+      n_comparable_by_draw > 0L &
+        n_comparable_by_draw < length(monitored_solutions)
+    )
+    n_none <- sum(n_comparable_by_draw == 0L)
+
+    if (length(monitored_solutions) > 1L) {
+      draw_status <- data.frame(
+        status = c(
+          "Complete for all solution types",
+          "Partial",
+          "No comparable solution"
+        ),
+        draws = c(
+          paste0(n_complete, "/", n_draws),
+          paste0(n_partial, "/", n_draws),
+          paste0(n_none, "/", n_draws)
+        ),
+        stringsAsFactors = FALSE
+      )
+    } else {
+      draw_status <- data.frame(
+        status = c("Comparable solution", "No comparable solution"),
+        draws = c(
+          paste0(n_complete, "/", n_draws),
+          paste0(n_none, "/", n_draws)
+        ),
+        stringsAsFactors = FALSE
+      )
+    }
+    .print_qcaert_table(draw_status, "Draw status", row.names = FALSE)
+
+    format_rate <- function(numerator, denominator) {
+      if (denominator == 0L) return(NA_character_)
+      sprintf("%.1f%%", 100 * numerator / denominator)
+    }
+
+    solution_table <- do.call(
+      rbind,
+      lapply(
+        monitored_solutions,
+        function(solution_type) {
+          counts <- type_counts[[solution_type]]
+          data.frame(
+            solution_type = solution_type,
+            successful_draws = paste0(counts$n_solution_compared, "/", n_draws),
+            formula_preserved = paste0(
+              counts$n_solution_preserved,
+              "/",
+              counts$n_solution_compared
+            ),
+            match_rate = format_rate(
+              counts$n_solution_preserved,
+              counts$n_solution_compared
+            ),
+            stringsAsFactors = FALSE
+          )
+        }
+      )
+    )
+    .print_qcaert_table(
+      solution_table,
+      "Solution-formula preservation",
+      row.names = FALSE
+    )
+
+    fit_table <- do.call(
+      rbind,
+      lapply(
+        monitored_solutions,
+        function(solution_type) {
+          counts <- type_counts[[solution_type]]
+          data.frame(
+            solution_type = solution_type,
+            successful_draws = paste0(counts$n_solution_compared, "/", n_draws),
+            fit_compared = paste0(
+              counts$n_fit_compared,
+              "/",
+              counts$n_solution_compared
+            ),
+            fit_preserved = paste0(
+              counts$n_fit_preserved,
+              "/",
+              counts$n_fit_compared
+            ),
+            match_rate = format_rate(
+              counts$n_fit_preserved,
+              counts$n_fit_compared
+            ),
+            stringsAsFactors = FALSE
+          )
+        }
+      )
+    )
+    .print_qcaert_table(
+      fit_table,
+      "Parameters-of-fit preservation",
+      row.names = FALSE
+    )
+
+    cat(
+      "\nFit match rates are conditional on fit being compared.\n",
+      "Draws without a matching solution formula are excluded from those rates.\n",
+      sep = ""
+    )
+  } else {
+    if (!is.null(summary$score_solution_by_solution_type) &&
+        length(summary$score_solution_by_solution_type) > 0L) {
+      solution_table <- data.frame(
+        solution_type = vapply(names(summary$score_solution_by_solution_type), .compact_solution_type_names, character(1)),
+        match_rate = as.numeric(summary$score_solution_by_solution_type),
+        stringsAsFactors = FALSE
+      )
+      .print_qcaert_table(solution_table, "Solution match rate by solution type", row.names = FALSE)
+    }
+
+    if (!is.null(summary$score_fit_by_solution_type) &&
+        length(summary$score_fit_by_solution_type) > 0L) {
+      fit_table <- data.frame(
+        solution_type = vapply(names(summary$score_fit_by_solution_type), .compact_solution_type_names, character(1)),
+        match_rate = as.numeric(summary$score_fit_by_solution_type),
+        stringsAsFactors = FALSE
+      )
+      if (any(!is.na(fit_table$match_rate))) {
+        .print_qcaert_table(fit_table, "Fit match rate by solution type", row.names = FALSE)
+      }
     }
   }
 

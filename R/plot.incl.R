@@ -161,9 +161,10 @@ plot.incl_test <- function(
 
     start_value <- row$incl.cut_start
     failing_value <- row$incl.cut_first_failing
+    boundary_stop <- row$stop_reason %in% c("search_boundary_lower", "search_boundary_upper")
 
     fail_point <- NULL
-    if (is.finite(failing_value) && !is.na(failing_value)) {
+    if (!boundary_stop && is.finite(failing_value) && !is.na(failing_value)) {
       failing_value_recorded <- nrow(trace) > 0L &&
         any(!is.na(trace$incl.cut) & trace$incl.cut == failing_value)
 
@@ -228,7 +229,7 @@ plot.incl_test <- function(
     if (show_stop && is.finite(start_value) && !is.na(start_value)) {
       p <- p + ggplot2::geom_hline(yintercept = start_value, linetype = "dashed")
     }
-    if (show_stop && is.finite(failing_value) && !is.na(failing_value)) {
+    if (show_stop && !boundary_stop && is.finite(failing_value) && !is.na(failing_value)) {
       p <- p + ggplot2::geom_hline(yintercept = failing_value, linetype = "dotdash")
     }
     if (!legend) p <- p + ggplot2::theme(legend.position = "none")

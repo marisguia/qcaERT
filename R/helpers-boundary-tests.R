@@ -427,7 +427,6 @@
 
     if (next_value < lower_limit || next_value > upper_limit) {
       stop_reason <- .boundary_stop_reason_from_status("boundary", direction = direction)
-      failing_value <- .boundary_cast_value(next_value, value_type)
       break
     }
 

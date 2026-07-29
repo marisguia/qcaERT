@@ -14,6 +14,22 @@ test_that("ncut.test rejects non-integer which_M", {
   )
 })
 
+test_that("ncut.test rejects a baseline n.cut above the number of cases", {
+  skip_if_not_installed("QCA")
+
+  expect_error(
+    ncut.test(
+      data = tiny_qca,
+      outcome = "Y",
+      conditions = c("A", "B"),
+      n.cut = nrow(tiny_qca) + 1L,
+      progress = FALSE
+    ),
+    "`n.cut` must not exceed the number of rows in `data`.",
+    fixed = TRUE
+  )
+})
+
 test_that("sol.df rejects non-QCA objects", {
   expect_error(
     sol.df(conservative = mtcars),

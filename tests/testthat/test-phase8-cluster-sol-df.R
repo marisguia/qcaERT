@@ -71,13 +71,56 @@ test_that("cluster.test does not duplicate one-term solutions as term components
 
   expect_true(nrow(clusters) > 0L)
   expect_identical(unique(clusters$component), "solution")
-  expect_false(any(clusters$component == clusters$solution_expression))
+  expect_false("solution_expression" %in% names(clusters))
 
   if (!is.null(out$results$units)) {
     units <- out$results$units[out$results$units$configuration %in% single_configurations, , drop = FALSE]
     expect_identical(unique(units$component), "solution")
-    expect_false(any(units$component == units$solution_expression))
+    expect_false("solution_expression" %in% names(units))
   }
+})
+
+test_that("cluster.test keeps internal solution-type prefixes out of displayed configurations", {
+  skip_if_not_installed("QCA")
+
+  fixture <- qcaert_fixture_cluster()
+  out <- qcaert_expect_no_warning(cluster.test(
+    data = fixture$data,
+    tt = fixture$truth_table,
+    cluster_id = fixture$cluster_id,
+    unit_id = fixture$unit_id,
+    solution = "conservative",
+    progress = FALSE
+  ))
+
+  configuration <- out$baseline$configurations[[1L]]
+  displayed <- configuration$solution_expression
+
+  expect_identical(out$results$overview$configuration, displayed)
+  expect_false(startsWith(displayed, "conservative:"))
+  expect_true(all(out$results$clusters$configuration == displayed))
+
+  if (!is.null(out$results$units)) {
+    expect_true(all(out$results$units$configuration == displayed))
+  }
+})
+
+test_that("cluster.test rejects the removed necessity argument", {
+  skip_if_not_installed("QCA")
+
+  fixture <- qcaert_fixture_cluster()
+  expect_error(
+    cluster.test(
+      data = fixture$data,
+      tt = fixture$truth_table,
+      cluster_id = fixture$cluster_id,
+      solution = "conservative",
+      necessity = TRUE,
+      progress = FALSE
+    ),
+    "`necessity` has been removed",
+    fixed = TRUE
+  )
 })
 
 test_that("cluster.test pooled and cluster fits agree with QCA pof", {
@@ -85,80 +128,69 @@ test_that("cluster.test pooled and cluster fits agree with QCA pof", {
 
   fixture <- qcaert_fixture_cluster()
 
-  pof_fit <- function(x, y, necessity) {
-    relation <- if (necessity) "necessity" else "sufficiency"
+  pof_fit <- function(x, y) {
     fit <- qcaert_expect_no_warning(QCA::pof(
       setms = x,
       outcome = y,
-      relation = relation
+      relation = "sufficiency"
     ))$incl.cov[1L, , drop = FALSE]
 
-    if (necessity) {
-      c(
-        consistency = fit$inclN,
-        coverage = fit$covN
-      )
-    } else {
-      c(
-        consistency = fit$inclS,
-        coverage = fit$covS
-      )
-    }
+    c(
+      consistency = fit$inclS,
+      coverage = fit$covS
+    )
   }
 
-  for (necessity in c(FALSE, TRUE)) {
-    out <- qcaert_expect_no_warning(cluster.test(
-      data = fixture$data,
-      tt = fixture$truth_table,
-      cluster_id = fixture$cluster_id,
-      unit_id = fixture$unit_id,
-      solution = "conservative",
-      necessity = necessity,
-      progress = FALSE
-    ))
+  out <- qcaert_expect_no_warning(cluster.test(
+    data = fixture$data,
+    tt = fixture$truth_table,
+    cluster_id = fixture$cluster_id,
+    unit_id = fixture$unit_id,
+    solution = "conservative",
+    progress = FALSE
+  ))
 
-    expect_length(out$baseline$configurations, 1L)
-    configuration <- out$baseline$configurations[[1L]]
-    configuration_key <- configuration$configuration_key
-    x <- configuration$solution_membership
-    y <- configuration$outcome_membership
+  expect_length(out$baseline$configurations, 1L)
+  configuration <- out$baseline$configurations[[1L]]
+  configuration_key <- configuration$configuration_key
+  x <- configuration$solution_membership
+  y <- configuration$outcome_membership
 
-    pooled_expected <- pof_fit(x, y, necessity)
-    diagnostic <- out$diagnostics[
-      out$diagnostics$configuration_key == configuration_key,
+  pooled_expected <- pof_fit(x, y)
+  diagnostic <- out$diagnostics[
+    out$diagnostics$configuration_key == configuration_key,
+    ,
+    drop = FALSE
+  ]
+
+  expect_equal(diagnostic$pooled_consistency, unname(pooled_expected["consistency"]))
+  expect_equal(diagnostic$pooled_coverage, unname(pooled_expected["coverage"]))
+
+  cluster_results <- out$results$clusters[
+    out$results$clusters$configuration == configuration$solution_expression &
+      out$results$clusters$component == "solution",
+    ,
+    drop = FALSE
+  ]
+
+  for (cluster_value in cluster_results$cluster_id) {
+    rows <- !is.na(fixture$data[[fixture$cluster_id]]) &
+      fixture$data[[fixture$cluster_id]] == cluster_value
+    cluster_expected <- pof_fit(x[rows], y[rows])
+    cluster_observed <- cluster_results[
+      cluster_results$cluster_id == cluster_value,
       ,
       drop = FALSE
     ]
 
-    expect_equal(diagnostic$pooled_consistency, unname(pooled_expected["consistency"]))
-    expect_equal(diagnostic$pooled_coverage, unname(pooled_expected["coverage"]))
-
-    cluster_results <- out$results$clusters[
-      out$results$clusters$configuration == configuration_key &
-        out$results$clusters$component == "solution",
-      ,
-      drop = FALSE
-    ]
-
-    for (cluster_value in cluster_results$cluster_id) {
-      rows <- !is.na(fixture$data[[fixture$cluster_id]]) &
-        fixture$data[[fixture$cluster_id]] == cluster_value
-      cluster_expected <- pof_fit(x[rows], y[rows], necessity)
-      cluster_observed <- cluster_results[
-        cluster_results$cluster_id == cluster_value,
-        ,
-        drop = FALSE
-      ]
-
-      expect_equal(
-        cluster_observed$consistency,
-        unname(cluster_expected["consistency"])
-      )
-      expect_equal(
-        cluster_observed$coverage,
-        unname(cluster_expected["coverage"])
-      )
-    }
+    expect_equal(
+      cluster_observed$consistency,
+      unname(cluster_expected["consistency"])
+    )
+    expect_equal(
+      cluster_observed$coverage,
+      unname(cluster_expected["coverage"])
+    )
   }
 })
 

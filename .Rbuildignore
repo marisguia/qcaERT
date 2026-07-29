@@ -6,5 +6,8 @@
 ^\.Rhistory$
 ^\.RData$
 ^Rplots\.pdf$
+^\.codex-book-profile\.R$
+^A-Guide-to-qcaERT-Version-.*\.zip$
+^Backup 27-07 Bookdown$
 ^The R Journal Paper$
 ^Bookdown$

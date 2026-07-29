@@ -113,3 +113,108 @@ test_that("altset.test requires outcome calibration specs for outcome testing", 
     fixed = TRUE
   )
 })
+
+test_that("altset.test rejects mismatched baseline memberships for tested sets", {
+  skip_if_not_installed("QCA")
+
+  fixture <- qcaert_fixture_direct6()
+  fixture$calib$A <- 1 - fixture$calib$A
+
+  expect_error(
+    altset.test(
+      raw.data = fixture$raw,
+      calib.data = fixture$calib,
+      outcome = fixture$outcome,
+      conditions = fixture$conditions,
+      calib_spec = fixture$calib_spec,
+      test.conditions = "A",
+      anchors_to_test = "E1",
+      unit_step = 1,
+      calib_max_steps = 1,
+      incl.cut = 0.75,
+      incl_step = 0.1,
+      incl_max_steps = 1,
+      n.cut = 1,
+      ncut_step = 1,
+      ncut_max_steps = 1,
+      n_draws = 1,
+      solution = "conservative",
+      exclude_mode = "none",
+      progress = FALSE
+    ),
+    paste0(
+      "`calib.data[['A']]` does not match the memberships reconstructed from ",
+      "`raw.data[['A_raw']]` and `calib_spec[['A']]`."
+    ),
+    fixed = TRUE
+  )
+})
+
+test_that("altset.test rejects mismatched baseline outcome memberships", {
+  skip_if_not_installed("QCA")
+
+  fixture <- qcaert_fixture_outcome_calibration()
+  fixture$calib$Y <- 1 - fixture$calib$Y
+
+  expect_error(
+    altset.test(
+      raw.data = fixture$raw,
+      calib.data = fixture$calib,
+      outcome = fixture$outcome,
+      conditions = fixture$conditions,
+      calib_spec = fixture$calib_spec,
+      test.conditions = NULL,
+      test.outcome = TRUE,
+      anchors_to_test = "E1",
+      unit_step = 1,
+      calib_max_steps = 1,
+      incl.cut = 0.75,
+      incl_step = 0.1,
+      incl_max_steps = 1,
+      n.cut = 1,
+      ncut_step = 1,
+      ncut_max_steps = 1,
+      n_draws = 1,
+      solution = "conservative",
+      exclude_mode = "none",
+      progress = FALSE
+    ),
+    paste0(
+      "`calib.data[['Y']]` does not match the memberships reconstructed from ",
+      "`raw.data[['Y_raw']]` and `calib_spec[['Y']]`."
+    ),
+    fixed = TRUE
+  )
+})
+
+test_that("altset.test does not validate untested condition memberships", {
+  skip_if_not_installed("QCA")
+
+  fixture <- qcaert_fixture_direct6()
+  fixture$calib$B <- 1 - fixture$calib$B
+
+  out <- qcaert_expect_no_warning(altset.test(
+    raw.data = fixture$raw,
+    calib.data = fixture$calib,
+    outcome = fixture$outcome,
+    conditions = fixture$conditions,
+    calib_spec = fixture$calib_spec,
+    test.conditions = "A",
+    anchors_to_test = "E1",
+    unit_step = 1,
+    calib_max_steps = 1,
+    incl.cut = 0.75,
+    incl_step = 0.1,
+    incl_max_steps = 1,
+    n.cut = 1,
+    ncut_step = 1,
+    ncut_max_steps = 1,
+    n_draws = 1,
+    seed = 101,
+    solution = "conservative",
+    exclude_mode = "none",
+    progress = FALSE
+  ))
+
+  expect_s3_class(out, "altset_test")
+})

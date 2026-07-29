@@ -1,5 +1,23 @@
 # qcaERT 0.1.2
 
+- `incl.test()` and `ncut.test()` now leave `first_failing` missing when the
+  next proposed cutoff lies outside the admissible search range, because that
+  value was not analyzed. Inclusion-cutoff trace plots likewise omit untested
+  boundary proposals and their reference lines.
+- `ncut.test()` now rejects a baseline `n.cut` greater than the number of rows
+  in the analysis data.
+- `altset.test()` now verifies that every tested condition or outcome
+  membership in `calib.data` matches the reference calibration reconstructed
+  from `raw.data` and `calib_spec`.
+- Corrected alternative-set fit reporting so `n_fit_deltas = 0` identifies a
+  completed comparison with no differences beyond `fit_tol`, whereas `NA`
+  identifies a draw in which fit was not compared. Printed summaries now show
+  the separate denominators for draw availability, formula preservation, and
+  fit preservation.
+- Removed the unused `necessity` argument from `cluster.test()`. The function
+  now documents its scope explicitly as the sufficiency assessment of selected
+  solution formulas and prime implicants, and its displayed `configuration`
+  values no longer include a redundant solution-type prefix.
 - Added centralized row-alignment checks for paired raw, calibrated, reduced-run,
   and truth-table inputs. Identifiable case labels must now be unique and appear
   in the same order; otherwise pairing remains explicitly positional.

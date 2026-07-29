@@ -31,6 +31,32 @@ test_that("incl.test runs end to end on the shared direct-six fixture", {
   )
 })
 
+test_that("incl.test does not report an out-of-range cutoff as first failing", {
+  skip_if_not_installed("QCA")
+
+  out <- qcaert_expect_no_warning(incl.test(
+    data = tiny_qca,
+    outcome = "Y",
+    conditions = c("A", "B"),
+    incl.cut = 1,
+    step = 0.01,
+    max_steps = 1,
+    n.cut = 1,
+    solution = "conservative",
+    exclude_mode = "none",
+    progress = FALSE
+  ))
+
+  upper_result <- out$results[out$results$direction == "upper", , drop = FALSE]
+  upper_diagnostic <- out$diagnostics[out$diagnostics$direction == "upper", , drop = FALSE]
+
+  expect_identical(upper_result$last_safe, 1)
+  expect_true(is.na(upper_result$first_failing))
+  expect_identical(upper_result$reason, "search_boundary_upper")
+  expect_true(is.na(upper_diagnostic$incl.cut_first_failing))
+  expect_identical(nrow(out$by_direction$upper$trace), 0L)
+})
+
 test_that("ncut.test runs end to end on the shared direct-six fixture", {
   skip_if_not_installed("QCA")
 

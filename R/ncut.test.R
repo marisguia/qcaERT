@@ -4,8 +4,9 @@
 #' when the monitored QCA solution changes. Starting from a baseline `n.cut`,
 #' the function searches downward and upward in fixed integer steps and records
 #' the last value that preserved the baseline solution, the first value that
-#' changed the solution or triggered an error, and the reason the search
-#' stopped in each direction.
+#' was tested and changed the solution or triggered an error, and the reason
+#' the search stopped in each direction. An out-of-range proposal is not
+#' reported as a failing value because it is not analyzed.
 #'
 #' @param data A non-empty data frame containing the outcome and condition
 #'   columns used in the QCA analysis.
@@ -14,7 +15,8 @@
 #' @param conditions Optional character vector of condition names. If `NULL`,
 #'   the condition set is left to [QCA::truthTable()].
 #' @param n.cut Baseline truth table frequency cutoff passed to
-#'   [QCA::truthTable()]. This must be an integer-like value of at least `1`.
+#'   [QCA::truthTable()]. This must be an integer-like value from `1` through
+#'   the number of rows in `data`.
 #' @param step Positive integer step size used to move `n.cut` downward and
 #'   upward from the baseline value.
 #' @param max_steps Maximum number of stepwise moves to attempt in each
@@ -106,7 +108,8 @@
 #'
 #' A directional search stops when one of the following occurs:
 #' \itemize{
-#'   \item the next tested value falls outside the allowed range,
+#'   \item the next proposed value falls outside the allowed range, in which
+#'   case it is not tested and `first_failing` remains missing,
 #'   \item truth table construction fails,
 #'   \item exclusion recomputation fails,
 #'   \item minimization fails, or
@@ -214,6 +217,10 @@ ncut.test <- function(
   step <- .as_integerish_scalar(step, "step", min = 1L)
   max_steps <- .as_integerish_scalar(max_steps, "max_steps", min = 1L)
   which_M <- .as_integerish_scalar(which_M, "which_M", min = 1L)
+
+  if (n.cut > nrow(data)) {
+    stop("`n.cut` must not exceed the number of rows in `data`.")
+  }
 
   mc <- match.call(expand.dots = FALSE)
   dots_raw <- list(...)

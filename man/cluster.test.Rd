@@ -4,7 +4,7 @@
 \alias{cluster.test}
 \alias{print.cluster_test}
 \alias{as.data.frame.cluster_test}
-\title{Cluster heterogeneity diagnostics for QCA configurations}
+\title{Cluster heterogeneity diagnostics for QCA solutions}
 \usage{
 cluster.test(
   data,
@@ -17,7 +17,6 @@ cluster.test(
   exclude = NULL,
   which_M = 1,
   i_mode = c("all", "C1P1"),
-  necessity = FALSE,
   progress = TRUE,
   ...
 )
@@ -65,10 +64,6 @@ when minimization returns multiple models.}
 \item{i_mode}{Character string controlling intermediate-solution selection.
 Accepted values are \code{"all"} and \code{"C1P1"}.}
 
-\item{necessity}{Logical; if \code{TRUE}, compute fit as necessity consistency
-and coverage. If \code{FALSE}, compute fit as sufficiency consistency and
-coverage.}
-
 \item{progress}{Logical; if \code{TRUE} and the session is interactive, show a
 text progress bar while minimizing the monitored solution types.}
 
@@ -88,7 +83,8 @@ is passed to \code{\link[=print.data.frame]{print.data.frame()}}. In
 An object of class \code{cluster_test} with the following components:
 \describe{
 \item{\code{diagnostics}}{A detailed data frame with one row per selected
-configuration. It records the solution type, configuration key, component count,
+solution formula. It records the solution type, internal configuration
+key, component count,
 status, pooled consistency and coverage, maximum and mean absolute
 cluster-level deltas, the clusters with the worst consistency and
 coverage values, whether within-unit diagnostics were available, the
@@ -96,49 +92,49 @@ number of repeated units, and error information when a configuration could not
 be evaluated.}
 \item{\code{results}}{A named list with three tables:
 \describe{
-\item{\code{overview}}{One row per selected configuration, summarizing pooled fit,
+\item{\code{overview}}{One row per selected solution formula, summarizing pooled fit,
 maximum cluster deltas, worst clusters, and within-unit
 availability.}
-\item{\code{clusters}}{One row per configuration-component-cluster combination,
+\item{\code{clusters}}{One row per expression-component-cluster combination,
 giving cluster-specific consistency, coverage, and deltas from the
-pooled configuration values. The whole configuration is stored as
+pooled expression values. The complete solution formula is stored as
 \code{component = "solution"}; separate term-level rows are included only
 for multi-term solutions.}
-\item{\code{units}}{One row per configuration-component-unit combination for
+\item{\code{units}}{One row per expression-component-unit combination for
 units observed in more than one cluster, giving within-unit
-consistency, coverage, and deltas from the pooled configuration values.
+consistency, coverage, and deltas from the pooled expression values.
 Separate term-level rows are included only for multi-term solutions.}
 }}
 \item{\code{baseline}}{A list containing the input truth table, minimization
 results by solution type, selected solution terms used for comparison,
-metadata, and the extracted configuration definitions used for the
+metadata, and the extracted expression definitions used for the
 heterogeneity diagnostics.}
 \item{\code{by_cluster}}{A named list of detailed cluster-level diagnostics
-for each selected configuration.}
+for each selected solution formula.}
 \item{\code{by_unit}}{A named list of detailed unit-level diagnostics for
-each selected configuration when repeated units are available, or \code{NULL}
+each selected solution formula when repeated units are available, or \code{NULL}
 otherwise.}
 \item{\code{settings}}{A list containing the analysis settings used to build
 the result object.}
 }
 
 \code{print.cluster_test()} prints a compact overview and, when the object has
-one displayed configuration, cluster and within-unit details.
+one displayed solution formula, cluster and within-unit details.
 \code{as.data.frame.cluster_test()} returns \code{results$overview}.
 }
 \description{
-Evaluates how the consistency and coverage of selected QCA configurations
-vary across clusters and, when repeated units are available, across units
-observed in more than one cluster. The function starts from an existing
-truth table, minimizes it under the requested solution type, extracts the
-selected baseline configurations, and then compares pooled fit values with
-cluster-specific and within-unit fit values.
+Evaluates how the consistency and coverage of selected QCA solution formulas
+and their prime implicants vary across clusters and, when repeated units are
+available, across units observed in more than one cluster. The function
+starts from an existing truth table, minimizes it under the requested
+solution type, extracts the selected baseline expressions, and then compares
+pooled fit values with cluster-specific and within-unit fit values.
 }
 \details{
 The function recovers the outcome membership from \code{tt$recoded.data}, runs
 minimization for the requested solution type or solution types, extracts the
-selected baseline configurations, and computes pooled fit values for each
-configuration and configuration component.
+selected baseline solution formulas, and computes pooled fit values for each
+complete formula and prime implicant.
 
 Rows in \code{data} and \code{tt$recoded.data} are paired before cluster diagnostics.
 Informative row names must be unique and identical in the same order on both
@@ -156,8 +152,8 @@ cluster-specific or within-unit fit.
 
 Within-unit diagnostics use a separate occurrence table formed from rows
 with non-missing \code{unit_id} and \code{cluster_id}. A unit is repeated when it is
-observed in more than one distinct cluster, regardless of its configuration
-or outcome membership values. Each non-missing unit-cluster combination
+observed in more than one distinct cluster, regardless of its selected
+expression or outcome membership values. Each non-missing unit-cluster combination
 must occur at most once; duplicate combinations are rejected rather than
 having their fuzzy memberships summed. Within-unit fit uses the eligible
 membership pairs among each repeated unit's observed cluster occurrences.
@@ -218,7 +214,6 @@ out <- cluster.test(
   dir.exp = dir_exp,
   exclude = enhanced,
   which_M = 1,
-  necessity = FALSE,
   progress = TRUE
 )
 

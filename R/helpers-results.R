@@ -820,6 +820,21 @@
   ))
 }
 
+.cluster_display_configuration <- function(solution_type, configuration_key) {
+  solution_type <- as.character(solution_type)
+  configuration_key <- as.character(configuration_key)
+  prefix <- paste0(solution_type, ":")
+  strip_prefix <- !is.na(configuration_key) &
+    !is.na(solution_type) &
+    startsWith(configuration_key, prefix)
+
+  configuration_key[strip_prefix] <- substring(
+    configuration_key[strip_prefix],
+    nchar(prefix[strip_prefix]) + 1L
+  )
+  configuration_key
+}
+
 .make_cluster_results <- function(diagnostics, by_cluster, by_unit) {
   needed <- c(
     "solution_type",
@@ -838,6 +853,10 @@
 
   .require_result_columns(diagnostics, needed, "cluster-test")
   overview <- diagnostics[, needed, drop = FALSE]
+  overview$configuration_key <- .cluster_display_configuration(
+    solution_type = overview$solution_type,
+    configuration_key = overview$configuration_key
+  )
   overview$solution_type <- vapply(overview$solution_type, .compact_solution_type_names, character(1))
 
   names(overview) <- c(
@@ -867,8 +886,10 @@
 
       data.frame(
         solution_type = .compact_solution_type_names(x$solution_type),
-        configuration = x$configuration_key,
-        solution_expression = x$solution_expression,
+        configuration = .cluster_display_configuration(
+          solution_type = x$solution_type,
+          configuration_key = x$configuration_key
+        ),
         component = as.character(d$component),
         cluster_id = as.character(d$cluster_id),
         cluster_size = as.integer(d$cluster_size),
@@ -897,8 +918,10 @@
 
       data.frame(
         solution_type = .compact_solution_type_names(x$solution_type),
-        configuration = x$configuration_key,
-        solution_expression = x$solution_expression,
+        configuration = .cluster_display_configuration(
+          solution_type = x$solution_type,
+          configuration_key = x$configuration_key
+        ),
         component = as.character(d$component),
         unit_id = as.character(d$unit_id),
         n_clusters = as.integer(d$n_clusters),
