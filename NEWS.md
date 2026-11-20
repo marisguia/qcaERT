@@ -1,4 +1,4 @@
-# qcaERT (Unreleased)
+# qcaERT 0.1.3
 
 - Stratified draws in `subsample.test()` now use the actual case from a
   one-case stratum. When the frequency-cutoff grid in `altset.test()` contains

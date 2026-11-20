@@ -119,7 +119,7 @@ at \doi{10.5281/zenodo.21685193}.
 \section{Recommended citation}{
 
 Marisguia, B. A. H. (2026). qcaERT: Enhanced Robustness Tests for
-Qualitative Comparative Analysis. R package version 0.1.2.
+Qualitative Comparative Analysis. R package version 0.1.3.
 \url{https://CRAN.R-project.org/package=qcaERT}.
 doi:10.32614/CRAN.package.qcaERT.
 
