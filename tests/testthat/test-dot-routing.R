@@ -113,3 +113,32 @@ test_that("calib.test accepts split truthTable and minimize dots", {
   expect_s3_class(out, "calib_test")
   expect_identical(out$baseline$status, "ok")
 })
+
+test_that("legacy negation agrees with tilde notation for fit and exclusions", {
+  skip_if_not_installed("QCA")
+
+  args <- list(
+    data = data.frame(A = c(1, 1, 0, 0), Y = c(0, 0, 1, 1)),
+    conditions = "A",
+    max_steps = 1,
+    solution = "parsimonious",
+    exclude_recompute = list(type = 3),
+    progress = FALSE
+  )
+  legacy <- do.call(incl.test, c(args, list(outcome = "Y", neg.out = TRUE)))
+  tilde <- do.call(incl.test, c(args, list(outcome = "~Y")))
+
+  expect_identical(legacy$settings$outcome, "~Y")
+  expect_identical(legacy$baseline$tt$recoded.data$Y, c(1, 1, 0, 0))
+  expect_identical(legacy$baseline$status, "ok")
+  expect_length(legacy$baseline$exclude_used, 0L)
+  expect_identical(legacy$baseline$exclude_used, tilde$baseline$exclude_used)
+  expect_equal(legacy$baseline$res$parsimonious$IC$sol.incl.cov$inclS, 1)
+  expect_identical(legacy$results, tilde$results)
+
+  expect_error(
+    do.call(incl.test, c(args, list(outcome = "~Y", neg.out = TRUE))),
+    "Use either `neg.out = TRUE` or a leading `~`",
+    fixed = TRUE
+  )
+})

@@ -57,6 +57,27 @@ test_that("incl.test does not report an out-of-range cutoff as first failing", {
   expect_identical(nrow(out$by_direction$upper$trace), 0L)
 })
 
+test_that("incl.test evaluates endpoints on the step grid", {
+  skip_if_not_installed("QCA")
+
+  args <- list(
+    data = tiny_qca, outcome = "Y", conditions = c("A", "B"),
+    max_steps = 5, solution = "conservative", exclude_mode = "none", progress = FALSE
+  )
+
+  upper <- do.call(incl.test, c(args, list(incl.cut = 0.8, step = 0.05)))
+  expect_equal(upper$by_direction$upper$trace$incl.cut, c(0.85, 0.9, 0.95, 1))
+  expect_identical(upper$results$last_safe[upper$results$direction == "upper"], 1)
+
+  lower <- do.call(incl.test, c(args, list(incl.cut = 0.3, step = 0.1)))
+  expect_equal(lower$by_direction$lower$trace$incl.cut, c(0.2, 0.1, 0))
+  expect_identical(tail(lower$by_direction$lower$trace$incl.cut, 1), 0)
+
+  off_grid <- do.call(incl.test, c(args, list(incl.cut = 0.8, step = 0.07)))
+  expect_equal(off_grid$by_direction$upper$trace$incl.cut, c(0.87, 0.94))
+  expect_identical(off_grid$results$reason[off_grid$results$direction == "upper"], "search_boundary_upper")
+})
+
 test_that("ncut.test runs end to end on the shared direct-six fixture", {
   skip_if_not_installed("QCA")
 

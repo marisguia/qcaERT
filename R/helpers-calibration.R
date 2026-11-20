@@ -365,6 +365,7 @@
     outcome = NULL,
     calib_spec,
     test.outcome = FALSE,
+    tested_sets,
     raw.data,
     unit_step,
     unit_step_divisor,
@@ -387,10 +388,11 @@
   spec_targets <- names(calib_specs)
   condition_specs <- calib_specs[conditions]
   outcome_spec <- if (isTRUE(test.outcome)) calib_specs[[outcome]] else NULL
+  step_targets <- if (is.null(unit_step)) intersect(spec_targets, tested_sets) else spec_targets
 
   unit_step_targets <- .coerce_unit_step(
     unit_step = unit_step,
-    conds = spec_targets,
+    conds = step_targets,
     raw.data = raw.data,
     unit_step_divisor = unit_step_divisor,
     calib_specs = calib_specs
@@ -407,7 +409,7 @@
     type_targets = vapply(calib_specs, function(x) x$type, character(1)),
     thresholds = lapply(condition_specs, function(x) x$thresholds),
     thresholds_targets = lapply(calib_specs, function(x) x$thresholds),
-    unit_step = unit_step_targets[conditions],
+    unit_step = unit_step_targets[intersect(conditions, step_targets)],
     unit_step_targets = unit_step_targets,
     anchors_to_test = .normalize_calib_anchors_to_test(anchors_to_test)
   )

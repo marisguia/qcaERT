@@ -82,7 +82,9 @@
 #'     reduced-data run fails.}
 #'     \item{`results`}{A compact data frame with the columns
 #'     `row_index`, `case_label`, `status`, `solution_change`,
-#'     `fit_changed_types`, `n_fit_deltas`, and `max_abs_fit_delta`.}
+#'     `fit_changed_types`, `n_fit_deltas`, and `max_abs_fit_delta`.
+#'     If fit comparison is requested, `n_fit_deltas` is `NA` when no fit
+#'     measures can be compared between the selected models.}
 #'     \item{`baseline`}{A list containing the baseline analysis built from the
 #'     full dataset, including the truth table, minimization output, selected
 #'     solution terms used for comparison, fit values, exclusion information,
@@ -279,7 +281,7 @@ loo.test <- function(
     style = "std"
   )
 
-  dots_split <- .split_truth_table_minimize_dots(dots_raw)
+  dots_split <- .split_truth_table_minimize_dots(dots_raw, outcome)
   dots_tt <- dots_split$tt
   dots_min <- dots_split$min
 
@@ -329,7 +331,7 @@ loo.test <- function(
     args <- c(
       list(
         data = data_step,
-        outcome = outcome,
+        outcome = dots_split$outcome,
         incl.cut = incl.cut,
         n.cut = n.cut
       ),
@@ -340,7 +342,7 @@ loo.test <- function(
       args$conditions <- conditions
     }
 
-    do.call(QCA::truthTable, args)
+    .qcaert_truth_table(args)
   }
 
   .run_once <- function(data_step, raw_step = NULL) {
@@ -550,7 +552,7 @@ loo.test <- function(
       solution_changed = isTRUE(sol_info$changed),
       changed_types = sol_info$changed_types,
       change_kind = sol_info$change_kind,
-      fit_changed = isTRUE(fit_info$changed),
+      fit_changed = fit_info$changed,
       fit_changed_types = fit_info$changed_types,
       n_fit_deltas = as.integer(fit_info$n_changed),
       max_abs_fit_delta = fit_info$max_abs_delta,
@@ -568,7 +570,7 @@ loo.test <- function(
       solution_changed = isTRUE(sol_info$changed),
       changed_types = sol_info$changed_types,
       change_kind = sol_info$change_kind,
-      fit_changed = isTRUE(fit_info$changed),
+      fit_changed = fit_info$changed,
       fit_changed_types = fit_info$changed_types,
       fit_changed_measures = fit_info$changed_measures,
       fit_delta = fit_info$delta,
@@ -596,7 +598,7 @@ loo.test <- function(
     baseline = baseline,
     by_case = by_case,
     settings = list(
-      outcome = outcome,
+      outcome = dots_split$outcome,
       conditions = conditions,
       cases = cases,
       case_labels = case_labels,

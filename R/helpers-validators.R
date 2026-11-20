@@ -108,7 +108,8 @@
 .validate_outcome_conditions_distinct <- function(outcome, conditions) {
   if (is.null(outcome) || length(outcome) < 1L) return(invisible(TRUE))
   if (is.null(conditions)) return(invisible(TRUE))
-  if (any(outcome %in% conditions)) {
+  outcome_names <- c(outcome, trimws(sub("^~", "", trimws(outcome))))
+  if (any(outcome_names %in% conditions)) {
     stop("`outcome` must not be included in `conditions`; the outcome is handled separately from the causal conditions.")
   }
   invisible(TRUE)

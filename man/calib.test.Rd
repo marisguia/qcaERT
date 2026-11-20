@@ -84,8 +84,8 @@ when minimization returns multiple models.}
 \item{unit_step}{Numeric step size used to move thresholds. Supply either
 one value applied to all tested sets, one value per condition when
 \code{test.outcome = FALSE}, or one value per \code{c(conditions, outcome)} when
-\code{test.outcome = TRUE}. If \code{NULL}, qcaERT computes scale-aware steps from
-each set's threshold spacing.}
+\code{test.outcome = TRUE}. If \code{NULL}, qcaERT computes scale-aware steps for
+the sets selected by \code{test.conditions} and \code{test.outcome}.}
 
 \item{unit_step_divisor}{Positive number used to compute \code{unit_step}
 automatically when \code{unit_step = NULL}. The default is \code{10}.}
@@ -204,10 +204,18 @@ anchor of one set and moves in one direction at a time (\code{"lower"} or
 \code{"upper"}), using \code{unit_step} until one of four things happens:
 \itemize{
 \item the monitored solution changes,
-\item minimization fails,
+\item recalibration or minimization fails,
 \item the raw-data range or anchor ordering blocks the next move, or
 \item \code{max_steps} is reached.
 }
+
+If a proposed threshold is infeasible, that path ends with reason
+\code{"feasibility_boundary"}. The \code{first_failing} value records the rejected
+threshold, which is not evaluated for solution preservation.
+
+If recalibration fails at a proposed threshold, that path ends with
+reason \code{"calibration_error"}. The result keeps the last safe threshold and
+records the threshold that failed. The diagnostics include QCA's error message.
 
 The shared solution-control, exclusion, calibration-specification, and
 returned-object conventions are described in \code{?qcaERT_conventions}.

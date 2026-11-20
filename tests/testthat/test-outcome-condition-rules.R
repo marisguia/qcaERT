@@ -94,3 +94,24 @@ test_that("cluster.test rejects truth tables whose outcome is also a condition",
     fixed = TRUE
   )
 })
+
+test_that("negating the outcome still excludes its column from the conditions", {
+  skip_if_not_installed("QCA")
+
+  data <- data.frame(A = c(0, 1, 0, 1), Y = c(0, 0, 1, 1), B = c(1, 1, 0, 0))
+  msg <- "`outcome` must not be included in `conditions`"
+
+  expect_error(
+    incl.test(data, outcome = "~Y", conditions = c("A", "Y"), progress = FALSE),
+    msg,
+    fixed = TRUE
+  )
+
+  # QCA expands this range to A, Y, and B while building the truth table.
+  out <- incl.test(
+    data, outcome = "~Y", conditions = "A:B", solution = "conservative",
+    progress = FALSE
+  )
+  expect_identical(out$baseline$status, "truth_table_error")
+  expect_match(out$baseline$error_message, msg, fixed = TRUE)
+})

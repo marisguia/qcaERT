@@ -95,8 +95,8 @@ when minimization returns multiple models.}
 \item{unit_step}{Numeric step size used to move calibration thresholds when
 building candidate alternative draws. Supply either one value applied to
 all calibrated sets or one value per condition, plus the outcome when
-\code{test.outcome = TRUE}. If \code{NULL}, qcaERT computes scale-aware steps from
-each set's threshold spacing.}
+\code{test.outcome = TRUE}. If \code{NULL}, qcaERT computes scale-aware steps for
+the sets selected by \code{test.conditions} and \code{test.outcome}.}
 
 \item{unit_step_divisor}{Positive number used to compute \code{unit_step}
 automatically when \code{unit_step = NULL}. The default is \code{10}.}

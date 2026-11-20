@@ -35,8 +35,9 @@ appearance.}
 values follow the common qcaERT solution-type conventions, excluding \code{"all"}.
 \code{"complex"} is accepted as an alias for \code{"conservative"} for display use.}
 
-\item{model}{Optional positive integer selecting which model to display when
-\code{x} contains more than one model.}
+\item{model}{Positive integer selecting the numbered model to display.
+Required when \code{x} contains more than one model number. Rows without a model
+number are retained alongside the selected model.}
 
 \item{intermediate_branch}{Optional intermediate branch to display when \code{x}
 contains more than one intermediate branch.}

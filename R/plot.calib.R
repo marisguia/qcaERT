@@ -219,55 +219,11 @@ plot.calib_test <- function(
       )
     }
 
-    trace$preserved <- ifelse(is.na(trace$changed), "Unknown", ifelse(trace$changed, "No", "Yes"))
-    trace$preserved <- factor(trace$preserved, levels = c("Yes", "No", "Unknown"))
-
     trace_row <- trace_row[1L, , drop = FALSE]
     start_value <- trace_row$start_value
     failing_value <- trace_row$failing_value
 
-    fail_point <- NULL
-    if (is.finite(failing_value) && !is.na(failing_value)) {
-      failing_value_recorded <- nrow(trace) > 0L &&
-        any(!is.na(trace$value) & trace$value == failing_value)
-
-      if (!failing_value_recorded) {
-        next_step <- if (nrow(trace) == 0L) 1L else max(trace$step, na.rm = TRUE) + 1L
-        fail_point <- data.frame(
-          step = next_step,
-          value = failing_value,
-          preserved = factor("No", levels = levels(trace$preserved))
-        )
-      }
-    }
-
-    line_df <- trace[, c("step", "value"), drop = FALSE]
-    if (!is.null(fail_point)) {
-      present <- nrow(line_df) && any(line_df$step == fail_point$step & line_df$value == fail_point$value)
-      if (!present) line_df <- rbind(line_df, fail_point[, c("step", "value"), drop = FALSE])
-      line_df <- line_df[order(line_df$step), , drop = FALSE]
-    }
-
     p <- ggplot2::ggplot() +
-      ggplot2::geom_line(
-        data = line_df,
-        ggplot2::aes(x = .data[["step"]], y = .data[["value"]]),
-        ...
-      ) +
-      ggplot2::geom_point(
-        data = trace,
-        ggplot2::aes(
-          x = .data[["step"]],
-          y = .data[["value"]],
-          shape = .data[["preserved"]],
-          colour = .data[["preserved"]]
-        ),
-        size = 4,
-        alpha = 0.8,
-        ...
-      ) +
-      ggplot2::scale_shape_manual(name = "Preserved", values = c(Yes = 19, No = 15, Unknown = 17)) +
-      ggplot2::scale_colour_manual(name = "Preserved", values = .plot_preserved_colors()) +
       ggplot2::labs(
         title = paste0("Calibration trace: ", set, " | ", anchor, " | ", direction),
         x = "Step",
@@ -275,25 +231,48 @@ plot.calib_test <- function(
       ) +
       theme
 
-    if (!is.null(fail_point)) {
-      p <- p + ggplot2::geom_point(
-        data = fail_point,
-        ggplot2::aes(
-          x = .data[["step"]],
-          y = .data[["value"]],
-          shape = .data[["preserved"]],
-          colour = .data[["preserved"]]
-        ),
-        inherit.aes = FALSE,
-        size = 4,
-        alpha = 0.8
+    if (nrow(trace) > 1L) {
+      p <- p + ggplot2::geom_line(
+        data = trace,
+        ggplot2::aes(x = .data[["step"]], y = .data[["value"]]),
+        ...
       )
     }
+    if (nrow(trace) > 0L) {
+      trace$preserved <- ifelse(is.na(trace$changed), "Unknown", ifelse(trace$changed, "No", "Yes"))
+      trace$preserved <- factor(trace$preserved, levels = c("Yes", "No", "Unknown"))
+      p <- p +
+        ggplot2::geom_point(
+          data = trace,
+          ggplot2::aes(
+            x = .data[["step"]],
+            y = .data[["value"]],
+            shape = .data[["preserved"]],
+            colour = .data[["preserved"]]
+          ),
+          size = 4,
+          alpha = 0.8,
+          ...
+        ) +
+        ggplot2::scale_shape_manual(name = "Preserved", values = c(Yes = 19, No = 15, Unknown = 17)) +
+        ggplot2::scale_colour_manual(name = "Preserved", values = .plot_preserved_colors())
+    }
+
     if (show_stop && is.finite(start_value) && !is.na(start_value)) {
       p <- p + ggplot2::geom_hline(yintercept = start_value, linetype = "dashed")
     }
-    if (show_stop && is.finite(failing_value) && !is.na(failing_value)) {
+    if (show_stop && is.finite(failing_value)) {
       p <- p + ggplot2::geom_hline(yintercept = failing_value, linetype = "dotdash")
+      if (identical(as.character(trace_row$stop_reason), "feasibility_boundary")) {
+        p <- p + ggplot2::annotate(
+          "text",
+          x = Inf,
+          y = failing_value,
+          label = "Infeasible threshold",
+          hjust = 1.05,
+          vjust = if (direction == "lower") -0.5 else 1.5
+        )
+      }
     }
     if (!legend) p <- p + ggplot2::theme(legend.position = "none")
 

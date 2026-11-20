@@ -137,7 +137,9 @@ measures, the largest absolute fit change, and error information when a
 reduced-data run fails.}
 \item{\code{results}}{A compact data frame with the columns
 \code{row_index}, \code{case_label}, \code{status}, \code{solution_change},
-\code{fit_changed_types}, \code{n_fit_deltas}, and \code{max_abs_fit_delta}.}
+\code{fit_changed_types}, \code{n_fit_deltas}, and \code{max_abs_fit_delta}.
+If fit comparison is requested, \code{n_fit_deltas} is \code{NA} when no fit
+measures can be compared between the selected models.}
 \item{\code{baseline}}{A list containing the baseline analysis built from the
 full dataset, including the truth table, minimization output, selected
 solution terms used for comparison, fit values, exclusion information,

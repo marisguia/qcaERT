@@ -329,7 +329,7 @@
   )
 
   tryCatch(
-    suppressWarnings(do.call(QCA::truthTable, args)),
+    suppressWarnings(.qcaert_truth_table(args)),
     error = function(e) e
   )
 }
@@ -1355,6 +1355,7 @@ theory.test <- function(
     stop("`outcome` must be a single non-empty character string.")
   }
   outcome <- trimws(outcome)
+  dots_split <- .split_truth_table_minimize_dots(dots_raw, outcome)
   if (!outcome %in% colnames(data)) {
     stop("`outcome` must name a column in `data`.")
   }
@@ -1415,7 +1416,6 @@ theory.test <- function(
     monitored_solutions = monitored_solutions
   )
 
-  dots_split <- .split_truth_table_minimize_dots(dots_raw)
   progress_state <- .new_qcaert_progress(total = length(theories), progress = progress)
   on.exit(progress_state$close(), add = TRUE)
 
@@ -1423,7 +1423,7 @@ theory.test <- function(
     run <- .theory_run_one(
       theory = theory,
       data = data,
-      outcome = outcome,
+      outcome = dots_split$outcome,
       conditions = theories[[theory]],
       dir.exp = if (is.null(dir.exp)) NULL else dir.exp[[theory]],
       incl.cut = incl.cut,
@@ -1476,7 +1476,7 @@ theory.test <- function(
     results = results,
     by_theory = by_theory,
     settings = list(
-      outcome = outcome,
+      outcome = dots_split$outcome,
       theories = theories,
       incl.cut = incl.cut,
       n.cut = n.cut,

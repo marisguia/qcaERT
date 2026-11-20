@@ -100,7 +100,12 @@
 #'     \item{`results`}{A compact data frame with the columns
 #'     `rep`, `n_sample`, `n_holdout`, `status`, `exact_match_baseline`,
 #'     `term_jaccard_baseline`, `solution_change`, `fit_changed_types`,
-#'     `n_fit_deltas`, and `max_abs_fit_delta`.}
+#'     `n_fit_deltas`, and `max_abs_fit_delta`.
+#'     `exact_match_baseline` is `TRUE` when all requested solution types match
+#'     the baseline. It is `FALSE` when a comparison shows a change, and `NA`
+#'     when the comparison is incomplete and no change has been established.
+#'     If fit comparison is requested, `n_fit_deltas` is `NA` when no fit
+#'     measures can be compared between the selected models.}
 #'     \item{`summary`}{A list with summary objects named `exact_solution`,
 #'     `term_stability`, `fit_stability`, `similarity`, and `calibration`.}
 #'     \item{`baseline`}{A list containing the baseline analysis built from the
@@ -340,7 +345,7 @@ subsample.test <- function(
     style = "std"
   )
 
-  dots_split <- .split_truth_table_minimize_dots(dots_raw)
+  dots_split <- .split_truth_table_minimize_dots(dots_raw, outcome)
   dots_tt <- dots_split$tt
   dots_min <- dots_split$min
 
@@ -387,7 +392,7 @@ subsample.test <- function(
     args <- c(
       list(
         data = data_step,
-        outcome = outcome,
+        outcome = dots_split$outcome,
         incl.cut = incl.cut,
         n.cut = n.cut
       ),
@@ -398,7 +403,7 @@ subsample.test <- function(
       args$conditions <- conditions
     }
 
-    do.call(QCA::truthTable, args)
+    .qcaert_truth_table(args)
   }
 
   .run_once <- function(data_step, raw_step = NULL) {
@@ -559,7 +564,7 @@ subsample.test <- function(
       baseline = baseline,
       by_run = setNames(vector("list", reps), paste0("R", seq_len(reps))),
       settings = list(
-        outcome = outcome,
+        outcome = dots_split$outcome,
         conditions = conditions,
         calib = calib,
         sample_n = sample_n,
@@ -629,7 +634,7 @@ subsample.test <- function(
       idx_pool <- strata_index[[lev]]
       n_take <- sample_alloc[[lev]]
       if (n_take > 0L) {
-        draw <- sample(idx_pool, size = n_take, replace = FALSE)
+        draw <- idx_pool[sample.int(length(idx_pool), size = n_take, replace = FALSE)]
         idx_sample <- c(idx_sample, draw)
         realized_counts <- c(realized_counts, n_take)
         names(realized_counts)[length(realized_counts)] <- lev
@@ -753,7 +758,13 @@ subsample.test <- function(
       fit_measures = fit_measures
     )
 
-    exact_match_baseline <- !isTRUE(sol_info$changed)
+    exact_match_baseline <- if (isTRUE(sol_info$changed)) {
+      FALSE
+    } else if (setequal(comparable_solution_types, monitored_solutions)) {
+      TRUE
+    } else {
+      NA
+    }
     term_set_cur <- .run_term_set(cur, baseline_solution_types)
     term_jaccard_baseline <- .jaccard(baseline_term_set_all, term_set_cur)
     changed_any <- isTRUE(sol_info$changed) || isTRUE(fit_info$changed)
@@ -767,7 +778,7 @@ subsample.test <- function(
       solution_changed = isTRUE(sol_info$changed),
       changed_types = sol_info$changed_types,
       change_kind = sol_info$change_kind,
-      fit_changed = isTRUE(fit_info$changed),
+      fit_changed = fit_info$changed,
       fit_changed_types = fit_info$changed_types,
       n_fit_deltas = as.integer(fit_info$n_changed),
       max_abs_fit_delta = fit_info$max_abs_delta,
@@ -791,7 +802,7 @@ subsample.test <- function(
       solution_changed = isTRUE(sol_info$changed),
       changed_types = sol_info$changed_types,
       change_kind = sol_info$change_kind,
-      fit_changed = isTRUE(fit_info$changed),
+      fit_changed = fit_info$changed,
       fit_changed_types = fit_info$changed_types,
       fit_changed_measures = fit_info$changed_measures,
       fit_delta = fit_info$delta,
@@ -951,7 +962,7 @@ subsample.test <- function(
             median_delta = if (all(is.na(deltas))) NA_real_ else stats::median(deltas, na.rm = TRUE),
             q25_delta = if (all(is.na(deltas))) NA_real_ else as.numeric(stats::quantile(deltas, probs = 0.25, na.rm = TRUE, names = FALSE)),
             q75_delta = if (all(is.na(deltas))) NA_real_ else as.numeric(stats::quantile(deltas, probs = 0.75, na.rm = TRUE, names = FALSE)),
-            prop_changed = if (length(vals) == 0L) NA_real_ else mean(abs(deltas) > fit_tol, na.rm = TRUE),
+            prop_changed = if (all(is.na(deltas))) NA_real_ else mean(abs(deltas) > fit_tol, na.rm = TRUE),
             stringsAsFactors = FALSE
           )
         }
@@ -1075,7 +1086,7 @@ subsample.test <- function(
     baseline = baseline,
     by_run = by_run,
     settings = list(
-      outcome = outcome,
+      outcome = dots_split$outcome,
       conditions = conditions,
       calib = calib,
       sample_n = sample_n,

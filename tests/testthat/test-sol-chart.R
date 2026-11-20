@@ -100,6 +100,22 @@ test_that("sol.chart requires a model when several are present", {
   expect_true(all(chart$terms$Model == 2L))
 })
 
+test_that("sol.chart keeps unnumbered solution rows alongside the selected model", {
+  x <- sol_chart_fixture()
+  x$Model[x$Solution == "Conservative"] <- "-"
+
+  chart <- .sol_chart_prepare(x)
+  expect_identical(chart$terms$Prime_Implicants, x$Prime_Implicants)
+  expect_length(chart$aligned_prime_implicants, 2L)
+  expect_setequal(chart$states$solution_type, c("conservative", "intermediate", "parsimonious"))
+
+  alternative <- transform(x[x$Solution == "Parsimonious", ], Model = "2", Prime_Implicants = "A*B")
+  selected <- .sol_chart_prepare(rbind(x, alternative), model = 2)
+  expect_identical(selected$terms$Model, c("-", "-", "2"))
+  expect_identical(selected$terms$Prime_Implicants, c("A*B*C", "A*B*~C", "A*B"))
+  expect_setequal(selected$states$solution_type, c("conservative", "parsimonious"))
+})
+
 test_that("sol.chart returns a ggplot object", {
   skip_if_not_installed("ggplot2")
 

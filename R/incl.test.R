@@ -101,7 +101,9 @@
 #' solution type. The function then tests lower and upper values of
 #' `incl.cut` one step at a time. When `solution = "all"`, conservative,
 #' parsimonious, and, when requested, intermediate paths are searched
-#' independently.
+#' independently. Cutoffs are calculated from the baseline and step number.
+#' A cutoff that differs from 0 or 1 only by floating-point rounding is
+#' evaluated at that endpoint.
 #'
 #' A directional search stops when one of the following occurs:
 #' \itemize{
@@ -259,7 +261,7 @@ incl.test <- function(
     style = "std"
   )
 
-  dots_split <- .split_truth_table_minimize_dots(dots_raw)
+  dots_split <- .split_truth_table_minimize_dots(dots_raw, outcome)
   dots_tt <- dots_split$tt
   dots_min <- dots_split$min
 
@@ -267,7 +269,7 @@ incl.test <- function(
     args <- c(
       list(
         data = data,
-        outcome = outcome,
+        outcome = dots_split$outcome,
         incl.cut = cutoff,
         n.cut = n.cut
       ),
@@ -278,7 +280,7 @@ incl.test <- function(
       args$conditions <- conditions
     }
 
-    do.call(QCA::truthTable, args)
+    .qcaert_truth_table(args)
   }
 
   .run_once <- function(cutoff, solution_types = monitored_solutions) {
@@ -330,7 +332,7 @@ incl.test <- function(
     baseline = baseline,
     by_direction = by_direction,
     settings = list(
-      outcome = outcome,
+      outcome = dots_split$outcome,
       conditions = conditions,
       incl.cut = incl.cut,
       step = step,

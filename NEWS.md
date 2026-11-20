@@ -1,3 +1,31 @@
+# qcaERT (Unreleased)
+
+- Stratified draws in `subsample.test()` now use the actual case from a
+  one-case stratum. When the frequency-cutoff grid in `altset.test()` contains
+  a single value, every draw uses that value.
+- `loo.test()` and `subsample.test()` now retrieve fit statistics for the
+  model selected by `which_M` when QCA returns multiple models. When fit
+  comparison is requested and no measures can be compared, `fit_changed` and
+  `n_fit_deltas` are `NA`. A completed comparison with no differences beyond
+  `fit_tol` reports `FALSE` and `0`, respectively.
+- Tests that build truth tables now apply `neg.out = TRUE` to a single
+  outcome during truth-table construction. Supply either `neg.out = TRUE`
+  or a leading `~` in the outcome. The tests also reject using the outcome
+  set as a condition.
+- `subsample.test()` reports `exact_match_baseline = TRUE` when all requested
+  solution types match. An observed difference gives `FALSE`. An incomplete
+  comparison with no observed difference gives `NA`.
+- When recalibration fails at a proposed threshold, `calib.test()` records
+  `calibration_error` for that search path and preserves the last safe
+  threshold, the failed threshold, and QCA's error message.
+- With `unit_step = NULL`, `calib.test()` and `altset.test()` calculate step
+  sizes for the sets selected by `test.conditions` and `test.outcome`.
+- `incl.test()` now evaluates `0` or `1` when a step lands there within
+  floating-point precision. With `show_stop = TRUE`, calibration trace plots
+  label a rejected threshold as infeasible on a reference line.
+- `sol.chart()` keeps rows without a model number alongside those for the
+  selected numbered model.
+
 # qcaERT 0.1.2
 
 - `incl.test()` and `ncut.test()` now leave `first_failing` missing when the

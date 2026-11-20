@@ -154,7 +154,9 @@ The baseline analysis is built with \code{\link[QCA:truthTable]{QCA::truthTable(
 solution type. The function then tests lower and upper values of
 \code{incl.cut} one step at a time. When \code{solution = "all"}, conservative,
 parsimonious, and, when requested, intermediate paths are searched
-independently.
+independently. Cutoffs are calculated from the baseline and step number.
+A cutoff that differs from 0 or 1 only by floating-point rounding is
+evaluated at that endpoint.
 
 A directional search stops when one of the following occurs:
 \itemize{

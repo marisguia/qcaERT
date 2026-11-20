@@ -134,7 +134,8 @@ plot.}
 \code{"lower"} or \code{"upper"}.}
 
 \item{show_stop}{Logical. If \code{TRUE}, draw reference lines for baseline and,
-when present, first-failing values.}
+when present, first-failing values. In a calibration trace, an infeasible
+threshold is labelled at the reference line and omitted from the trace.}
 
 \item{order_sets}{For \code{calib_test}, set ordering in interval and heatmap
 views. \code{"input"} preserves result order; \code{"most_sensitive"} and

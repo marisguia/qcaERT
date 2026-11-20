@@ -259,7 +259,7 @@ ncut.test <- function(
     style = "std"
   )
 
-  dots_split <- .split_truth_table_minimize_dots(dots_raw)
+  dots_split <- .split_truth_table_minimize_dots(dots_raw, outcome)
   dots_tt <- dots_split$tt
   dots_min <- dots_split$min
 
@@ -267,7 +267,7 @@ ncut.test <- function(
     args <- c(
       list(
         data = data,
-        outcome = outcome,
+        outcome = dots_split$outcome,
         incl.cut = incl.cut,
         n.cut = cutoff
       ),
@@ -278,7 +278,7 @@ ncut.test <- function(
       args$conditions <- conditions
     }
 
-    do.call(QCA::truthTable, args)
+    .qcaert_truth_table(args)
   }
 
   .run_once <- function(cutoff, solution_types = monitored_solutions) {
@@ -334,7 +334,7 @@ ncut.test <- function(
     baseline = baseline,
     by_direction = by_direction,
     settings = list(
-      outcome = outcome,
+      outcome = dots_split$outcome,
       conditions = conditions,
       n.cut = n.cut,
       step = step,

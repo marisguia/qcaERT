@@ -273,3 +273,48 @@ test_that("plot methods explain zero-row filters", {
     fixed = TRUE
   )
 })
+
+test_that("calib.test returns completed steps when recalibration fails", {
+  skip_if_not_installed("QCA")
+
+  raw <- data.frame(A_raw = 0:6)
+  data <- data.frame(
+    A = QCA::calibrate(raw$A_raw, thresholds = c(2, 3, 5), logistic = FALSE),
+    Y = as.integer(raw$A_raw >= 4)
+  )
+  spec <- list(A = list(
+    raw = "A_raw", type = "fuzzy", thresholds = c(E = 2, C = 3, I = 5),
+    calibrate = list(logistic = FALSE)
+  ))
+  calibrate <- .calibrate_from_spec
+  local_mocked_bindings(
+    .calibrate_from_spec = function(raw_x, spec) {
+      if (spec$thresholds[["E"]] == 0) stop("Calibration failed at E = 0.")
+      calibrate(raw_x, spec)
+    },
+    .package = "qcaERT"
+  )
+
+  args <- list(
+    raw.data = raw, calib.data = data, outcome = "Y", conditions = "A",
+    calib_spec = spec, anchors_to_test = "E", unit_step = 1, incl.cut = 0.75,
+    solution = "conservative", progress = FALSE
+  )
+  one_step <- do.call(calib.test, c(args, list(max_steps = 1)))
+  expect_identical(one_step$results$reason[one_step$results$direction == "lower"], "run_budget_exhausted")
+
+  two_steps <- do.call(calib.test, c(args, list(max_steps = 2)))
+  lower <- two_steps$results[two_steps$results$direction == "lower", ]
+  expect_equal(lower$last_safe, 1)
+  expect_equal(lower$first_failing, 0)
+  expect_identical(lower$steps, 1L)
+  expect_identical(lower$reason, "calibration_error")
+  expect_identical(two_steps$diagnostics$error_message[two_steps$diagnostics$direction == "lower"],
+    "Calibration failed at E = 0.")
+
+  trace <- two_steps$by_set$A$steps$E_lower$trace
+  expect_equal(trace$value, c(1, 0))
+  expect_identical(trace$status, c("ok", "calibration_error"))
+  expect_identical(trace$changed, c(FALSE, NA))
+  expect_true("upper" %in% two_steps$results$direction)
+})

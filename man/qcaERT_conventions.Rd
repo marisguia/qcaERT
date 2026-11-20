@@ -40,6 +40,17 @@ comparative theory testing needs one comparable intermediate branch per
 theory by default.
 }
 
+\section{Outcome Negation}{
+
+For tests that build truth tables, \code{neg.out = TRUE} requests the negation of
+a single outcome set. qcaERT passes the negated outcome to QCA using a
+leading \code{~}. Supply one form of negation per call.
+
+Use the original column name with \code{neg.out = TRUE} when the test looks up
+that column for calibration or stratification. \code{settings$outcome} records
+the outcome used to build the truth tables.
+}
+
 \section{Exclusions}{
 
 Functions that can monitor parsimonious or intermediate solutions use a

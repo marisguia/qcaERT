@@ -343,7 +343,10 @@
 ) {
   value_type <- match.arg(value_type, c("numeric", "integer"))
   value_na <- .boundary_cast_value(NA, value_type)
-  cur_value <- .boundary_cast_value(start_value, value_type)
+  signed_step <- if (direction == "lower") -step else step
+  endpoint <- if (direction == "lower") lower_limit else upper_limit
+  # Allow roundoff at the inclusion limits without snapping a different grid step.
+  endpoint_tolerance <- min(4 * .Machine$double.eps, step / 4)
   steps_done <- 0L
   last_safe_value <- .boundary_cast_value(start_value, value_type)
   last_safe_exclude <- baseline$exclude_used
@@ -423,9 +426,16 @@
   }
 
   for (k in seq_len(max_steps)) {
-    next_value <- if (direction == "lower") cur_value - step else cur_value + step
+    if (value_type == "numeric") {
+      next_value <- start_value + k * signed_step
+      if (abs(next_value - endpoint) <= endpoint_tolerance) {
+        next_value <- endpoint
+      }
+    } else {
+      next_value <- last_safe_value + signed_step
+    }
 
-    if (next_value < lower_limit || next_value > upper_limit) {
+    if (last_safe_value == endpoint || next_value < lower_limit || next_value > upper_limit) {
       stop_reason <- .boundary_stop_reason_from_status("boundary", direction = direction)
       break
     }
@@ -478,7 +488,6 @@
       break
     }
 
-    cur_value <- .boundary_cast_value(next_value, value_type)
     last_safe_value <- .boundary_cast_value(next_value, value_type)
     last_safe_exclude <- cur$exclude_used
     steps_done <- steps_done + 1L

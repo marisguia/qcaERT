@@ -121,7 +121,7 @@ test_that("calib_test plot methods return ggplot objects for direct-six anchors"
   )
 })
 
-test_that("calib_test trace plots do not duplicate an evaluated failing threshold", {
+test_that("calib_test trace plots distinguish solution changes from infeasible thresholds", {
   skip_if_not_installed("ggplot2")
 
   trace <- data.frame(
@@ -160,13 +160,33 @@ test_that("calib_test trace plots do not duplicate an evaluated failing threshol
 
   changed_plot <- plot(out, type = "trace", set = "BLEN", anchor = "I", direction = "lower")
   expect_equal(changed_plot$layers[[1L]]$data$step, 1:4)
+  expect_identical(as.character(changed_plot$layers[[2L]]$data$preserved), c("Yes", "Yes", "Yes", "No"))
   expect_length(changed_plot$layers, 4L)
 
   out$diagnostics$stop_reason <- "feasibility_boundary"
   out$by_set$BLEN$steps$I_lower$trace <- trace[1:3, , drop = FALSE]
   boundary_plot <- plot(out, type = "trace", set = "BLEN", anchor = "I", direction = "lower")
-  expect_equal(boundary_plot$layers[[1L]]$data$step, 1:4)
-  expect_equal(boundary_plot$layers[[3L]]$data$step, 4L)
+  expect_identical(boundary_plot$layers[[1L]]$data$step, 1:3)
+  expect_identical(as.character(boundary_plot$layers[[2L]]$data$preserved), rep("Yes", 3))
+  boundary_layers <- ggplot2::ggplot_build(boundary_plot)$data
+  expect_equal(boundary_layers[[4L]]$yintercept, 51.42)
+  expect_identical(boundary_layers[[5L]]$label, "Infeasible threshold")
+
+  trace_only <- plot(out, type = "trace", set = "BLEN", anchor = "I", direction = "lower", show_stop = FALSE)
+  expect_length(trace_only$layers, 2L)
+
+  out$diagnostics$last_safe_value <- out$diagnostics$start_value
+  out$diagnostics$number_of_steps <- 0L
+  out$diagnostics$total_delta_units <- 0
+  out$diagnostics$delta_as_pct_of_raw_range <- 0
+  out$by_set$BLEN$steps$I_lower$trace <- trace[0L, , drop = FALSE]
+  first_step_boundary <- plot(out, type = "trace", set = "BLEN", anchor = "I", direction = "lower")
+  grDevices::pdf(file = NULL)
+  tryCatch(
+    expect_no_warning(ggplot2::ggplotGrob(first_step_boundary)),
+    finally = grDevices::dev.off()
+  )
+  expect_length(first_step_boundary$layers, 3L)
 })
 
 test_that("calib_test plot methods return ggplot objects for indirect anchors", {

@@ -42,8 +42,8 @@
 #' @param unit_step Numeric step size used to move thresholds. Supply either
 #'   one value applied to all tested sets, one value per condition when
 #'   `test.outcome = FALSE`, or one value per `c(conditions, outcome)` when
-#'   `test.outcome = TRUE`. If `NULL`, qcaERT computes scale-aware steps from
-#'   each set's threshold spacing.
+#'   `test.outcome = TRUE`. If `NULL`, qcaERT computes scale-aware steps for
+#'   the sets selected by `test.conditions` and `test.outcome`.
 #' @param unit_step_divisor Positive number used to compute `unit_step`
 #'   automatically when `unit_step = NULL`. The default is `10`.
 #' @param max_steps Positive integer giving the maximum number of upward or
@@ -139,10 +139,18 @@
 #' `"upper"`), using `unit_step` until one of four things happens:
 #' \itemize{
 #'   \item the monitored solution changes,
-#'   \item minimization fails,
+#'   \item recalibration or minimization fails,
 #'   \item the raw-data range or anchor ordering blocks the next move, or
 #'   \item `max_steps` is reached.
 #' }
+#'
+#' If a proposed threshold is infeasible, that path ends with reason
+#' `"feasibility_boundary"`. The `first_failing` value records the rejected
+#' threshold, which is not evaluated for solution preservation.
+#'
+#' If recalibration fails at a proposed threshold, that path ends with
+#' reason `"calibration_error"`. The result keeps the last safe threshold and
+#' records the threshold that failed. The diagnostics include QCA's error message.
 #'
 #' The shared solution-control, exclusion, calibration-specification, and
 #' returned-object conventions are described in `?qcaERT_conventions`.
@@ -356,9 +364,6 @@ calib.test <- function(
   result_shape <- match.arg(result_shape)
   .reject_exclusion_controls_in_dots(dots_raw, "calib.test")
   .reject_calibration_inputs_in_dots(dots_raw, "calib.test")
-  dots_split <- .split_truth_table_minimize_dots(dots_raw)
-  dots_tt <- dots_split$tt
-  dots_min <- dots_split$min
 
   # capture minimize-style conveniences for outcome/conditions/dir.exp ----
   if (!is.null(mc$outcome)) {
@@ -436,6 +441,7 @@ calib.test <- function(
   .stage_stop_reason <- function(source) {
     switch(
       source,
+      calibrate = "calibration_error",
       truthTable = "truth_table_build_error",
       exclude = "exclude_recompute_error",
       conservative = "requested_minimize_error",
@@ -496,7 +502,7 @@ calib.test <- function(
     tt_args <- c(
       list(
         data = data_step,
-        outcome = outcome,
+        outcome = dots_split$outcome,
         incl.cut = incl.cut,
         n.cut = n.cut
       ),
@@ -508,7 +514,7 @@ calib.test <- function(
     }
 
     tryCatch(
-      suppressWarnings(do.call(QCA::truthTable, tt_args)),
+      suppressWarnings(.qcaert_truth_table(tt_args)),
       error = function(e) e
     )
   }
@@ -912,6 +918,10 @@ calib.test <- function(
     stop("`outcome` must be a single non-empty character string.")
   }
 
+  dots_split <- .split_truth_table_minimize_dots(dots_raw, outcome)
+  dots_tt <- dots_split$tt
+  dots_min <- dots_split$min
+
   if (!outcome %in% colnames(calib.data)) {
     stop("`outcome` must exist in `calib.data`.")
   }
@@ -933,11 +943,13 @@ calib.test <- function(
     test.outcome = test.outcome
   )
 
+  tested_sets <- c(test.conditions, if (test.outcome) outcome else character(0))
   calib_context <- .prepare_calib_context(
     conditions = conditions,
     outcome = outcome,
     calib_spec = calib_spec,
     test.outcome = test.outcome,
+    tested_sets = tested_sets,
     raw.data = raw.data,
     unit_step = unit_step,
     unit_step_divisor = unit_step_divisor,
@@ -950,7 +962,6 @@ calib.test <- function(
   unit_step_vec <- calib_context$unit_step_targets
   anchors_to_test <- calib_context$anchors_to_test
 
-  tested_sets <- c(test.conditions, if (test.outcome) outcome else character(0))
   tested_roles <- c(rep("condition", length(test.conditions)), if (test.outcome) "outcome" else character(0))
   names(tested_roles) <- tested_sets
 
@@ -1285,17 +1296,21 @@ calib.test <- function(
 
         spec_step <- .replace_calib_anchor(spec0, anchor, next_value)
 
-        data_step <- baseline_data
-        data_step[[set_name]] <- .calibrate_from_spec(x_raw, spec_step)
+        calibrated <- tryCatch(.calibrate_from_spec(x_raw, spec_step), error = identity)
+        if (inherits(calibrated, "error")) {
+          cur_err <- .stage_error_info("calibrate", calibrated)
+        } else {
+          data_step <- baseline_data
+          data_step[[set_name]] <- calibrated
 
-        cur <- .run_selected_solution(
-          data_step,
-          solution = solution_i,
-          which_M = which_M,
-          dots_filtered = dots_filtered
-        )
-
-        cur_err <- .step_error_info(cur, solution = solution_i, dir.exp = dir.exp)
+          cur <- .run_selected_solution(
+            data_step,
+            solution = solution_i,
+            which_M = which_M,
+            dots_filtered = dots_filtered
+          )
+          cur_err <- .step_error_info(cur, solution = solution_i, dir.exp = dir.exp)
+        }
 
         if (isTRUE(cur_err$error)) {
           stop_reason <- cur_err$reason
@@ -1500,7 +1515,7 @@ calib.test <- function(
     baseline = baseline,
     by_set = by_set,
     settings = list(
-      outcome = outcome,
+      outcome = dots_split$outcome,
       conditions = conditions,
       test.conditions = test.conditions,
       test.outcome = test.outcome,

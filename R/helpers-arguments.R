@@ -60,14 +60,35 @@
   )
 }
 
-.split_truth_table_minimize_dots <- function(dots) {
+.split_truth_table_minimize_dots <- function(dots, outcome = NULL) {
+  if ("neg.out" %in% names(dots)) {
+    if (isTRUE(dots[["neg.out"]])) {
+      if (!is.character(outcome) || length(outcome) != 1L || is.na(outcome) ||
+          !nzchar(trimws(outcome))) {
+        stop("`neg.out = TRUE` requires a named `outcome`.")
+      }
+      outcome <- trimws(outcome)
+      if (startsWith(outcome, "~")) {
+        stop("Use either `neg.out = TRUE` or a leading `~` in `outcome` to request negation.")
+      }
+      if (grepl("[+*]", outcome)) {
+        stop(
+          "`neg.out = TRUE` requires a single outcome set. ",
+          "Supply the compound outcome as a single calibrated column."
+        )
+      }
+      outcome <- paste0("~", outcome)
+    }
+    dots <- dots[!names(dots) %in% "neg.out"]
+  }
+
   if (length(dots) == 0L) {
-    return(list(tt = dots, min = dots))
+    return(list(tt = dots, min = dots, outcome = outcome))
   }
 
   nms <- names(dots)
   if (is.null(nms)) {
-    return(list(tt = list(), min = dots))
+    return(list(tt = list(), min = dots, outcome = outcome))
   }
 
   is_tt <- !is.na(match(nms, .truth_table_forwarded_args()))
@@ -75,7 +96,13 @@
   dots_rest <- dots[!is_tt]
   dots_min <- .filter_dots_for_minimize(dots_rest)
 
-  list(tt = dots_tt, min = dots_min)
+  list(tt = dots_tt, min = dots_min, outcome = outcome)
+}
+
+.qcaert_truth_table <- function(args) {
+  tt <- do.call(QCA::truthTable, args)
+  .validate_outcome_conditions_distinct(tt$options$outcome, tt$options$conditions)
+  tt
 }
 
 .reject_exclusion_controls_in_dots <- function(dots, caller) {

@@ -12,8 +12,9 @@
 #' @param solution_types Solution types to display, in plotting order. Accepted
 #'   values follow the common qcaERT solution-type conventions, excluding `"all"`.
 #'   `"complex"` is accepted as an alias for `"conservative"` for display use.
-#' @param model Optional positive integer selecting which model to display when
-#'   `x` contains more than one model.
+#' @param model Positive integer selecting the numbered model to display.
+#'   Required when `x` contains more than one model number. Rows without a model
+#'   number are retained alongside the selected model.
 #' @param intermediate_branch Optional intermediate branch to display when `x`
 #'   contains more than one intermediate branch.
 #' @param colors Named character vector with colors for `"conservative"`,
@@ -521,17 +522,18 @@ sol.chart <- function(
   }
 
   if (is.null(model)) {
-    if (length(available) == 1L) {
-      return(df[models == available[[1L]], , drop = FALSE])
+    if (length(available) > 1L) {
+      stop(
+        "`model` must be supplied when more than one model is present. Available models: ",
+        paste(available, collapse = ", "),
+        call. = FALSE
+      )
     }
-    stop(
-      "`model` must be supplied when more than one model is present. Available models: ",
-      paste(available, collapse = ", "),
-      call. = FALSE
-    )
+    model <- available[[1L]]
+  } else {
+    model <- .as_integerish_scalar(model, "model", min = 1L)
   }
 
-  model <- .as_integerish_scalar(model, "model", min = 1L)
   if (!model %in% available) {
     stop(
       "`model` is not available in `x`. Available models: ",
@@ -540,7 +542,7 @@ sol.chart <- function(
     )
   }
 
-  df[models == model, , drop = FALSE]
+  df[is.na(models) | models == model, , drop = FALSE]
 }
 
 .sol_chart_terms <- function(x) {

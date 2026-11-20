@@ -162,7 +162,12 @@ fails.}
 \item{\code{results}}{A compact data frame with the columns
 \code{rep}, \code{n_sample}, \code{n_holdout}, \code{status}, \code{exact_match_baseline},
 \code{term_jaccard_baseline}, \code{solution_change}, \code{fit_changed_types},
-\code{n_fit_deltas}, and \code{max_abs_fit_delta}.}
+\code{n_fit_deltas}, and \code{max_abs_fit_delta}.
+\code{exact_match_baseline} is \code{TRUE} when all requested solution types match
+the baseline. It is \code{FALSE} when a comparison shows a change, and \code{NA}
+when the comparison is incomplete and no change has been established.
+If fit comparison is requested, \code{n_fit_deltas} is \code{NA} when no fit
+measures can be compared between the selected models.}
 \item{\code{summary}}{A list with summary objects named \code{exact_solution},
 \code{term_stability}, \code{fit_stability}, \code{similarity}, and \code{calibration}.}
 \item{\code{baseline}}{A list containing the baseline analysis built from the

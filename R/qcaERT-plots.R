@@ -36,7 +36,8 @@
 #' @param direction For `type = "trace"`, the single search direction to plot:
 #'   `"lower"` or `"upper"`.
 #' @param show_stop Logical. If `TRUE`, draw reference lines for baseline and,
-#'   when present, first-failing values.
+#'   when present, first-failing values. In a calibration trace, an infeasible
+#'   threshold is labelled at the reference line and omitted from the trace.
 #' @param legend Logical. If `FALSE`, hide the plot legend.
 #' @param theme A ggplot2 theme object added to the plot.
 #' @param sets For `calib_test`, optional character vector selecting calibrated

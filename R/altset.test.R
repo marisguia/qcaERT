@@ -47,8 +47,8 @@
 #' @param unit_step Numeric step size used to move calibration thresholds when
 #'   building candidate alternative draws. Supply either one value applied to
 #'   all calibrated sets or one value per condition, plus the outcome when
-#'   `test.outcome = TRUE`. If `NULL`, qcaERT computes scale-aware steps from
-#'   each set's threshold spacing.
+#'   `test.outcome = TRUE`. If `NULL`, qcaERT computes scale-aware steps for
+#'   the sets selected by `test.conditions` and `test.outcome`.
 #' @param unit_step_divisor Positive number used to compute `unit_step`
 #'   automatically when `unit_step = NULL`. The default is `10`.
 #' @param calib_max_steps Positive integer giving the maximum number of
@@ -337,9 +337,6 @@ altset.test <- function(
   if (!is.character(outcome) || length(outcome) != 1L || !nzchar(outcome)) {
     stop("`outcome` must be a single non-empty character string.")
   }
-  if (!outcome %in% colnames(calib.data)) {
-    stop("`outcome` must exist in `calib.data`.")
-  }
   if (!is.character(conditions) || length(conditions) < 1L) {
     stop("`conditions` must be a non-empty character vector.")
   }
@@ -385,6 +382,11 @@ altset.test <- function(
       outcome <- .expr_to_chrvec(expr)
       if (length(outcome) != 1) stop("outcome must resolve to a single outcome name.")
     }
+  }
+
+  dots_split <- .split_truth_table_minimize_dots(dots_raw, outcome)
+  if (!outcome %in% colnames(calib.data)) {
+    stop("`outcome` must exist in `calib.data`.")
   }
 
   if (!is.null(altset$conditions)) {
@@ -533,7 +535,7 @@ altset.test <- function(
     args <- c(
       list(
         data = data_step,
-        outcome = outcome,
+        outcome = dots_split$outcome,
         incl.cut = incl_cutoff,
         n.cut = n_cutoff
       ),
@@ -544,7 +546,7 @@ altset.test <- function(
       args$conditions <- conditions
     }
 
-    do.call(QCA::truthTable, args)
+    .qcaert_truth_table(args)
   }
 
   .compute_exclude <- function(tt_obj) {
@@ -862,11 +864,13 @@ altset.test <- function(
 
   # materialize settings -
   which_M <- .coerce_which_M(which_M)
+  tested_sets <- c(test.conditions, if (test.outcome) outcome else character(0))
   calib_context <- .prepare_calib_context(
     conditions = conditions,
     outcome = outcome,
     calib_spec = calib_spec,
     test.outcome = test.outcome,
+    tested_sets = tested_sets,
     raw.data = raw.data,
     unit_step = unit_step,
     unit_step_divisor = unit_step_divisor,
@@ -879,11 +883,9 @@ altset.test <- function(
   thr_list <- calib_context$thresholds_targets
   unit_step_vec <- calib_context$unit_step_targets
   anchors_to_test <- calib_context$anchors_to_test
-  dots_split <- .split_truth_table_minimize_dots(dots_raw)
   dots_tt <- dots_split$tt
   dots_filtered <- dots_split$min
 
-  tested_sets <- c(test.conditions, if (test.outcome) outcome else character(0))
   tested_roles <- c(rep("condition", length(test.conditions)), if (test.outcome) "outcome" else character(0))
   names(tested_roles) <- tested_sets
 
@@ -983,7 +985,7 @@ altset.test <- function(
       tries <- tries + 1L
 
       incl_b <- sample(incl_grid, size = 1L)
-      ncut_b <- sample(ncut_grid, size = 1L)
+      ncut_b <- ncut_grid[sample.int(length(ncut_grid), size = 1L)]
       calib_b <- .altset_sample_calibration_draw(
         candidate_map = candidate_map,
         calib.data = calib.data,
@@ -1252,7 +1254,7 @@ altset.test <- function(
     ),
     by_draw = by_draw,
     settings = list(
-      outcome = outcome,
+      outcome = dots_split$outcome,
       conditions = conditions,
       test.conditions = test.conditions,
       test.outcome = test.outcome,

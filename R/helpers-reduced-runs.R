@@ -3,7 +3,7 @@
   tryCatch(conditionMessage(e), error = function(...) as.character(e))
 }
 
-.reduced_extract_standard_fit <- function(res, solution_type, which_M, fit_measures) {
+.reduced_extract_model_fit <- function(ic, fit_key, which_M, fit_measures) {
   if (length(fit_measures) == 0L) {
     return(list(
       fit = NULL,
@@ -14,41 +14,27 @@
     ))
   }
 
-  ic <- res$IC
-  tbl <- if (is.list(ic) && "sol.incl.cov" %in% names(ic)) ic$sol.incl.cov else NULL
-
-  if (is.null(tbl) || !is.data.frame(tbl) || nrow(tbl) == 0L) {
-    return(list(
-      fit = NULL,
-      fit_missing = TRUE,
-      fit_available = character(0),
-      fit_missing_measures = fit_measures,
-      meta = list(n_fit_rows = 0L)
-    ))
+  model_fit <- .fit_vec_from_ic(ic, which_M)
+  available <- intersect(fit_measures, names(model_fit))
+  n_fit_rows <- 0L
+  if (is.list(ic)) {
+    n_fit_rows <- if (!is.null(ic[["individual"]])) {
+      length(ic[["individual"]])
+    } else {
+      NROW(ic[["sol.incl.cov"]])
+    }
   }
-
-  available <- intersect(fit_measures, colnames(tbl))
-  missing_measures <- setdiff(fit_measures, available)
-
-  if (nrow(tbl) < which_M) {
-    return(list(
-      fit = NULL,
-      fit_missing = TRUE,
-      fit_available = available,
-      fit_missing_measures = fit_measures,
-      meta = list(n_fit_rows = nrow(tbl))
-    ))
-  }
-
-  vals <- suppressWarnings(as.numeric(tbl[which_M, available, drop = TRUE]))
-  names(vals) <- paste0(solution_type, ".", available)
 
   list(
-    fit = vals,
-    fit_missing = FALSE,
+    fit = if (length(available)) {
+      setNames(model_fit[available], paste0(fit_key, ".", available))
+    } else {
+      NULL
+    },
+    fit_missing = length(available) == 0L,
     fit_available = available,
-    fit_missing_measures = missing_measures,
-    meta = list(n_fit_rows = nrow(tbl))
+    fit_missing_measures = setdiff(fit_measures, available),
+    meta = list(n_fit_rows = n_fit_rows)
   )
 }
 
@@ -93,37 +79,25 @@
   }
 
   out <- numeric(0)
-  missing_any <- FALSE
   avail_any <- character(0)
-  fit_rows <- integer(0)
+  fit_rows <- integer(length(i.sol))
 
   for (k in seq_along(i.sol)) {
-    el <- i.sol[[k]]
-    ic <- if (is.list(el) && "IC" %in% names(el)) el$IC else NULL
-    tbl <- if (is.list(ic) && "sol.incl.cov" %in% names(ic)) ic$sol.incl.cov else NULL
-
-    if (is.null(tbl) || !is.data.frame(tbl) || nrow(tbl) == 0L) {
-      missing_any <- TRUE
-      fit_rows <- c(fit_rows, 0L)
-      next
-    }
-
-    fit_rows <- c(fit_rows, nrow(tbl))
-    available <- intersect(fit_measures, colnames(tbl))
-    avail_any <- union(avail_any, available)
-
-    if (nrow(tbl) < which_M) {
-      missing_any <- TRUE
-    } else {
-      vals <- suppressWarnings(as.numeric(tbl[which_M, available, drop = TRUE]))
-      names(vals) <- paste0(solution_type, ".", nm[k], ".", available)
-      out <- c(out, vals)
-    }
+    branch <- i.sol[[k]]
+    branch_fit <- .reduced_extract_model_fit(
+      ic = if (is.list(branch)) branch[["IC"]] else NULL,
+      fit_key = paste0(solution_type, ".", nm[k]),
+      which_M = which_M,
+      fit_measures = fit_measures
+    )
+    fit_rows[k] <- branch_fit$meta$n_fit_rows
+    avail_any <- union(avail_any, branch_fit$fit_available)
+    out <- c(out, branch_fit$fit)
   }
 
   list(
     fit = if (length(out) == 0L) NULL else out,
-    fit_missing = missing_any && length(out) == 0L,
+    fit_missing = length(out) == 0L,
     fit_available = avail_any,
     fit_missing_measures = setdiff(fit_measures, avail_any),
     meta = list(n_i = length(i.sol), n_fit_rows = fit_rows)
@@ -132,9 +106,9 @@
 
 .reduced_extract_solution_type_fit <- function(res, solution_type, which_M, i_mode, fit_measures) {
   if (solution_type %in% c("conservative", "parsimonious")) {
-    out <- .reduced_extract_standard_fit(
-      res = res,
-      solution_type = solution_type,
+    out <- .reduced_extract_model_fit(
+      ic = res[["IC"]],
+      fit_key = solution_type,
       which_M = which_M,
       fit_measures = fit_measures
     )
@@ -777,26 +751,27 @@
     monitored_solutions = monitored_solutions
   )
 
-  if (length(comparable_solutions) == 0L) {
+  deltas_by_type <- lapply(comparable_solutions, function(solution_type) {
+    delta <- .fit_delta_vec(base$fit[[solution_type]], cur$fit[[solution_type]])
+    delta[is.finite(delta)]
+  })
+
+  if (!any(lengths(deltas_by_type) > 0L)) {
     return(list(
-      changed = FALSE,
+      changed = NA,
       changed_types = NA_character_,
       changed_measures = character(0),
       delta = numeric(0),
-      n_changed = 0L,
+      n_changed = NA_integer_,
       max_abs_delta = NA_real_
     ))
   }
 
-  changed_flags <- vapply(
-    comparable_solutions,
-    function(solution_type) .fit_changed(base$fit[[solution_type]], cur$fit[[solution_type]], tol = fit_tol),
-    logical(1)
-  )
-
-  changed <- any(changed_flags)
-
-  if (!changed) {
+  changed_deltas <- lapply(deltas_by_type, function(delta) {
+    delta[vapply(delta, .fit_exceeds_tol, logical(1), tol = fit_tol)]
+  })
+  changed_types <- comparable_solutions[lengths(changed_deltas) > 0L]
+  if (!length(changed_types)) {
     return(list(
       changed = FALSE,
       changed_types = NA_character_,
@@ -807,34 +782,15 @@
     ))
   }
 
-  changed_types <- paste(comparable_solutions[changed_flags], collapse = ",")
-
-  changed_measures <- unlist(
-    lapply(
-      comparable_solutions[changed_flags],
-      function(solution_type) .fit_change_names(base$fit[[solution_type]], cur$fit[[solution_type]], tol = fit_tol)
-    ),
-    use.names = FALSE
-  )
-
-  delta_vec <- unlist(
-    lapply(
-      comparable_solutions[changed_flags],
-      function(solution_type) {
-        keep_names <- .fit_change_names(base$fit[[solution_type]], cur$fit[[solution_type]], tol = fit_tol)
-        dv <- .fit_delta_vec(base$fit[[solution_type]], cur$fit[[solution_type]])
-        dv[names(dv) %in% keep_names]
-      }
-    ),
-    use.names = TRUE
-  )
+  delta_vec <- unlist(changed_deltas, use.names = TRUE)
+  changed_measures <- sort(unique(names(delta_vec)))
 
   list(
     changed = TRUE,
-    changed_types = changed_types,
-    changed_measures = sort(unique(changed_measures)),
+    changed_types = paste(changed_types, collapse = ","),
+    changed_measures = changed_measures,
     delta = delta_vec,
-    n_changed = length(unique(changed_measures)),
+    n_changed = length(changed_measures),
     max_abs_delta = .fit_abs_max(delta_vec)
   )
 }
